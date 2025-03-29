@@ -1,0 +1,772 @@
+----- /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/config/WebSecurityConfig.java -----
+package com.zblog.zblogpostcore.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.beans.factory.annotation.Value;
+
+@Configuration
+@EnableWebSecurity
+public class WebSecurityConfig {
+
+    // Issuer URI from AWS Cognito, read from .env or app properties
+    @Value("${aws.cognito.issuer-uri}")
+    private String issuerUri;
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(authz -> authz
+                        // Public endpoints if any
+                        .requestMatchers("/api/public/**").permitAll()
+                        // Everything else requires authentication
+                        .anyRequest().authenticated()
+                )
+                // Use JWT bearer tokens
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
+
+        return http.build();
+    }
+
+    @Bean
+    public JwtDecoder jwtDecoder() {
+        // Construct JWKS endpoint from the issuer URI
+        String jwkSetUri = issuerUri + "/.well-known/jwks.json";
+        return NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build();
+    }
+}
+
+
+----- /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/repository/TagRepository.java -----
+package com.zblog.zblogpostcore.repository;
+
+import com.zblog.zblogpostcore.domain.entity.Tag;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import java.util.Optional;
+import java.util.UUID;
+
+@Repository
+public interface TagRepository extends JpaRepository<Tag, UUID> {
+    Optional<Tag> findByNameIgnoreCase(String name);
+}
+
+
+----- /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/repository/PostRepository.java -----
+package com.zblog.zblogpostcore.repository;
+
+import com.zblog.zblogpostcore.domain.entity.Post;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.UUID;
+
+public interface PostRepository extends JpaRepository<Post, UUID> {
+
+    Page<Post> findByAuthorId(String authorId, Pageable pageable);
+
+    Page<Post> findByTitleContainingIgnoreCase(String keyword, Pageable pageable);
+
+    Page<Post> findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(
+            String titleKeyword, String contentKeyword, Pageable pageable);
+
+    Page<Post> findByIsPublishedTrue(Pageable pageable);
+    Page<Post> findByIsPublishedTrueAndAuthorId(String authorId, Pageable pageable);
+
+    // If want to filter by tag name, would do a custom query or a spec
+}
+
+
+----- /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/controller/PostController.java -----
+package com.zblog.zblogpostcore.controller;
+
+import com.zblog.zblogpostcore.dto.PostDTO;
+import com.zblog.zblogpostcore.service.PostService;
+import com.zblog.zblogpostcore.util.SecurityUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/api/posts")
+public class PostController {
+
+    private final PostService postService;
+
+    @Autowired
+    public PostController(PostService postService) {
+        this.postService = postService;
+    }
+
+    // CREATE
+    @PostMapping
+    public PostDTO createPost(@RequestBody PostDTO postDTO) {
+        String currentUserId = SecurityUtil.getCurrentUserId();
+        return postService.createPost(postDTO, currentUserId);
+    }
+
+    // READ (single post)
+    @GetMapping("/{postId}")
+    public PostDTO getPost(@PathVariable("postId") UUID postId) {
+        String currentUserId = SecurityUtil.getCurrentUserIdOrNull();
+        return postService.getPost(postId, currentUserId);
+    }
+
+    // UPDATE
+    @PutMapping("/{postId}")
+    public PostDTO updatePost(@PathVariable("postId") UUID postId, @RequestBody PostDTO postDTO) {
+        String currentUserId = SecurityUtil.getCurrentUserId();
+        return postService.updatePost(postId, postDTO, currentUserId);
+    }
+
+    // DELETE
+    @DeleteMapping("/{postId}")
+    public void deletePost(@PathVariable("postId") UUID postId) {
+        String currentUserId = SecurityUtil.getCurrentUserId();
+        postService.deletePost(postId, currentUserId);
+    }
+
+    // LIST/PAGINATION - gets all or only published
+    @GetMapping
+    public Page<PostDTO> getAllPosts(@RequestParam(value = "publishedOnly", defaultValue = "true") boolean publishedOnly,
+                                     Pageable pageable) {
+        return postService.getAllPosts(publishedOnly, pageable);
+    }
+
+    // SEARCH
+    @GetMapping("/search")
+    public Page<PostDTO> searchPosts(@RequestParam("keyword") String keyword,
+                                     @RequestParam(value = "publishedOnly", defaultValue = "true") boolean publishedOnly,
+                                     Pageable pageable) {
+        return postService.searchPosts(keyword, publishedOnly, pageable);
+    }
+
+    // LIST BY AUTHOR
+    @GetMapping("/by-author/{authorId}")
+    public Page<PostDTO> getPostsByAuthor(@PathVariable("authorId") String authorId,
+                                          @RequestParam(value = "publishedOnly", defaultValue = "true") boolean publishedOnly,
+                                          Pageable pageable) {
+        return postService.getPostsByAuthor(authorId, publishedOnly, pageable);
+    }
+
+    // INCREMENT VIEW COUNT
+    @PatchMapping("/{postId}/view")
+    public PostDTO incrementView(@PathVariable("postId") UUID postId) {
+        return postService.incrementViewCount(postId);
+    }
+
+    // REACT
+    @PatchMapping("/{postId}/react")
+    public PostDTO react(@PathVariable("postId") UUID postId,
+                         @RequestParam("type") String reactionType) {
+        String currentUserId = SecurityUtil.getCurrentUserId();
+        return postService.reactToPost(postId, reactionType, currentUserId);
+    }
+}
+
+
+----- /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/dto/PostDTO.java -----
+package com.zblog.zblogpostcore.dto;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
+
+public class PostDTO {
+    private UUID id;
+    private String authorId;
+    private String title;
+    private String content;
+    private boolean published;
+    private long viewCount;
+    private long likeCount;
+    private long heartCount;
+    private long bookmarkCount;
+
+    private String bannerImageFileId;
+    private String bannerImageUrl; // resolved from S3
+
+    private Instant createdAt;
+    private Instant updatedAt;
+
+    private List<String> tags; // tag names
+
+    // Getters & Setters
+
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
+
+    public String getAuthorId() { return authorId; }
+    public void setAuthorId(String authorId) { this.authorId = authorId; }
+
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
+
+    public String getContent() { return content; }
+    public void setContent(String content) { this.content = content; }
+
+    public boolean isPublished() { return published; }
+    public void setPublished(boolean published) { this.published = published; }
+
+    public long getViewCount() { return viewCount; }
+    public void setViewCount(long viewCount) { this.viewCount = viewCount; }
+
+    public long getLikeCount() { return likeCount; }
+    public void setLikeCount(long likeCount) { this.likeCount = likeCount; }
+
+    public long getHeartCount() { return heartCount; }
+    public void setHeartCount(long heartCount) { this.heartCount = heartCount; }
+
+    public long getBookmarkCount() { return bookmarkCount; }
+    public void setBookmarkCount(long bookmarkCount) { this.bookmarkCount = bookmarkCount; }
+
+    public String getBannerImageFileId() { return bannerImageFileId; }
+    public void setBannerImageFileId(String bannerImageFileId) { this.bannerImageFileId = bannerImageFileId; }
+
+    public String getBannerImageUrl() { return bannerImageUrl; }
+    public void setBannerImageUrl(String bannerImageUrl) { this.bannerImageUrl = bannerImageUrl; }
+
+    public Instant getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+
+    public Instant getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
+
+    public List<String> getTags() { return tags; }
+    public void setTags(List<String> tags) { this.tags = tags; }
+}
+
+
+----- /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/util/SecurityUtil.java -----
+package com.zblog.zblogpostcore.util;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+public class SecurityUtil {
+
+    public static String getCurrentUserId() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getName() == null) {
+            throw new SecurityException("No authenticated user");
+        }
+        // 'auth.getName()' is typically the 'sub' from the JWT
+        return auth.getName();
+    }
+
+    public static String getCurrentUserIdOrNull() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) {
+            return null;
+        }
+        return auth.getName();
+    }
+}
+
+
+----- /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/service/TagService.java -----
+package com.zblog.zblogpostcore.service;
+
+import com.zblog.zblogpostcore.domain.entity.Tag;
+import com.zblog.zblogpostcore.repository.TagRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.UUID;
+
+@Service
+public class TagService {
+
+    private final TagRepository tagRepository;
+
+    @Autowired
+    public TagService(TagRepository tagRepository) {
+        this.tagRepository = tagRepository;
+    }
+
+    public List<Tag> listAllTags() {
+        return tagRepository.findAll();
+    }
+
+    public Tag getTagById(UUID id) {
+        return tagRepository.findById(id).orElse(null);
+    }
+
+    public Tag createOrUpdateTag(String name) {
+        return tagRepository.findByNameIgnoreCase(name)
+                .orElseGet(() -> {
+                    Tag newTag = new Tag();
+                    newTag.setName(name);
+                    return tagRepository.save(newTag);
+                });
+    }
+
+    public void deleteTag(UUID id) {
+        tagRepository.deleteById(id);
+    }
+}
+
+
+----- /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/service/impl/PostServiceImpl.java -----
+package com.zblog.zblogpostcore.service.impl;
+
+import com.zblog.s3core.service.S3Service;
+import com.zblog.zblogpostcore.domain.entity.Post;
+import com.zblog.zblogpostcore.domain.entity.Tag;
+import com.zblog.zblogpostcore.dto.PostDTO;
+import com.zblog.zblogpostcore.exception.PostNotFoundException;
+import com.zblog.zblogpostcore.repository.PostRepository;
+import com.zblog.zblogpostcore.repository.TagRepository;
+import com.zblog.zblogpostcore.service.PostService;
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import java.net.URL;
+import java.util.*;
+import java.util.stream.Collectors;
+
+@Service
+public class PostServiceImpl implements PostService {
+
+    private final PostRepository postRepository;
+    private final TagRepository tagRepository;
+    private final S3Service s3Service;
+
+    @Autowired
+    public PostServiceImpl(PostRepository postRepository,
+                           TagRepository tagRepository
+            ,S3Service s3Service) {
+        this.postRepository = postRepository;
+        this.tagRepository = tagRepository;
+        this.s3Service = s3Service;
+    }
+
+    @Override
+    public PostDTO createPost(PostDTO postDTO, String currentUserId) {
+        Post post = new Post();
+        post.setAuthorId(currentUserId);
+        post.setTitle(postDTO.getTitle());
+        post.setContent(postDTO.getContent());
+        post.setPublished(postDTO.isPublished());
+        post.setBannerImageFileId(postDTO.getBannerImageFileId());
+
+        // Initialize counters at 0
+        post.setLikeCount(0);
+        post.setHeartCount(0);
+        post.setBookmarkCount(0);
+
+        // Attach tags
+        if (postDTO.getTags() != null) {
+            post.setTags(resolveTags(postDTO.getTags()));
+        }
+
+        Post saved = postRepository.save(post);
+        return mapToDTO(saved, true);
+    }
+
+    @Override
+    public PostDTO updatePost(UUID postId, PostDTO postDTO, String currentUserId) {
+        Post existing = postRepository.findById(postId)
+                .orElseThrow(() -> new PostNotFoundException("Post not found"));
+
+        // Ownership check
+        if (!existing.getAuthorId().equals(currentUserId)) {
+            throw new SecurityException("Not authorized to edit this post");
+        }
+
+        existing.setTitle(postDTO.getTitle());
+        existing.setContent(postDTO.getContent());
+        existing.setPublished(postDTO.isPublished());
+        existing.setBannerImageFileId(postDTO.getBannerImageFileId());
+
+        // Update tags
+        existing.getTags().clear();
+        if (postDTO.getTags() != null) {
+            existing.getTags().addAll(resolveTags(postDTO.getTags()));
+        }
+
+        Post saved = postRepository.save(existing);
+        return mapToDTO(saved, true);
+    }
+
+    @Override
+    public void deletePost(UUID postId, String currentUserId) {
+        Post existing = postRepository.findById(postId)
+                .orElseThrow(() -> new PostNotFoundException("Post not found"));
+
+        if (!existing.getAuthorId().equals(currentUserId)) {
+            throw new SecurityException("Not authorized to delete this post");
+        }
+        // Hard delete for simplicity
+        postRepository.delete(existing);
+    }
+
+    @Override
+    public PostDTO getPost(UUID postId, String currentUserId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new PostNotFoundException("Post not found"));
+
+        if (!post.isPublished() && !post.getAuthorId().equals(currentUserId)) {
+            throw new SecurityException("This post is unpublished and you are not the owner");
+        }
+        return mapToDTO(post, true);
+    }
+
+    @Override
+    public Page<PostDTO> getAllPosts(boolean onlyPublished, Pageable pageable) {
+        // If we only want published posts
+        if (onlyPublished) {
+            return postRepository.findByIsPublishedTrue(pageable)
+                    .map(entity -> mapToDTO(entity, false));
+        }
+        // Return all posts, ignoring publish state
+        return postRepository.findAll(pageable)
+                .map(entity -> mapToDTO(entity, false));
+    }
+
+    @Override
+    public Page<PostDTO> searchPosts(String keyword, boolean onlyPublished, Pageable pageable) {
+        Page<Post> page = postRepository.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(keyword, keyword, pageable);
+
+        if (onlyPublished) {
+            List<Post> filtered = page.getContent().stream()
+                    .filter(Post::isPublished)
+                    .collect(Collectors.toList());
+
+            return new PageImpl<>(
+                    filtered.stream().map(p -> mapToDTO(p, false)).collect(Collectors.toList()),
+                    pageable,
+                    filtered.size()
+            );
+        }
+
+        return page.map(post -> mapToDTO(post, false));
+    }
+
+    @Override
+    public Page<PostDTO> getPostsByAuthor(String authorId, boolean onlyPublished, Pageable pageable) {
+        if (onlyPublished) {
+            return postRepository.findByIsPublishedTrueAndAuthorId(authorId, pageable)
+                    .map(entity -> mapToDTO(entity, false));
+        } else {
+            return postRepository.findByAuthorId(authorId, pageable)
+                    .map(entity -> mapToDTO(entity, false));
+        }
+    }
+
+    @Override
+    public PostDTO incrementViewCount(UUID postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new PostNotFoundException("Post not found"));
+        post.setViewCount(post.getViewCount() + 1);
+        Post saved = postRepository.save(post);
+        return mapToDTO(saved, false);
+    }
+
+    @Override
+    public PostDTO reactToPost(UUID postId, String reactionType, String currentUserId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new PostNotFoundException("Post not found"));
+
+        switch (reactionType.toLowerCase()) {
+            case "like":
+                post.setLikeCount(post.getLikeCount() + 1);
+                break;
+            case "heart":
+                post.setHeartCount(post.getHeartCount() + 1);
+                break;
+            case "bookmark":
+                post.setBookmarkCount(post.getBookmarkCount() + 1);
+                break;
+            default:
+                // You could throw an exception or ignore unknown reaction types
+                throw new IllegalArgumentException("Unknown reaction type: " + reactionType);
+        }
+        Post saved = postRepository.save(post);
+        return mapToDTO(saved, false);
+    }
+
+    // ---------- Helpers ----------
+
+    /**
+     * Resolve a list of tag names into Tag entities. Creates new if doesn't exist.
+     */
+    private List<Tag> resolveTags(List<String> tagNames) {
+        return tagNames.stream()
+                .map(tagName -> {
+                    Tag existing = tagRepository.findByNameIgnoreCase(tagName).orElse(null);
+                    if (existing == null) {
+                        existing = new Tag();
+                        existing.setName(tagName);
+                    }
+                    return existing;
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Convert an entity to a PostDTO, resolving the bannerImageUrl from s3-core.
+     */
+    private PostDTO mapToDTO(Post post, boolean resolveBannerUrl) {
+        PostDTO dto = new PostDTO();
+        dto.setId(post.getId());
+        dto.setAuthorId(post.getAuthorId());
+        dto.setTitle(post.getTitle());
+        dto.setContent(post.getContent());
+        dto.setPublished(post.isPublished());
+        dto.setViewCount(post.getViewCount());
+        dto.setLikeCount(post.getLikeCount());
+        dto.setHeartCount(post.getHeartCount());
+        dto.setBookmarkCount(post.getBookmarkCount());
+        dto.setBannerImageFileId(post.getBannerImageFileId());
+        dto.setCreatedAt(post.getCreatedAt());
+        dto.setUpdatedAt(post.getUpdatedAt());
+
+        dto.setTags(post.getTags().stream()
+                .map(Tag::getName)
+                .collect(Collectors.toList()));
+
+        if (resolveBannerUrl && post.getBannerImageFileId() != null) {
+            try {
+                URL url = s3Service.getFileUrl(post.getBannerImageFileId(), false);
+                dto.setBannerImageUrl(url.toString());
+            } catch (Exception e) {
+                // fallback or log error
+                dto.setBannerImageUrl(null);
+            }
+        }
+
+        return dto;
+    }
+}
+
+
+----- /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/service/PostService.java -----
+package com.zblog.zblogpostcore.service;
+
+import com.zblog.zblogpostcore.dto.PostDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import java.util.UUID;
+
+public interface PostService {
+    PostDTO createPost(PostDTO postDTO, String currentUserId);
+    PostDTO updatePost(UUID postId, PostDTO postDTO, String currentUserId);
+    void deletePost(UUID postId, String currentUserId);
+
+    PostDTO getPost(UUID postId, String currentUserId);
+    Page<PostDTO> getAllPosts(boolean onlyPublished, Pageable pageable);
+    Page<PostDTO> searchPosts(String keyword, boolean onlyPublished, Pageable pageable);
+    Page<PostDTO> getPostsByAuthor(String authorId, boolean onlyPublished, Pageable pageable);
+
+    PostDTO incrementViewCount(UUID postId);
+    PostDTO reactToPost(UUID postId, String reactionType, String currentUserId);
+}
+
+
+----- /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/ZblogPostCoreApplication.java -----
+package com.zblog.zblogpostcore;
+
+import io.github.cdimascio.dotenv.Dotenv;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
+
+@SpringBootApplication
+@ComponentScan(basePackages = {
+        "com.zblog.zblogpostcore",
+        "com.zblog.s3core"
+})
+public class ZblogPostCoreApplication {
+
+    public static void main(String[] args) {
+        // Load .env
+        Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+        dotenv.entries().forEach(entry ->
+                System.setProperty(entry.getKey(), entry.getValue())
+        );
+
+        SpringApplication.run(ZblogPostCoreApplication.class, args);
+    }
+}
+
+
+----- /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/domain/entity/Post.java -----
+package com.zblog.zblogpostcore.domain.entity;
+
+import jakarta.persistence.*;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+@Entity
+@Table(name = "posts")
+public class Post {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID id;
+
+    // ID of the author (the 'sub' claim from Cognito JWT)
+    private String authorId;
+
+    private String title;
+
+    @Column(columnDefinition = "TEXT")
+    private String content;
+
+    private boolean isPublished;
+    private long viewCount;
+
+    private long likeCount;
+    private long heartCount;
+    private long bookmarkCount;
+
+    private String bannerImageFileId; // reference to S3Core
+
+    private Instant createdAt;
+    private Instant updatedAt;
+
+    // Many-to-many for tags
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @JoinTable(name = "post_tags",
+            joinColumns = @JoinColumn(name = "post_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id"))
+    private List<Tag> tags = new ArrayList<>();
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = Instant.now();
+        updatedAt = createdAt;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = Instant.now();
+    }
+
+    // Getters/Setters
+
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
+
+    public String getAuthorId() { return authorId; }
+    public void setAuthorId(String authorId) { this.authorId = authorId; }
+
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
+
+    public String getContent() { return content; }
+    public void setContent(String content) { this.content = content; }
+
+    public boolean isPublished() { return isPublished; }
+    public void setPublished(boolean published) { isPublished = published; }
+
+    public long getViewCount() { return viewCount; }
+    public void setViewCount(long viewCount) { this.viewCount = viewCount; }
+
+    public long getLikeCount() { return likeCount; }
+    public void setLikeCount(long likeCount) { this.likeCount = likeCount; }
+
+    public long getHeartCount() { return heartCount; }
+    public void setHeartCount(long heartCount) { this.heartCount = heartCount; }
+
+    public long getBookmarkCount() { return bookmarkCount; }
+    public void setBookmarkCount(long bookmarkCount) { this.bookmarkCount = bookmarkCount; }
+
+    public String getBannerImageFileId() { return bannerImageFileId; }
+    public void setBannerImageFileId(String bannerImageFileId) { this.bannerImageFileId = bannerImageFileId; }
+
+    public Instant getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+
+    public Instant getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
+
+    public List<Tag> getTags() { return tags; }
+    public void setTags(List<Tag> tags) { this.tags = tags; }
+}
+
+
+----- /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/domain/entity/Tag.java -----
+package com.zblog.zblogpostcore.domain.entity;
+
+import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+@Entity
+@Table(name = "tags")
+public class Tag {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID id;
+
+    @Column(unique = true, nullable = false)
+    private String name;
+
+    @ManyToMany(mappedBy = "tags", fetch = FetchType.LAZY)
+    private List<Post> posts = new ArrayList<>();
+
+    // Getters/Setters
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public List<Post> getPosts() { return posts; }
+    public void setPosts(List<Post> posts) { this.posts = posts; }
+}
+
+
+----- /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/exception/PostNotFoundException.java -----
+package com.zblog.zblogpostcore.exception;
+
+public class PostNotFoundException extends RuntimeException {
+    public PostNotFoundException(String message) {
+        super(message);
+    }
+}
+
+
+----- /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/resources/schema.sql -----
+
+
+----- /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/resources/application.properties -----
+spring.application.name=zblog-post-core
+server.port=8082
+
+spring.datasource.url=jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DB}
+spring.datasource.username=${MYSQL_USER}
+spring.datasource.password=${MYSQL_PASS}
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+
+aws.cognito.issuer-uri=${COGNITO_ISSUER_URI}
+
+
