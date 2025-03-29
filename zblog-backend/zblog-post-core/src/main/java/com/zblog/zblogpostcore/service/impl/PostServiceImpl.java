@@ -241,4 +241,12 @@ public class PostServiceImpl implements PostService {
 
         return dto;
     }
+
+    @Override
+    public void validatePostExists(UUID postId) {
+        if (!postRepository.existsById(postId)) {
+            throw new PostNotFoundException("Post not found for id: " + postId);
+        }
+    }
+
 }

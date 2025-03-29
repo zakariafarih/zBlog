@@ -17,6 +17,7 @@
         <module>zblog-auth-core</module>
         <module>s3-core</module>
         <module>zblog-post-core</module>
+        <module>zblog-comment-core</module>
         <!-- other modules -->
     </modules>
 
