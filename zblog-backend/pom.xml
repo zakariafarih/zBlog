@@ -18,6 +18,7 @@
         <module>s3-core</module>
         <module>zblog-post-core</module>
         <module>zblog-comment-core</module>
+        <module>zblog-user-core</module>
         <!-- other modules -->
     </modules>
 

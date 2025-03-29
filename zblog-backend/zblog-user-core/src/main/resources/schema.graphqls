@@ -1,0 +1,34 @@
+type Query {
+    user(userId: ID!): UserProfile
+    me: UserProfile
+    bookmarks(page: Int, size: Int): [Bookmark!]
+}
+
+type Mutation {
+    updateProfile(input: UserProfileInput!): UserProfile
+    bookmarkPost(postId: ID!): Boolean
+    unbookmarkPost(postId: ID!): Boolean
+}
+
+type UserProfile {
+    username: String
+    displayName: String
+    bio: String
+    profileImageFileId: String
+    profileImageUrl: String
+    createdAt: String
+    updatedAt: String
+}
+
+type Bookmark {
+    id: ID!
+    postId: ID!
+    createdAt: String
+}
+
+input UserProfileInput {
+    username: String!
+    displayName: String
+    bio: String
+    profileImageFileId: String
+}
