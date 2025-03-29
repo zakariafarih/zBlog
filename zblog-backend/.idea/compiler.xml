@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="s3-core" />
+        <module name="zblog-common-core" />
+        <module name="zblog-auth-core" />
+        <module name="zblog-post-core" />
+      </profile>
+    </annotationProcessing>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="s3-core" options="" />
+      <module name="zblog-auth-core" options="" />
+      <module name="zblog-common-core" options="" />
+      <module name="zblog-post-core" options="" />
+    </option>
+  </component>
+</project>
