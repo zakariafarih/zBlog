@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 7, "column": 0}, "map": {"version":3,"sources":["file:///home/zakaria/zBlog/zblog-frontend/src/lib/cognitoConfig.ts"],"sourcesContent":["export const cognitoConfig = {\n  authority: process.env.NEXT_PUBLIC_COGNITO_AUTHORITY!,\n  client_id: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID!,\n  redirect_uri: process.env.NEXT_PUBLIC_COGNITO_REDIRECT_URI!,\n  response_type: \"code\",\n  scope: \"phone openid email\",\n}\n"],"names":[],"mappings":";;;AACa;AADN,MAAM,gBAAgB;IAC3B,SAAS;IACT,SAAS;IACT,YAAY;IACZ,eAAe;IACf,OAAO;AACT","debugId":null}},
+    {"offset": {"line": 27, "column": 0}, "map": {"version":3,"sources":["file:///home/zakaria/zBlog/zblog-frontend/src/providers/CognitoProvider.tsx"],"sourcesContent":["\"use client\"\n\nimport { AuthProvider } from \"react-oidc-context\";\nimport { cognitoConfig } from \"@/lib/cognitoConfig\";\n\nexport default function CognitoProvider({ children }: { children: React.ReactNode }) {\n  return <AuthProvider {...cognitoConfig}>{children}</AuthProvider>;\n}\n"],"names":[],"mappings":";;;;AAEA;AACA;AAHA;;;;AAKe,SAAS,gBAAgB,EAAE,QAAQ,EAAiC;IACjF,qBAAO,6LAAC,sLAAA,CAAA,eAAY;QAAE,GAAG,8HAAA,CAAA,gBAAa;kBAAG;;;;;;AAC3C;KAFwB","debugId":null}}]
+}
