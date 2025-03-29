@@ -1,11 +1,10 @@
 "use client"
 
 import { motion } from "framer-motion"
-import Navbar from "@/components/Navbar"
-import HeroSection from "@/components/HeroSection"
-import FeaturesSection from "@/components/FeaturesSection"
-import PostsSection from "@/components/PostsSection"
-import ArticlesSection from "@/components/ArticlesSection"
+import HeroSection from "@/components/landingPage/HeroSection"
+import FeaturesSection from "@/components/landingPage/FeaturesSection"
+import PostsSection from "@/components/landingPage/PostsSection"
+import ArticlesSection from "@/components/landingPage/ArticlesSection"
 
 export default function Home() {
   return (
