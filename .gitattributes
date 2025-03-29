@@ -1,19 +1,2 @@
-# Ignore generated files and cache
-node_modules/** linguist-vendored
-dist/** linguist-vendored
-build/** linguist-vendored
-.cache/** linguist-vendored
-
-# Ensure TypeScript and Java are counted correctly
-*.ts linguist-language=TypeScript
-*.tsx linguist-language=TypeScript
-*.java linguist-language=Java
-
-# Ignore minified and generated JS files
-*.min.js linguist-generated
-*.map.js linguist-generated
-
-# Ignore lock and temporary files
-*.log linguist-vendored
-*.lock linguist-vendored
-*.bak linguist-vendored
+* linguist-vendored
+*.java linguist-vendored=false
