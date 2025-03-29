@@ -1,0 +1,14 @@
+node_modules/* linguist-vendored
+dist/* linguist-vendored
+
+*.ts linguist-language=TypeScript
+*.tsx linguist-language=TypeScript
+
+*.java linguist-language=Java
+
+*.min.js linguist-generated
+*.map.js linguist-generated
+
+*.log linguist-vendored
+*.lock linguist-vendored
+*.bak linguist-vendored
