@@ -1,14 +1,20 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
-import { useSearchParams } from "next/navigation"
-import ExplorePostsFilter, { FilterState } from "@/components/posts/ExplorePostsFilter"
+import { useSearchParams, useRouter } from "next/navigation"
+import dynamic from "next/dynamic"
 import NoPostsHolder from "@/components/posts/NoPostsHolder"
 import PostCard from "@/components/posts/PostCard"
 import { mockPosts } from "./mockPosts"
 import AnimatedHeaderPost from "@/components/posts/AnimatedHeaderPost"
+import type { FilterState } from "@/components/posts/ExplorePostsFilter"
+
+const ExplorePostsFilter = dynamic(() => import("@/components/posts/ExplorePostsFilter.client"), {
+  ssr: false,
+})
 
 export default function ExplorePostsPage() {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const initialTag = searchParams.get("tag") || ""
 
@@ -50,7 +56,11 @@ export default function ExplorePostsPage() {
         {filteredPosts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
             {filteredPosts.map((post) => (
-              <PostCard key={post.id} {...post} onClick={() => {}} />
+              <PostCard
+                key={post.id}
+                {...post}
+                onClick={() => router.push("/posts/react-the-good-parts")} // TEMPORARY redirection
+              />
             ))}
           </div>
         ) : (

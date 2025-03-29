@@ -3,48 +3,58 @@
 import Lottie from "lottie-react"
 import explorerAnimation from "@/assets/animations/explorer-walking.json"
 import { motion, useAnimationControls } from "framer-motion"
-import { useEffect, useRef, useState } from "react"
+import { useLayoutEffect, useRef, useState } from "react"
 
 export default function AnimatedHeaderPost() {
   const [showText, setShowText] = useState(false)
   const controls = useAnimationControls()
   const containerRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    let isMounted = true
+
     if (!containerRef.current) return
 
     const containerWidth = containerRef.current.offsetWidth
     const detectiveWidth = 96
     const travelDistance = containerWidth - detectiveWidth - 80
 
-    // Step 1: Walk to the right (scaleX: 1)
-    controls.start({
-      x: travelDistance,
-      scaleX: 1,
-      transition: { duration: 3.2, ease: [0.33, 1, 0.68, 1] },
-    }).then(() => {
-      // Step 2: Flip in place
-      return controls.start({
+    const runAnimation = async () => {
+      if (!isMounted) return
+      await controls.start({
+        x: travelDistance,
+        scaleX: 1,
+        transition: { duration: 3.2, ease: [0.33, 1, 0.68, 1] },
+      })
+
+      if (!isMounted) return
+      await controls.start({
         scaleX: -1,
         transition: { duration: 0.4 },
       })
-    }).then(() => {
-      // Step 3: Walk back left (still flipped)
-      return controls.start({
+
+      if (!isMounted) return
+      await controls.start({
         x: 0,
         transition: { duration: 2.8, ease: [0.33, 1, 0.68, 1] },
       })
-    }).then(() => {
-      // Step 4: Flip back to face title
-      return controls.start({
+
+      if (!isMounted) return
+      await controls.start({
         scaleX: 1,
         transition: { duration: 0.4 },
       })
-    }).then(() => {
-      // Step 5: Show text
+
+      if (!isMounted) return
       setShowText(true)
-    })
-  }, [])
+    }
+
+    runAnimation()
+
+    return () => {
+      isMounted = false
+    }
+  }, [controls])
 
   return (
     <div

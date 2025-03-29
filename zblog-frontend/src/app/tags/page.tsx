@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useLayoutEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, useAnimationControls } from 'framer-motion'
 import Lottie from 'lottie-react'
@@ -14,29 +14,41 @@ export default function TagsPage() {
   const controls = useAnimationControls()
   const containerRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    let isMounted = true
+
     if (!containerRef.current) return
 
     const containerWidth = containerRef.current.offsetWidth
     const iconWidth = 96
     const maxX = containerWidth - iconWidth - 24
 
-    const sequence = async () => {
+    const runAnimation = async () => {
+      if (!isMounted) return
+
       await controls.start({
         x: maxX,
         transition: { duration: 2, ease: 'easeInOut' },
       })
+
+      if (!isMounted) return
 
       await controls.start({
         x: 0,
         transition: { duration: 2, ease: 'easeInOut' },
       })
 
+      if (!isMounted) return
+
       setShowText(true)
     }
 
-    sequence()
-  }, [])
+    runAnimation()
+
+    return () => {
+      isMounted = false
+    }
+  }, [controls])
 
   return (
     <main className="bg-slate-900 text-white min-h-screen pt-8 pb-16 overflow-hidden">
@@ -60,7 +72,7 @@ export default function TagsPage() {
             />
           </motion.div>
 
-          {/* Text with adjusted margin */}
+          {/* Text */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: showText ? 1 : 0 }}
