@@ -477,7 +477,7 @@ function RecentPostsPage() {
         hasMore: true
     }, void 0, false, {
         fileName: "[project]/src/app/recent/page.tsx",
-        lineNumber: 82,
+        lineNumber: 83,
         columnNumber: 5
     }, this);
 }

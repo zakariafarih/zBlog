@@ -4,6 +4,7 @@ import React from "react"
 import RecentPosts from "@/components/posts/RecentPosts"
 import type { PostCardProps } from "@/components/posts/PostCard"
 
+
 const mockPosts: PostCardProps[] = [
   {
     id: "1",
