@@ -1,0 +1,36 @@
+type Query {
+    # Retrieve top-level comments for a post
+    commentsForPost(postId: ID!, page: Int, size: Int): [CommentDTO!]!
+
+    # Get single comment (with nested replies)
+    comment(id: ID!): CommentDTO
+}
+
+type Mutation {
+    createComment(input: CommentCreateInput!): CommentDTO
+    updateComment(id: ID!, content: String!): CommentDTO
+    deleteComment(id: ID!): Boolean
+
+    reactToComment(id: ID!, reactionType: String!): CommentDTO
+}
+
+type CommentDTO {
+    id: ID!
+    postId: ID!
+    authorId: String
+    content: String
+    createdAt: String
+    updatedAt: String
+    parentId: ID
+    likeCount: Int
+    laughCount: Int
+    sadCount: Int
+    insightfulCount: Int
+    replies: [CommentDTO!]
+}
+
+input CommentCreateInput {
+    postId: ID!
+    parentId: ID
+    content: String!
+}

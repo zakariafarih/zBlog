@@ -1,6 +1,7 @@
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/config/WebSecurityConfig.java -----
-package com.zblog.zblogpostcore.config;
+----- /home/zakaria/zBlog/zblog-backend/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/config/SecurityConfig.java -----
+package com.zblog.zblogcommentcore.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -9,13 +10,11 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.beans.factory.annotation.Value;
 
 @Configuration
 @EnableWebSecurity
-public class WebSecurityConfig {
+public class SecurityConfig {
 
-    // Issuer URI from AWS Cognito, read from .env or app properties
     @Value("${aws.cognito.issuer-uri}")
     private String issuerUri;
 
@@ -24,12 +23,9 @@ public class WebSecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
-                        // Public endpoints if any
                         .requestMatchers("/api/public/**").permitAll()
-                        // Everything else requires authentication
                         .anyRequest().authenticated()
                 )
-                // Use JWT bearer tokens
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
 
         return http.build();
@@ -37,205 +33,196 @@ public class WebSecurityConfig {
 
     @Bean
     public JwtDecoder jwtDecoder() {
-        // Construct JWKS endpoint from the issuer URI
         String jwkSetUri = issuerUri + "/.well-known/jwks.json";
         return NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build();
     }
 }
 
 
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/repository/TagRepository.java -----
-package com.zblog.zblogpostcore.repository;
+----- /home/zakaria/zBlog/zblog-backend/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/repository/CommentRepository.java -----
+package com.zblog.zblogcommentcore.repository;
 
-import com.zblog.zblogpostcore.domain.entity.Tag;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-import java.util.Optional;
-import java.util.UUID;
-
-@Repository
-public interface TagRepository extends JpaRepository<Tag, UUID> {
-    Optional<Tag> findByNameIgnoreCase(String name);
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/repository/PostRepository.java -----
-package com.zblog.zblogpostcore.repository;
-
-import com.zblog.zblogpostcore.domain.entity.Post;
+import com.zblog.zblogcommentcore.domain.entity.Comment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.UUID;
 
-public interface PostRepository extends JpaRepository<Post, UUID> {
+public interface CommentRepository extends JpaRepository<Comment, UUID> {
 
-    Page<Post> findByAuthorId(String authorId, Pageable pageable);
+    // Retrieve top-level comments for a post
+    Page<Comment> findByPostIdAndParentIdIsNullOrderByCreatedAtAsc(UUID postId, Pageable pageable);
 
-    Page<Post> findByTitleContainingIgnoreCase(String keyword, Pageable pageable);
+    // Retrieve child comments for a given parent
+    List<Comment> findByParentIdOrderByCreatedAtAsc(UUID parentId);
 
-    Page<Post> findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(
-            String titleKeyword, String contentKeyword, Pageable pageable);
-
-    Page<Post> findByIsPublishedTrue(Pageable pageable);
-    Page<Post> findByIsPublishedTrueAndAuthorId(String authorId, Pageable pageable);
-
-    // If want to filter by tag name, would do a custom query or a spec
+    // All comments for a post (if needed)
+    Page<Comment> findByPostIdOrderByCreatedAtAsc(UUID postId, Pageable pageable);
 }
 
 
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/controller/PostController.java -----
-package com.zblog.zblogpostcore.controller;
+----- /home/zakaria/zBlog/zblog-backend/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/controller/CommentController.java -----
+package com.zblog.zblogcommentcore.controller;
 
-import com.zblog.zblogpostcore.dto.PostDTO;
-import com.zblog.zblogpostcore.service.PostService;
-import com.zblog.zblogpostcore.util.SecurityUtil;
+import com.zblog.zblogcommentcore.dto.*;
+import com.zblog.zblogcommentcore.service.CommentService;
+import com.zblog.zblogcommentcore.util.SecurityUtil;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/posts")
-public class PostController {
+@RequestMapping("/api/comments")
+@Validated
+public class CommentController {
 
-    private final PostService postService;
+    private final CommentService commentService;
 
     @Autowired
-    public PostController(PostService postService) {
-        this.postService = postService;
+    public CommentController(CommentService commentService) {
+        this.commentService = commentService;
     }
 
-    // CREATE
     @PostMapping
-    public PostDTO createPost(@RequestBody PostDTO postDTO) {
+    public CommentResponseDTO createComment(@Valid @RequestBody CommentCreateRequest request) {
         String currentUserId = SecurityUtil.getCurrentUserId();
-        return postService.createPost(postDTO, currentUserId);
+        return commentService.createComment(request, currentUserId);
     }
 
-    // READ (single post)
-    @GetMapping("/{postId}")
-    public PostDTO getPost(@PathVariable("postId") UUID postId) {
-        String currentUserId = SecurityUtil.getCurrentUserIdOrNull();
-        return postService.getPost(postId, currentUserId);
-    }
-
-    // UPDATE
-    @PutMapping("/{postId}")
-    public PostDTO updatePost(@PathVariable("postId") UUID postId, @RequestBody PostDTO postDTO) {
+    @PutMapping("/{commentId}")
+    public CommentResponseDTO updateComment(@PathVariable("commentId") UUID commentId,
+                                            @Valid @RequestBody CommentUpdateRequest request) {
         String currentUserId = SecurityUtil.getCurrentUserId();
-        return postService.updatePost(postId, postDTO, currentUserId);
+        request.setId(commentId); // ensure ID matches
+        return commentService.updateComment(request, currentUserId);
     }
 
-    // DELETE
-    @DeleteMapping("/{postId}")
-    public void deletePost(@PathVariable("postId") UUID postId) {
+    @DeleteMapping("/{commentId}")
+    public void deleteComment(@PathVariable("commentId") UUID commentId) {
         String currentUserId = SecurityUtil.getCurrentUserId();
-        postService.deletePost(postId, currentUserId);
+        commentService.deleteComment(commentId, currentUserId);
     }
 
-    // LIST/PAGINATION - gets all or only published
-    @GetMapping
-    public Page<PostDTO> getAllPosts(@RequestParam(value = "publishedOnly", defaultValue = "true") boolean publishedOnly,
-                                     Pageable pageable) {
-        return postService.getAllPosts(publishedOnly, pageable);
+    @GetMapping("/post/{postId}")
+    public Page<CommentResponseDTO> getTopLevelComments(@PathVariable("postId") UUID postId, Pageable pageable) {
+        return commentService.getTopLevelComments(postId, pageable);
     }
 
-    // SEARCH
-    @GetMapping("/search")
-    public Page<PostDTO> searchPosts(@RequestParam("keyword") String keyword,
-                                     @RequestParam(value = "publishedOnly", defaultValue = "true") boolean publishedOnly,
-                                     Pageable pageable) {
-        return postService.searchPosts(keyword, publishedOnly, pageable);
+    @GetMapping("/{commentId}")
+    public CommentResponseDTO getComment(@PathVariable("commentId") UUID commentId) {
+        return commentService.getComment(commentId);
     }
 
-    // LIST BY AUTHOR
-    @GetMapping("/by-author/{authorId}")
-    public Page<PostDTO> getPostsByAuthor(@PathVariable("authorId") String authorId,
-                                          @RequestParam(value = "publishedOnly", defaultValue = "true") boolean publishedOnly,
-                                          Pageable pageable) {
-        return postService.getPostsByAuthor(authorId, publishedOnly, pageable);
+    @PatchMapping("/{commentId}/react")
+    public CommentResponseDTO reactToComment(@PathVariable("commentId") UUID commentId,
+                                             @RequestParam("type") String reactionType) {
+        return commentService.reactToComment(commentId, reactionType);
     }
 
-    // INCREMENT VIEW COUNT
-    @PatchMapping("/{postId}/view")
-    public PostDTO incrementView(@PathVariable("postId") UUID postId) {
-        return postService.incrementViewCount(postId);
-    }
-
-    // REACT
-    @PatchMapping("/{postId}/react")
-    public PostDTO react(@PathVariable("postId") UUID postId,
-                         @RequestParam("type") String reactionType) {
-        String currentUserId = SecurityUtil.getCurrentUserId();
-        return postService.reactToPost(postId, reactionType, currentUserId);
+    // optional route to get entire comment subtree
+    @GetMapping("/{commentId}/thread")
+    public CommentResponseDTO getCommentThread(@PathVariable("commentId") UUID commentId) {
+        return commentService.buildCommentThread(commentId);
     }
 }
 
 
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/dto/PostDTO.java -----
-package com.zblog.zblogpostcore.dto;
+----- /home/zakaria/zBlog/zblog-backend/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/dto/CommentUpdateRequest.java -----
+package com.zblog.zblogcommentcore.dto;
+
+import jakarta.validation.constraints.NotBlank;
+import java.util.UUID;
+
+public class CommentUpdateRequest {
+
+    private UUID id; // comment ID
+
+    @NotBlank(message = "Content cannot be blank")
+    private String content;
+
+    // Getters/Setters
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
+
+    public String getContent() { return content; }
+    public void setContent(String content) { this.content = content; }
+}
+
+
+----- /home/zakaria/zBlog/zblog-backend/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/dto/CommentCreateRequest.java -----
+package com.zblog.zblogcommentcore.dto;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+import java.util.UUID;
+
+public class CommentCreateRequest {
+
+    @NotNull(message = "Post ID cannot be null")
+    private UUID postId;
+
+    private UUID parentId;
+
+    @NotBlank(message = "Content cannot be blank")
+    private String content;
+
+    // Getters/Setters
+    public UUID getPostId() { return postId; }
+    public void setPostId(UUID postId) { this.postId = postId; }
+
+    public UUID getParentId() { return parentId; }
+    public void setParentId(UUID parentId) { this.parentId = parentId; }
+
+    public String getContent() { return content; }
+    public void setContent(String content) { this.content = content; }
+}
+
+
+----- /home/zakaria/zBlog/zblog-backend/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/dto/CommentResponseDTO.java -----
+package com.zblog.zblogcommentcore.dto;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-public class PostDTO {
+public class CommentResponseDTO {
+
     private UUID id;
+    private UUID postId;
     private String authorId;
-    private String title;
     private String content;
-    private boolean published;
-    private long viewCount;
-    private long likeCount;
-    private long heartCount;
-    private long bookmarkCount;
-
-    private String bannerImageFileId;
-    private String bannerImageUrl; // resolved from S3
-
     private Instant createdAt;
     private Instant updatedAt;
+    private UUID parentId;
 
-    private List<String> tags; // tag names
+    private long likeCount;
+    private long laughCount;
+    private long sadCount;
+    private long insightfulCount;
+
+    // Nested replies for convenience
+    private List<CommentResponseDTO> replies;
 
     // Getters & Setters
-
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
+
+    public UUID getPostId() { return postId; }
+    public void setPostId(UUID postId) { this.postId = postId; }
 
     public String getAuthorId() { return authorId; }
     public void setAuthorId(String authorId) { this.authorId = authorId; }
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
-
     public String getContent() { return content; }
     public void setContent(String content) { this.content = content; }
-
-    public boolean isPublished() { return published; }
-    public void setPublished(boolean published) { this.published = published; }
-
-    public long getViewCount() { return viewCount; }
-    public void setViewCount(long viewCount) { this.viewCount = viewCount; }
-
-    public long getLikeCount() { return likeCount; }
-    public void setLikeCount(long likeCount) { this.likeCount = likeCount; }
-
-    public long getHeartCount() { return heartCount; }
-    public void setHeartCount(long heartCount) { this.heartCount = heartCount; }
-
-    public long getBookmarkCount() { return bookmarkCount; }
-    public void setBookmarkCount(long bookmarkCount) { this.bookmarkCount = bookmarkCount; }
-
-    public String getBannerImageFileId() { return bannerImageFileId; }
-    public void setBannerImageFileId(String bannerImageFileId) { this.bannerImageFileId = bannerImageFileId; }
-
-    public String getBannerImageUrl() { return bannerImageUrl; }
-    public void setBannerImageUrl(String bannerImageUrl) { this.bannerImageUrl = bannerImageUrl; }
 
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
@@ -243,13 +230,28 @@ public class PostDTO {
     public Instant getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
 
-    public List<String> getTags() { return tags; }
-    public void setTags(List<String> tags) { this.tags = tags; }
+    public UUID getParentId() { return parentId; }
+    public void setParentId(UUID parentId) { this.parentId = parentId; }
+
+    public long getLikeCount() { return likeCount; }
+    public void setLikeCount(long likeCount) { this.likeCount = likeCount; }
+
+    public long getLaughCount() { return laughCount; }
+    public void setLaughCount(long laughCount) { this.laughCount = laughCount; }
+
+    public long getSadCount() { return sadCount; }
+    public void setSadCount(long sadCount) { this.sadCount = sadCount; }
+
+    public long getInsightfulCount() { return insightfulCount; }
+    public void setInsightfulCount(long insightfulCount) { this.insightfulCount = insightfulCount; }
+
+    public List<CommentResponseDTO> getReplies() { return replies; }
+    public void setReplies(List<CommentResponseDTO> replies) { this.replies = replies; }
 }
 
 
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/util/SecurityUtil.java -----
-package com.zblog.zblogpostcore.util;
+----- /home/zakaria/zBlog/zblog-backend/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/util/SecurityUtil.java -----
+package com.zblog.zblogcommentcore.util;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -261,397 +263,216 @@ public class SecurityUtil {
         if (auth == null || auth.getName() == null) {
             throw new SecurityException("No authenticated user");
         }
-        // 'auth.getName()' is typically the 'sub' from the JWT
-        return auth.getName();
-    }
-
-    public static String getCurrentUserIdOrNull() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null) {
-            return null;
-        }
+        // typically the sub claim from Cognito
         return auth.getName();
     }
 }
 
 
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/service/TagService.java -----
-package com.zblog.zblogpostcore.service;
+----- /home/zakaria/zBlog/zblog-backend/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/service/impl/CommentServiceImpl.java -----
+package com.zblog.zblogcommentcore.service.impl;
 
-import com.zblog.zblogpostcore.domain.entity.Tag;
-import com.zblog.zblogpostcore.repository.TagRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.UUID;
-
-@Service
-public class TagService {
-
-    private final TagRepository tagRepository;
-
-    @Autowired
-    public TagService(TagRepository tagRepository) {
-        this.tagRepository = tagRepository;
-    }
-
-    public List<Tag> listAllTags() {
-        return tagRepository.findAll();
-    }
-
-    public Tag getTagById(UUID id) {
-        return tagRepository.findById(id).orElse(null);
-    }
-
-    public Tag createOrUpdateTag(String name) {
-        return tagRepository.findByNameIgnoreCase(name)
-                .orElseGet(() -> {
-                    Tag newTag = new Tag();
-                    newTag.setName(name);
-                    return tagRepository.save(newTag);
-                });
-    }
-
-    public void deleteTag(UUID id) {
-        tagRepository.deleteById(id);
-    }
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/service/impl/PostServiceImpl.java -----
-package com.zblog.zblogpostcore.service.impl;
-
-import com.zblog.s3core.service.S3Service;
-import com.zblog.zblogpostcore.domain.entity.Post;
-import com.zblog.zblogpostcore.domain.entity.Tag;
-import com.zblog.zblogpostcore.dto.PostDTO;
-import com.zblog.zblogpostcore.exception.PostNotFoundException;
-import com.zblog.zblogpostcore.repository.PostRepository;
-import com.zblog.zblogpostcore.repository.TagRepository;
+import com.zblog.zblogcommentcore.domain.entity.Comment;
+import com.zblog.zblogcommentcore.dto.*;
+import com.zblog.zblogcommentcore.exception.CommentNotFoundException;
+import com.zblog.zblogcommentcore.repository.CommentRepository;
+import com.zblog.zblogcommentcore.service.CommentService;
 import com.zblog.zblogpostcore.service.PostService;
-
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class PostServiceImpl implements PostService {
+public class CommentServiceImpl implements CommentService {
 
-    private final PostRepository postRepository;
-    private final TagRepository tagRepository;
-    private final S3Service s3Service;
+    private final CommentRepository commentRepository;
+    private final PostService postService;
 
     @Autowired
-    public PostServiceImpl(PostRepository postRepository,
-                           TagRepository tagRepository
-            ,S3Service s3Service) {
-        this.postRepository = postRepository;
-        this.tagRepository = tagRepository;
-        this.s3Service = s3Service;
+    public CommentServiceImpl(CommentRepository commentRepository, PostService postService) {
+        this.commentRepository = commentRepository;
+        this.postService = postService;
     }
 
     @Override
-    public PostDTO createPost(PostDTO postDTO, String currentUserId) {
-        Post post = new Post();
-        post.setAuthorId(currentUserId);
-        post.setTitle(postDTO.getTitle());
-        post.setContent(postDTO.getContent());
-        post.setPublished(postDTO.isPublished());
-        post.setBannerImageFileId(postDTO.getBannerImageFileId());
+    public CommentResponseDTO createComment(CommentCreateRequest request, String currentUserId) {
+        // Validate post existence via post-core, e.g.:
+        postService.validatePostExists(request.getPostId());
 
-        // Initialize counters at 0
-        post.setLikeCount(0);
-        post.setHeartCount(0);
-        post.setBookmarkCount(0);
+        Comment comment = new Comment();
+        comment.setPostId(request.getPostId());
+        comment.setAuthorId(currentUserId);
+        comment.setContent(request.getContent());
+        comment.setParentId(request.getParentId());
 
-        // Attach tags
-        if (postDTO.getTags() != null) {
-            post.setTags(resolveTags(postDTO.getTags()));
-        }
-
-        Post saved = postRepository.save(post);
-        return mapToDTO(saved, true);
+        commentRepository.save(comment);
+        return toDTO(comment, true);
     }
 
     @Override
-    public PostDTO updatePost(UUID postId, PostDTO postDTO, String currentUserId) {
-        Post existing = postRepository.findById(postId)
-                .orElseThrow(() -> new PostNotFoundException("Post not found"));
-
-        // Ownership check
-        if (!existing.getAuthorId().equals(currentUserId)) {
-            throw new SecurityException("Not authorized to edit this post");
-        }
-
-        existing.setTitle(postDTO.getTitle());
-        existing.setContent(postDTO.getContent());
-        existing.setPublished(postDTO.isPublished());
-        existing.setBannerImageFileId(postDTO.getBannerImageFileId());
-
-        // Update tags
-        existing.getTags().clear();
-        if (postDTO.getTags() != null) {
-            existing.getTags().addAll(resolveTags(postDTO.getTags()));
-        }
-
-        Post saved = postRepository.save(existing);
-        return mapToDTO(saved, true);
-    }
-
-    @Override
-    public void deletePost(UUID postId, String currentUserId) {
-        Post existing = postRepository.findById(postId)
-                .orElseThrow(() -> new PostNotFoundException("Post not found"));
+    public CommentResponseDTO updateComment(CommentUpdateRequest request, String currentUserId) {
+        Comment existing = commentRepository.findById(request.getId())
+                .orElseThrow(() -> new CommentNotFoundException("Comment not found"));
 
         if (!existing.getAuthorId().equals(currentUserId)) {
-            throw new SecurityException("Not authorized to delete this post");
+            throw new SecurityException("Not authorized to update this comment");
         }
-        // Hard delete for simplicity
-        postRepository.delete(existing);
+        existing.setContent(request.getContent());
+        commentRepository.save(existing);
+
+        return toDTO(existing, true);
     }
 
     @Override
-    public PostDTO getPost(UUID postId, String currentUserId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new PostNotFoundException("Post not found"));
+    public void deleteComment(UUID commentId, String currentUserId) {
+        Comment existing = commentRepository.findById(commentId)
+                .orElseThrow(() -> new CommentNotFoundException("Comment not found"));
 
-        if (!post.isPublished() && !post.getAuthorId().equals(currentUserId)) {
-            throw new SecurityException("This post is unpublished and you are not the owner");
+        if (!existing.getAuthorId().equals(currentUserId)) {
+            throw new SecurityException("Not authorized to delete this comment");
         }
-        return mapToDTO(post, true);
+        // Hard delete
+        // optional recursion if you want to delete children as well
+        commentRepository.delete(existing);
     }
 
     @Override
-    public Page<PostDTO> getAllPosts(boolean onlyPublished, Pageable pageable) {
-        // If we only want published posts
-        if (onlyPublished) {
-            return postRepository.findByIsPublishedTrue(pageable)
-                    .map(entity -> mapToDTO(entity, false));
-        }
-        // Return all posts, ignoring publish state
-        return postRepository.findAll(pageable)
-                .map(entity -> mapToDTO(entity, false));
+    public Page<CommentResponseDTO> getTopLevelComments(UUID postId, Pageable pageable) {
+        Page<Comment> page = commentRepository.findByPostIdAndParentIdIsNullOrderByCreatedAtAsc(postId, pageable);
+        return page.map(comment -> toDTO(comment, false));
     }
 
     @Override
-    public Page<PostDTO> searchPosts(String keyword, boolean onlyPublished, Pageable pageable) {
-        Page<Post> page = postRepository.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(keyword, keyword, pageable);
-
-        if (onlyPublished) {
-            List<Post> filtered = page.getContent().stream()
-                    .filter(Post::isPublished)
-                    .collect(Collectors.toList());
-
-            return new PageImpl<>(
-                    filtered.stream().map(p -> mapToDTO(p, false)).collect(Collectors.toList()),
-                    pageable,
-                    filtered.size()
-            );
-        }
-
-        return page.map(post -> mapToDTO(post, false));
+    public CommentResponseDTO getComment(UUID commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new CommentNotFoundException("Comment not found"));
+        return toDTO(comment, true);
     }
 
     @Override
-    public Page<PostDTO> getPostsByAuthor(String authorId, boolean onlyPublished, Pageable pageable) {
-        if (onlyPublished) {
-            return postRepository.findByIsPublishedTrueAndAuthorId(authorId, pageable)
-                    .map(entity -> mapToDTO(entity, false));
-        } else {
-            return postRepository.findByAuthorId(authorId, pageable)
-                    .map(entity -> mapToDTO(entity, false));
-        }
-    }
-
-    @Override
-    public PostDTO incrementViewCount(UUID postId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new PostNotFoundException("Post not found"));
-        post.setViewCount(post.getViewCount() + 1);
-        Post saved = postRepository.save(post);
-        return mapToDTO(saved, false);
-    }
-
-    @Override
-    public PostDTO reactToPost(UUID postId, String reactionType, String currentUserId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new PostNotFoundException("Post not found"));
+    public CommentResponseDTO reactToComment(UUID commentId, String reactionType) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new CommentNotFoundException("Comment not found"));
 
         switch (reactionType.toLowerCase()) {
             case "like":
-                post.setLikeCount(post.getLikeCount() + 1);
+                comment.setLikeCount(comment.getLikeCount() + 1);
                 break;
-            case "heart":
-                post.setHeartCount(post.getHeartCount() + 1);
+            case "laugh":
+                comment.setLaughCount(comment.getLaughCount() + 1);
                 break;
-            case "bookmark":
-                post.setBookmarkCount(post.getBookmarkCount() + 1);
+            case "sad":
+                comment.setSadCount(comment.getSadCount() + 1);
+                break;
+            case "insightful":
+                comment.setInsightfulCount(comment.getInsightfulCount() + 1);
                 break;
             default:
-                // You could throw an exception or ignore unknown reaction types
                 throw new IllegalArgumentException("Unknown reaction type: " + reactionType);
         }
-        Post saved = postRepository.save(post);
-        return mapToDTO(saved, false);
+        commentRepository.save(comment);
+        return toDTO(comment, true);
+    }
+
+    @Override
+    public CommentResponseDTO buildCommentThread(UUID commentId) {
+        Comment root = commentRepository.findById(commentId)
+                .orElseThrow(() -> new CommentNotFoundException("Comment not found"));
+        return toDTO(root, true);
     }
 
     // ---------- Helpers ----------
 
-    /**
-     * Resolve a list of tag names into Tag entities. Creates new if doesn't exist.
-     */
-    private List<Tag> resolveTags(List<String> tagNames) {
-        return tagNames.stream()
-                .map(tagName -> {
-                    Tag existing = tagRepository.findByNameIgnoreCase(tagName).orElse(null);
-                    if (existing == null) {
-                        existing = new Tag();
-                        existing.setName(tagName);
-                    }
-                    return existing;
-                })
-                .collect(Collectors.toList());
-    }
+    private CommentResponseDTO toDTO(Comment comment, boolean buildReplies) {
+        CommentResponseDTO dto = new CommentResponseDTO();
+        dto.setId(comment.getId());
+        dto.setPostId(comment.getPostId());
+        dto.setAuthorId(comment.getAuthorId());
+        dto.setContent(comment.getContent());
+        dto.setCreatedAt(comment.getCreatedAt());
+        dto.setUpdatedAt(comment.getUpdatedAt());
+        dto.setParentId(comment.getParentId());
+        dto.setLikeCount(comment.getLikeCount());
+        dto.setLaughCount(comment.getLaughCount());
+        dto.setSadCount(comment.getSadCount());
+        dto.setInsightfulCount(comment.getInsightfulCount());
 
-    /**
-     * Convert an entity to a PostDTO, resolving the bannerImageUrl from s3-core.
-     */
-    private PostDTO mapToDTO(Post post, boolean resolveBannerUrl) {
-        PostDTO dto = new PostDTO();
-        dto.setId(post.getId());
-        dto.setAuthorId(post.getAuthorId());
-        dto.setTitle(post.getTitle());
-        dto.setContent(post.getContent());
-        dto.setPublished(post.isPublished());
-        dto.setViewCount(post.getViewCount());
-        dto.setLikeCount(post.getLikeCount());
-        dto.setHeartCount(post.getHeartCount());
-        dto.setBookmarkCount(post.getBookmarkCount());
-        dto.setBannerImageFileId(post.getBannerImageFileId());
-        dto.setCreatedAt(post.getCreatedAt());
-        dto.setUpdatedAt(post.getUpdatedAt());
-
-        dto.setTags(post.getTags().stream()
-                .map(Tag::getName)
-                .collect(Collectors.toList()));
-
-        if (resolveBannerUrl && post.getBannerImageFileId() != null) {
-            try {
-                URL url = s3Service.getFileUrl(post.getBannerImageFileId(), false);
-                dto.setBannerImageUrl(url.toString());
-            } catch (Exception e) {
-                // fallback or log error
-                dto.setBannerImageUrl(null);
-            }
+        if (buildReplies) {
+            // gather replies
+            List<Comment> children = commentRepository.findByParentIdOrderByCreatedAtAsc(comment.getId());
+            List<CommentResponseDTO> childDTOs = children.stream()
+                    .map(child -> toDTO(child, true))
+                    .collect(Collectors.toList());
+            dto.setReplies(childDTOs);
         }
-
         return dto;
     }
 }
 
 
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/service/PostService.java -----
-package com.zblog.zblogpostcore.service;
+----- /home/zakaria/zBlog/zblog-backend/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/service/CommentService.java -----
+package com.zblog.zblogcommentcore.service;
 
-import com.zblog.zblogpostcore.dto.PostDTO;
+import com.zblog.zblogcommentcore.dto.CommentCreateRequest;
+import com.zblog.zblogcommentcore.dto.CommentUpdateRequest;
+import com.zblog.zblogcommentcore.dto.CommentResponseDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
 
-public interface PostService {
-    PostDTO createPost(PostDTO postDTO, String currentUserId);
-    PostDTO updatePost(UUID postId, PostDTO postDTO, String currentUserId);
-    void deletePost(UUID postId, String currentUserId);
+public interface CommentService {
 
-    PostDTO getPost(UUID postId, String currentUserId);
-    Page<PostDTO> getAllPosts(boolean onlyPublished, Pageable pageable);
-    Page<PostDTO> searchPosts(String keyword, boolean onlyPublished, Pageable pageable);
-    Page<PostDTO> getPostsByAuthor(String authorId, boolean onlyPublished, Pageable pageable);
+    CommentResponseDTO createComment(CommentCreateRequest request, String currentUserId);
 
-    PostDTO incrementViewCount(UUID postId);
-    PostDTO reactToPost(UUID postId, String reactionType, String currentUserId);
+    CommentResponseDTO updateComment(CommentUpdateRequest request, String currentUserId);
+
+    void deleteComment(UUID commentId, String currentUserId);
+
+    Page<CommentResponseDTO> getTopLevelComments(UUID postId, Pageable pageable);
+
+    CommentResponseDTO getComment(UUID commentId);
+
+    CommentResponseDTO reactToComment(UUID commentId, String reactionType);
+
+    // Get nested replies by parent
+    CommentResponseDTO buildCommentThread(UUID commentId);
 }
 
 
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/ZblogPostCoreApplication.java -----
-package com.zblog.zblogpostcore;
-
-import io.github.cdimascio.dotenv.Dotenv;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
-
-@SpringBootApplication
-@ComponentScan(basePackages = {
-        "com.zblog.zblogpostcore",
-        "com.zblog.s3core"
-})
-public class ZblogPostCoreApplication {
-
-    public static void main(String[] args) {
-        // Load .env
-        Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
-        dotenv.entries().forEach(entry ->
-                System.setProperty(entry.getKey(), entry.getValue())
-        );
-
-        SpringApplication.run(ZblogPostCoreApplication.class, args);
-    }
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/domain/entity/Post.java -----
-package com.zblog.zblogpostcore.domain.entity;
+----- /home/zakaria/zBlog/zblog-backend/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/domain/entity/Comment.java -----
+package com.zblog.zblogcommentcore.domain.entity;
 
 import jakarta.persistence.*;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "posts")
-public class Post {
+@Table(name = "comments")
+public class Comment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    // ID of the author (the 'sub' claim from Cognito JWT)
-    private String authorId;
-
-    private String title;
-
-    @Column(columnDefinition = "TEXT")
+    private UUID postId;      // link to post-core
+    private String authorId;  // from Cognito sub
     private String content;
-
-    private boolean isPublished;
-    private long viewCount;
-
-    private long likeCount;
-    private long heartCount;
-    private long bookmarkCount;
-
-    private String bannerImageFileId; // reference to S3Core
 
     private Instant createdAt;
     private Instant updatedAt;
 
-    // Many-to-many for tags
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-    @JoinTable(name = "post_tags",
-            joinColumns = @JoinColumn(name = "post_id"),
-            inverseJoinColumns = @JoinColumn(name = "tag_id"))
-    private List<Tag> tags = new ArrayList<>();
+    private UUID parentId;    // if null => top-level comment; if not => nested
+
+    // Reactions stored as counters: likeCount, laughCount, etc.
+    private long likeCount;
+    private long laughCount;
+    private long sadCount;
+    private long insightfulCount;
 
     @PrePersist
     protected void onCreate() {
@@ -665,36 +486,17 @@ public class Post {
     }
 
     // Getters/Setters
-
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
+
+    public UUID getPostId() { return postId; }
+    public void setPostId(UUID postId) { this.postId = postId; }
 
     public String getAuthorId() { return authorId; }
     public void setAuthorId(String authorId) { this.authorId = authorId; }
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
-
     public String getContent() { return content; }
     public void setContent(String content) { this.content = content; }
-
-    public boolean isPublished() { return isPublished; }
-    public void setPublished(boolean published) { isPublished = published; }
-
-    public long getViewCount() { return viewCount; }
-    public void setViewCount(long viewCount) { this.viewCount = viewCount; }
-
-    public long getLikeCount() { return likeCount; }
-    public void setLikeCount(long likeCount) { this.likeCount = likeCount; }
-
-    public long getHeartCount() { return heartCount; }
-    public void setHeartCount(long heartCount) { this.heartCount = heartCount; }
-
-    public long getBookmarkCount() { return bookmarkCount; }
-    public void setBookmarkCount(long bookmarkCount) { this.bookmarkCount = bookmarkCount; }
-
-    public String getBannerImageFileId() { return bannerImageFileId; }
-    public void setBannerImageFileId(String bannerImageFileId) { this.bannerImageFileId = bannerImageFileId; }
 
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
@@ -702,71 +504,173 @@ public class Post {
     public Instant getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
 
-    public List<Tag> getTags() { return tags; }
-    public void setTags(List<Tag> tags) { this.tags = tags; }
+    public UUID getParentId() { return parentId; }
+    public void setParentId(UUID parentId) { this.parentId = parentId; }
+
+    public long getLikeCount() { return likeCount; }
+    public void setLikeCount(long likeCount) { this.likeCount = likeCount; }
+
+    public long getLaughCount() { return laughCount; }
+    public void setLaughCount(long laughCount) { this.laughCount = laughCount; }
+
+    public long getSadCount() { return sadCount; }
+    public void setSadCount(long sadCount) { this.sadCount = sadCount; }
+
+    public long getInsightfulCount() { return insightfulCount; }
+    public void setInsightfulCount(long insightfulCount) { this.insightfulCount = insightfulCount; }
 }
 
 
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/domain/entity/Tag.java -----
-package com.zblog.zblogpostcore.domain.entity;
+----- /home/zakaria/zBlog/zblog-backend/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/graphql/CommentGraphQLController.java -----
+package com.zblog.zblogcommentcore.graphql;
 
-import jakarta.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
+import com.zblog.zblogcommentcore.dto.CommentCreateRequest;
+import com.zblog.zblogcommentcore.dto.CommentResponseDTO;
+import com.zblog.zblogcommentcore.dto.CommentUpdateRequest;
+import com.zblog.zblogcommentcore.service.CommentService;
+import com.zblog.zblogcommentcore.util.SecurityUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.MutationMapping;
+import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.stereotype.Controller;
+
 import java.util.UUID;
 
-@Entity
-@Table(name = "tags")
-public class Tag {
+@Controller
+public class CommentGraphQLController {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+    private final CommentService commentService;
 
-    @Column(unique = true, nullable = false)
-    private String name;
+    @Autowired
+    public CommentGraphQLController(CommentService commentService) {
+        this.commentService = commentService;
+    }
 
-    @ManyToMany(mappedBy = "tags", fetch = FetchType.LAZY)
-    private List<Post> posts = new ArrayList<>();
+    @QueryMapping
+    public Iterable<CommentResponseDTO> commentsForPost(@Argument UUID postId,
+                                                        @Argument Integer page,
+                                                        @Argument Integer size) {
+        int p = (page == null) ? 0 : page;
+        int s = (size == null) ? 10 : size;
+        return commentService.getTopLevelComments(postId, PageRequest.of(p, s));
+    }
 
-    // Getters/Setters
-    public UUID getId() { return id; }
-    public void setId(UUID id) { this.id = id; }
+    @QueryMapping
+    public CommentResponseDTO comment(@Argument UUID id) {
+        return commentService.buildCommentThread(id);
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    @MutationMapping
+    public CommentResponseDTO createComment(@Argument CommentCreateRequest input) {
+        String userId = SecurityUtil.getCurrentUserId();
+        return commentService.createComment(input, userId);
+    }
 
-    public List<Post> getPosts() { return posts; }
-    public void setPosts(List<Post> posts) { this.posts = posts; }
+    @MutationMapping
+    public CommentResponseDTO updateComment(@Argument UUID id,
+                                            @Argument String content) {
+        String userId = SecurityUtil.getCurrentUserId();
+        CommentUpdateRequest req = new CommentUpdateRequest();
+        req.setId(id);
+        req.setContent(content);
+        return commentService.updateComment(req, userId);
+    }
+
+    @MutationMapping
+    public Boolean deleteComment(@Argument UUID id) {
+        String userId = SecurityUtil.getCurrentUserId();
+        commentService.deleteComment(id, userId);
+        return true;
+    }
+
+    @MutationMapping
+    public CommentResponseDTO reactToComment(@Argument UUID id,
+                                             @Argument String reactionType) {
+        return commentService.reactToComment(id, reactionType);
+    }
 }
 
 
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/exception/PostNotFoundException.java -----
-package com.zblog.zblogpostcore.exception;
+----- /home/zakaria/zBlog/zblog-backend/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/exception/CommentNotFoundException.java -----
+package com.zblog.zblogcommentcore.exception;
 
-public class PostNotFoundException extends RuntimeException {
-    public PostNotFoundException(String message) {
+public class CommentNotFoundException extends RuntimeException {
+    public CommentNotFoundException(String message) {
         super(message);
     }
 }
 
 
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/resources/schema.sql -----
+----- /home/zakaria/zBlog/zblog-backend/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/ZblogCommentCoreApplication.java -----
+package com.zblog.zblogcommentcore;
+
+import io.github.cdimascio.dotenv.Dotenv;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
+
+@SpringBootApplication
+@ComponentScan(basePackages = {
+        "com.zblog.zblogcommentcore",
+        "com.zblog.zblogpostcore"
+})
+public class ZblogCommentCoreApplication {
+
+    public static void main(String[] args) {
+        // Load .env if using dotenv
+        Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+        dotenv.entries().forEach(entry ->
+                System.setProperty(entry.getKey(), entry.getValue())
+        );
+
+        SpringApplication.run(ZblogCommentCoreApplication.class, args);
+    }
+
+}
 
 
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/resources/application.properties -----
-spring.application.name=zblog-post-core
-server.port=8082
+----- /home/zakaria/zBlog/zblog-backend/zblog-comment-core/src/main/resources/application.properties -----
+spring.application.name=zblog-comment-core
 
-spring.datasource.url=jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DB}
-spring.datasource.username=${MYSQL_USER}
-spring.datasource.password=${MYSQL_PASS}
-spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
-spring.jpa.properties.hibernate.format_sql=true
+----- /home/zakaria/zBlog/zblog-backend/zblog-comment-core/src/main/resources/graphql/schema.graphqls -----
+type Query {
+    # Retrieve top-level comments for a post
+    commentsForPost(postId: ID!, page: Int, size: Int): [CommentDTO!]!
 
-aws.cognito.issuer-uri=${COGNITO_ISSUER_URI}
+    # Get single comment (with nested replies)
+    comment(id: ID!): CommentDTO
+}
+
+type Mutation {
+    createComment(input: CommentCreateInput!): CommentDTO
+    updateComment(id: ID!, content: String!): CommentDTO
+    deleteComment(id: ID!): Boolean
+
+    reactToComment(id: ID!, reactionType: String!): CommentDTO
+}
+
+type CommentDTO {
+    id: ID!
+    postId: ID!
+    authorId: String
+    content: String
+    createdAt: String
+    updatedAt: String
+    parentId: ID
+    likeCount: Int
+    laughCount: Int
+    sadCount: Int
+    insightfulCount: Int
+    replies: [CommentDTO!]
+}
+
+input CommentCreateInput {
+    postId: ID!
+    parentId: ID
+    content: String!
+}
 
 

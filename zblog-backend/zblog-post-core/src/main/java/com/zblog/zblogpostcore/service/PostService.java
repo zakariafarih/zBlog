@@ -18,4 +18,6 @@ public interface PostService {
 
     PostDTO incrementViewCount(UUID postId);
     PostDTO reactToPost(UUID postId, String reactionType, String currentUserId);
+
+    void validatePostExists(UUID postId);
 }
