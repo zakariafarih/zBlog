@@ -1,5 +1,8 @@
 # zBlog 🚀
 
+![Peek+2025-03-29+08-39(1)](https://github.com/user-attachments/assets/551ee40a-643b-430f-a0ec-7b5974d05372)
+
+
 **zBlog** is a modern, full-stack content-sharing platform built using **Next.js**, **Spring Boot**, **microservices architecture**, and **AWS**. It’s designed to showcase both strong technical foundations and a clean, user-centric experience.
 
 > “My vision of what a truly meaningful, social platform should be — rich in content, not just scrolling.”
