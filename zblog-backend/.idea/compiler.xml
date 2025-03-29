@@ -9,6 +9,7 @@
         <module name="s3-core" />
         <module name="zblog-common-core" />
         <module name="zblog-auth-core" />
+        <module name="zblog-user-core" />
         <module name="zblog-post-core" />
       </profile>
       <profile name="Annotation profile for zblog-backend" enabled="true">
@@ -16,6 +17,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.30/lombok-1.18.30.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.30/lombok-1.18.30.jar" />
         </processorPath>
         <module name="zblog-comment-core" />
