@@ -1,25 +1,23 @@
 package com.zblog.zblogusercore.service.impl;
 
-import com.zblog.s3core.service.S3Service;
+import com.zblog.zblogusercore.client.FileClient;
+import com.zblog.zblogusercore.client.dto.FileMetadataDTO;
 import com.zblog.zblogusercore.domain.entity.UserProfile;
 import com.zblog.zblogusercore.dto.UserProfileDTO;
 import com.zblog.zblogusercore.exception.UserNotFoundException;
 import com.zblog.zblogusercore.repository.UserProfileRepository;
 import com.zblog.zblogusercore.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.net.URL;
 
 @Service
 public class UserServiceImpl implements UserService {
 
     private final UserProfileRepository userProfileRepo;
-    private final S3Service s3Service;
+    private final FileClient fileClient;
 
-    @Autowired
-    public UserServiceImpl(UserProfileRepository userProfileRepo, S3Service s3Service) {
+    public UserServiceImpl(UserProfileRepository userProfileRepo, FileClient fileClient) {
         this.userProfileRepo = userProfileRepo;
-        this.s3Service = s3Service;
+        this.fileClient = fileClient;
     }
 
     @Override
@@ -39,6 +37,7 @@ public class UserServiceImpl implements UserService {
         profile.setBio(profileDTO.getBio());
         profile.setProfileImageFileId(profileDTO.getProfileImageFileId());
         userProfileRepo.save(profile);
+
         return toDTO(profile, true);
     }
 
@@ -54,13 +53,11 @@ public class UserServiceImpl implements UserService {
         dto.setUpdatedAt(entity.getUpdatedAt());
 
         if (resolveImageUrl && entity.getProfileImageFileId() != null) {
-            try {
-                URL url = s3Service.getFileUrl(entity.getProfileImageFileId(), false);
-                dto.setProfileImageUrl(url.toString());
-            } catch (Exception e) {
-                dto.setProfileImageUrl(null);
-            }
+            // We now do a REST call to s3-core to fetch the presigned URL
+            FileMetadataDTO fileMeta = fileClient.getFileMetadata(entity.getProfileImageFileId(), false);
+            dto.setProfileImageUrl(fileMeta.getUrl());
         }
+
         return dto;
     }
 }

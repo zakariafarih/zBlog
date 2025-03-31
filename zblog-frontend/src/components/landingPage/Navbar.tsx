@@ -16,14 +16,15 @@ export default function Navbar() {
   const [time, setTime] = useState<string>("Fetching time...")
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false)
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState<boolean>(false)
-  const [isAvatarHovered, setIsAvatarHovered] = useState<boolean>(false)  // Track hover state for disabling animation
+  const [isAvatarHovered, setIsAvatarHovered] = useState<boolean>(false)
 
   const navItems = [
     { label: "Recent", href: "/recent" },
     { label: "Tags", href: "/tags" },
     { label: "Explore", href: "/posts" },
+    ...(auth.isAuthenticated ? [{ label: "Express", href: "/express" }] : []),
     { label: "About", href: "/about" },
-  ]
+  ]  
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -95,15 +96,18 @@ export default function Navbar() {
 
       {/* Welcome + Time/CTA Top Bar */}
       <div className="col-span-3 flex items-center justify-between px-6 h-10 border-b border-slate-800">
-        {/* Centered Welcome Text */}
         <p className="text-sm text-slate-400 text-center flex-1">
-          Welcome to ZBlog — A place for devs who build cool stuff.
+          Welcome to ZBlog — A blog made by me for you
         </p>
-        <div className="flex items-center gap-6 text-sm text-slate-400 whitespace-nowrap">
-          <span>{time} — {temperature}</span>
-          <span className="text-blue-400 font-medium hover:underline cursor-pointer">
-            Let’s Build Together
-          </span>
+        <div className="flex items-center h-full">
+          <div className="px-6 h-full flex items-center border-l border-slate-800">
+            <span className="text-sm text-slate-400">{time} — {temperature}</span>
+          </div>
+          <div className="px-6 h-full flex items-center border-l border-r border-slate-800">
+            <span className="text-blue-400 font-medium cursor-pointer hover:text-white transition-colors">
+              Blog like you never did before
+            </span>
+          </div>
         </div>
       </div>
 
@@ -111,92 +115,112 @@ export default function Navbar() {
       <div className="col-span-3 flex items-center justify-between px-0 h-14 border-t border-slate-800">
         {/* Navigation Items */}
         <nav className="flex h-full">
-          {navItems.map((item, idx) => (
-            <Link
-              key={item.label}
-              href={item.href}
-              className={`flex items-center px-6 h-full text-sm uppercase tracking-wide text-slate-300 hover:text-white transition
-                ${idx !== 0 ? 'border-l border-slate-800' : ''}
-                ${idx === navItems.length - 1 ? 'border-r border-slate-800' : ''}
-              `}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+        {navItems.map((item, idx) => (
+          <Link
+            key={item.label}
+            href={item.href}
+            className={`
+              flex items-center px-6 h-full 
+              text-sm uppercase tracking-wide 
+              text-slate-300 hover:text-white 
+              relative group transition-all
+              ${idx !== 0 ? 'border-l border-slate-800' : ''}
+              ${idx === navItems.length - 1 ? 'border-r border-slate-800' : ''}
+            `}
+          >
+            {item.label}
+            <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-blue-500 to-teal-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200" />
+          </Link>
+        ))}
+      </nav>
 
         {/* Search + Auth */}
-        <div className="flex items-center gap-4 px-6">
-          <motion.div
-            className="relative"
-            onClick={() => setIsSearchOpen((prev) => !prev)}
-          >
-            <Search className="w-4 h-4 text-slate-400 hover:text-white cursor-pointer" />
-            {isSearchOpen && (
-              <input
-                type="text"
-                placeholder="Search..."
-                className="absolute top-10 left-0 w-48 p-2 bg-slate-700 border border-slate-600 rounded text-white"
-              />
-            )}
-          </motion.div>
+        {/* Search + Auth */}
+  <div className="flex h-full">
+    <div className="relative h-full flex items-center px-6 border-l border-slate-800">
+      <div className="flex items-center gap-3">
+        {isSearchOpen && (
+          <motion.input
+            initial={{ width: 0, opacity: 0 }}
+            animate={{ width: "200px", opacity: 1 }}
+            exit={{ width: 0, opacity: 0 }}
+            type="text"
+            placeholder="Type to search..."
+            className="bg-slate-800 text-sm text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 focus:outline-none focus:border-blue-500/50"
+          />
+        )}
+        <Search 
+          className="w-4 h-4 text-slate-400 hover:text-white cursor-pointer" 
+          onClick={() => setIsSearchOpen(!isSearchOpen)}
+        />
+      </div>
+    </div>
 
-          {auth.isAuthenticated ? (
-            <motion.div
-              className="relative profile-dropdown"
+    {auth.isAuthenticated ? (
+  <div className="relative h-full flex items-center px-6 border-l border-r border-slate-800">
+    <div
+      className="flex items-center gap-2 cursor-pointer"
+      onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+    >
+      <UserCircle className="w-5 h-5 text-slate-200" />
+      <span className="text-sm hidden md:inline text-slate-300">
+        {auth.user?.profile.email}
+      </span>
+      <MoreHorizontal className="text-slate-400 w-4 h-4" />
+    </div>
+    
+    {/* Dropdown Menu */}
+    {isProfileDropdownOpen && (
+      <>
+        {/* Overlay */}
+        <div 
+          className="fixed inset-0 bg-black/20 z-40" 
+          onClick={() => setIsProfileDropdownOpen(false)}
+        />
+        
+        {/* Dropdown Content */}
+        <div 
+          className="absolute right-0 top-[calc(100%+1px)] w-56 bg-slate-800 rounded-lg shadow-lg border border-slate-700 z-50 overflow-hidden"
+          onClick={(e) => e.stopPropagation()}
+        >
+          
+          {/* Menu Items */}
+          <div className="p-2">
+            <button
+              onClick={() => {
+                auth.removeUser();
+                setIsProfileDropdownOpen(false);
+              }}
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-slate-700/50 rounded-md transition-colors text-left"
             >
-              <div
-                className="flex items-center gap-2 cursor-pointer"
-                onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-              >
-                <UserCircle
-                  className={`w-6 h-6 text-slate-200 ${isProfileDropdownOpen ? 'transform-none' : 'transform scale-105'}`}
-                />
-                <span className="text-sm hidden md:inline">{auth.user?.profile.email}</span>
-                <MoreHorizontal className="text-slate-200 ml-2 w-5 h-5" />
-              </div>
-              {isProfileDropdownOpen && (
-                <div
-                  className="absolute right-1 top-[2rem] w-48 bg-slate-800 text-white text-sm rounded-lg p-2 shadow-lg z-50"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <Link
-                    href="/profile"
-                    className="block px-2 py-1.5 text-slate-200 hover:bg-slate-700 rounded transition-colors"
-                    onClick={() => setIsProfileDropdownOpen(false)}
-                  >
-                    View Profile
-                  </Link>
-                  <button
-                    onClick={() => {
-                      auth.removeUser();
-                      setIsProfileDropdownOpen(false);
-                    }}
-                    className="w-full text-left px-2 py-1.5 text-blue-400 hover:bg-slate-700 rounded transition-colors"
-                  >
-                    Logout
-                  </button>
-                </div>
-              )}
-            </motion.div>
-          ) : (
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => auth.signinRedirect()}
-                className="text-sm text-slate-300 hover:text-white"
-              >
-                Login
-              </button>
-              <Link
-                href="/register"
-                className="text-sm text-slate-300 hover:text-white"
-              >
-                Register
-              </Link>
-            </div>
-          )}
+              Logout
+            </button>
+          </div>
+        </div>
+      </>
+    )}
+  </div>
+    ) : (
+      <div className="h-full flex items-center px-6 border-l border-r border-slate-800">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => auth.signinRedirect()}
+            className="text-sm text-slate-300 hover:text-white"
+          >
+            Login
+          </button>
+          <div className="w-px h-4 bg-slate-800" />
+          <Link
+            href="/register"
+            className="text-sm text-slate-300 hover:text-white"
+          >
+            Register
+          </Link>
         </div>
       </div>
+    )}
+  </div>
+</div>
     </header>
   )
 }

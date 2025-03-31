@@ -2,6 +2,7 @@ package com.zblog.zblogpostcore.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -23,18 +24,22 @@ public class WebSecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
-                        // Public endpoints if any
-                        .requestMatchers("/api/public/**").permitAll()
-                        // Everything else requires authentication
+                        // Health check endpoint for ECS
+                        .requestMatchers("/post/health").permitAll()
+
+                        // Public (if any) — currently unused
+                        .requestMatchers("/post/api/public/**").permitAll()
+
+                        // Everything else requires JWT
                         .anyRequest().authenticated()
                 )
-                // Use JWT bearer tokens
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
 
         return http.build();
     }
 
     @Bean
+    @Primary
     public JwtDecoder jwtDecoder() {
         // Construct JWKS endpoint from the issuer URI
         String jwkSetUri = issuerUri + "/.well-known/jwks.json";

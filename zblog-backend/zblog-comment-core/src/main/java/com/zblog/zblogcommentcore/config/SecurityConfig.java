@@ -22,7 +22,13 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/api/public/**").permitAll()
+                        // Health check endpoints ( for ALB / ECS )
+                        .requestMatchers("/comment/health").permitAll()
+
+                        // Public GET route for listing comments (no JWT required)
+                        .requestMatchers("/api/comments/post/**").permitAll()
+
+                        // Everything else requires JWT
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));

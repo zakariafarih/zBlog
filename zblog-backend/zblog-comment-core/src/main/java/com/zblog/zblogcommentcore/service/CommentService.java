@@ -20,8 +20,6 @@ public interface CommentService {
 
     CommentResponseDTO getComment(UUID commentId);
 
-    CommentResponseDTO reactToComment(UUID commentId, String reactionType);
-
     // Get nested replies by parent
     CommentResponseDTO buildCommentThread(UUID commentId);
 }

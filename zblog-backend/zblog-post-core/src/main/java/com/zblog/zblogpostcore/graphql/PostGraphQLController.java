@@ -22,19 +22,18 @@ public class PostGraphQLController {
     }
 
     @QueryMapping
-    public PostDTO getPost(@Argument UUID id) {
+    public PostDTO getPost(@Argument("id") UUID id) {
         String currentUserId = SecurityUtil.getCurrentUserIdOrNull();
         return postService.getPost(id, currentUserId);
     }
 
     @QueryMapping
-    public Iterable<PostDTO> getAllPosts(@Argument boolean publishedOnly) {
-        // Return first 100 for simplicity
+    public Iterable<PostDTO> getAllPosts(@Argument("publishedOnly") boolean publishedOnly) {
         return postService.getAllPosts(publishedOnly, org.springframework.data.domain.PageRequest.of(0, 100));
     }
 
     @MutationMapping
-    public PostDTO createPost(@Argument PostDTO postInput) {
+    public PostDTO createPost(@Argument("postInput") PostDTO postInput) {
         String currentUserId = SecurityUtil.getCurrentUserId();
         return postService.createPost(postInput, currentUserId);
     }

@@ -15,6 +15,8 @@ public class CommentCreateRequest {
     @NotBlank(message = "Content cannot be blank")
     private String content;
 
+    private String attachmentFileId;
+
     // Getters/Setters
     public UUID getPostId() { return postId; }
     public void setPostId(UUID postId) { this.postId = postId; }
@@ -24,4 +26,7 @@ public class CommentCreateRequest {
 
     public String getContent() { return content; }
     public void setContent(String content) { this.content = content; }
+
+    public String getAttachmentFileId() { return attachmentFileId; }
+    public void setAttachmentFileId(String attachmentFileId) { this.attachmentFileId = attachmentFileId; }
 }

@@ -21,11 +21,7 @@ public class Comment {
 
     private UUID parentId;    // if null => top-level comment; if not => nested
 
-    // Reactions stored as counters: likeCount, laughCount, etc.
-    private long likeCount;
-    private long laughCount;
-    private long sadCount;
-    private long insightfulCount;
+    private String attachmentFileId; // store as String if your s3-core uses a string-based key
 
     @PrePersist
     protected void onCreate() {
@@ -60,15 +56,6 @@ public class Comment {
     public UUID getParentId() { return parentId; }
     public void setParentId(UUID parentId) { this.parentId = parentId; }
 
-    public long getLikeCount() { return likeCount; }
-    public void setLikeCount(long likeCount) { this.likeCount = likeCount; }
-
-    public long getLaughCount() { return laughCount; }
-    public void setLaughCount(long laughCount) { this.laughCount = laughCount; }
-
-    public long getSadCount() { return sadCount; }
-    public void setSadCount(long sadCount) { this.sadCount = sadCount; }
-
-    public long getInsightfulCount() { return insightfulCount; }
-    public void setInsightfulCount(long insightfulCount) { this.insightfulCount = insightfulCount; }
+    public String getAttachmentFileId() { return attachmentFileId; }
+    public void setAttachmentFileId(String attachmentFileId) { this.attachmentFileId = attachmentFileId; }
 }

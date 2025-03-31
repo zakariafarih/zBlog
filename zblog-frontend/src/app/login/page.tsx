@@ -18,6 +18,13 @@ export default function LoginPage() {
     }
   }, [auth.isAuthenticated, router])
 
+  useEffect(() => {
+    if (auth.isAuthenticated && auth.user) {
+      const token = auth.user.access_token
+      console.log("Authorization Header:", `Bearer ${token}`)
+    }
+  }, [auth.isAuthenticated, auth.user])  
+
   return (
     <div className="relative min-h-screen flex items-center justify-center px-4">
       <AnimatedBackground />

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/bookmarks")
+@RequestMapping("/user/api/bookmarks")
 public class BookmarkController {
 
     private final BookmarkService bookmarkService;

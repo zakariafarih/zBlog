@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/tags")
+@RequestMapping("/post/api/tags")
 public class TagController {
 
     private final TagService tagService;

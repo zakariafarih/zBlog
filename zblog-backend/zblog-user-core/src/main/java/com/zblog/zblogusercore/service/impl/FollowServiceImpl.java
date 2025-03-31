@@ -36,9 +36,7 @@ public class FollowServiceImpl implements FollowService {
     @Override
     public void unfollowUser(String followerId, String targetUserId) {
         // remove from DB
-        followRepo.findAll().stream()
-                .filter(f -> f.getFollowerId().equals(followerId) && f.getFollowedId().equals(targetUserId))
-                .findFirst()
+        followRepo.findByFollowerIdAndFollowedId(followerId, targetUserId)
                 .ifPresent(followRepo::delete);
     }
 }

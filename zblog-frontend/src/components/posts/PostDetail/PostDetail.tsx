@@ -1,22 +1,22 @@
-"use client"
+"use client";
 
-import React from "react"
-import PostHeader from "./PostHeader"
-import PostReactionPanel from "./PostReactionPanel"
-import CommentSection from "./CommentSection"
+import React from "react";
+import PostHeader from "./PostHeader";
+import PostReactionPanel from "./PostReactionPanel";
+import CommentSection from "./CommentSection";
 
 interface PostDetailProps {
   post: {
-    title: string
-    coverImageUrl: string
+    title: string;
+    coverImageUrl: string;
     author: {
-      name: string
-      avatarUrl: string
-    }
-    publishedAt: Date
-    tag: string
-    content: string
-  }
+      name: string;
+      avatarUrl: string;
+    };
+    publishedAt: Date;
+    tag: string;
+    content: string;
+  };
 }
 
 export default function PostDetail({ post }: PostDetailProps) {
@@ -39,20 +39,16 @@ export default function PostDetail({ post }: PostDetailProps) {
             tag={post.tag}
           />
 
-          {/* Body Content */}
-          <article className="text-slate-300 leading-relaxed space-y-6">
-            {post.content
-              .trim()
-              .split("\n")
-              .map((para, idx) => (
-                <p key={idx}>{para}</p>
-              ))}
-          </article>
+          {/* Body Content rendered as HTML */}
+          <article
+            className="text-slate-300 leading-relaxed space-y-6"
+            dangerouslySetInnerHTML={{ __html: post.content }}
+          />
 
           {/* Comment Section */}
           <CommentSection />
         </div>
       </section>
     </main>
-  )
+  );
 }

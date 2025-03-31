@@ -3,6 +3,8 @@ package com.zblog.zblogcommentcore.graphql;
 import com.zblog.zblogcommentcore.dto.CommentCreateRequest;
 import com.zblog.zblogcommentcore.dto.CommentResponseDTO;
 import com.zblog.zblogcommentcore.dto.CommentUpdateRequest;
+import com.zblog.zblogcommentcore.dto.ReactionSummaryDTO;
+import com.zblog.zblogcommentcore.service.CommentReactionService;
 import com.zblog.zblogcommentcore.service.CommentService;
 import com.zblog.zblogcommentcore.util.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +20,13 @@ import java.util.UUID;
 public class CommentGraphQLController {
 
     private final CommentService commentService;
+    private final CommentReactionService reactionService;
 
     @Autowired
-    public CommentGraphQLController(CommentService commentService) {
+    public CommentGraphQLController(CommentService commentService,
+                                    CommentReactionService reactionService) {
         this.commentService = commentService;
+        this.reactionService = reactionService;
     }
 
     @QueryMapping
@@ -36,6 +41,11 @@ public class CommentGraphQLController {
     @QueryMapping
     public CommentResponseDTO comment(@Argument UUID id) {
         return commentService.buildCommentThread(id);
+    }
+
+    @QueryMapping
+    public ReactionSummaryDTO reactionSummary(@Argument UUID commentId) {
+        return reactionService.getReactionSummary(commentId);
     }
 
     @MutationMapping
@@ -62,8 +72,10 @@ public class CommentGraphQLController {
     }
 
     @MutationMapping
-    public CommentResponseDTO reactToComment(@Argument UUID id,
+    public ReactionSummaryDTO toggleReaction(@Argument UUID commentId,
                                              @Argument String reactionType) {
-        return commentService.reactToComment(id, reactionType);
+        String userId = SecurityUtil.getCurrentUserId();
+        reactionService.toggleReaction(commentId, userId, reactionType);
+        return reactionService.getReactionSummary(commentId);
     }
 }

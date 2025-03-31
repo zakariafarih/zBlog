@@ -2,6 +2,8 @@
 
 import { motion } from "framer-motion"
 import Link from "next/link"
+import { useEffect } from "react"
+import { useAuth } from "react-oidc-context"
 
 export interface HeroSectionProps {
   title?: string
@@ -14,6 +16,17 @@ export default function HeroSection({
   subtitle = "Create and organize posts with images, videos, code snippets, and more. Execute live code, share your thoughts, and explore new ideas.",
   buttonText = "Join Now",
 }: HeroSectionProps) {
+
+  const auth = useAuth()
+
+  useEffect(() => {
+    if (auth.isAuthenticated && auth.user) {
+      const token = auth.user.access_token
+      console.log("Authorization Header:", `Bearer ${token}`)
+    }
+  }, [auth.isAuthenticated, auth.user])
+
+  
   return (
     <section className="relative overflow-hidden">
       {/* Background decorative elements */}

@@ -13,8 +13,6 @@
     <description>Parent project for all backend microservices and shared modules</description>
 
     <modules>
-        <module>zblog-common-core</module>
-        <module>zblog-auth-core</module>
         <module>s3-core</module>
         <module>zblog-post-core</module>
         <module>zblog-comment-core</module>

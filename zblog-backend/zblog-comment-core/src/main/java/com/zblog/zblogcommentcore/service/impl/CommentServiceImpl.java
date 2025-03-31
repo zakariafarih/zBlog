@@ -1,41 +1,54 @@
 package com.zblog.zblogcommentcore.service.impl;
 
+import com.zblog.zblogcommentcore.client.FileClient;
+import com.zblog.zblogcommentcore.client.PostCoreClient;
 import com.zblog.zblogcommentcore.domain.entity.Comment;
 import com.zblog.zblogcommentcore.dto.*;
 import com.zblog.zblogcommentcore.exception.CommentNotFoundException;
 import com.zblog.zblogcommentcore.repository.CommentRepository;
 import com.zblog.zblogcommentcore.service.CommentService;
-import com.zblog.zblogpostcore.service.PostService;
+import com.zblog.zblogcommentcore.service.CommentReactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
-    private final PostService postService;
+    private final PostCoreClient postCoreClient;
+    private final CommentReactionService reactionService; // << inject
+    private final FileClient fileClient;
 
     @Autowired
-    public CommentServiceImpl(CommentRepository commentRepository, PostService postService) {
+    public CommentServiceImpl(
+            CommentRepository commentRepository,
+            PostCoreClient postCoreClient,
+            CommentReactionService reactionService,
+            FileClient fileClient) {
+
         this.commentRepository = commentRepository;
-        this.postService = postService;
+        this.postCoreClient = postCoreClient;
+        this.reactionService = reactionService;
+        this.fileClient = fileClient;
     }
 
     @Override
     public CommentResponseDTO createComment(CommentCreateRequest request, String currentUserId) {
-        // Validate post existence via post-core, e.g.:
-        postService.validatePostExists(request.getPostId());
-
+        postCoreClient.validatePostExists(request.getPostId());
         Comment comment = new Comment();
         comment.setPostId(request.getPostId());
         comment.setAuthorId(currentUserId);
         comment.setContent(request.getContent());
         comment.setParentId(request.getParentId());
+
+        // store fileId if present
+        comment.setAttachmentFileId(request.getAttachmentFileId());
 
         commentRepository.save(comment);
         return toDTO(comment, true);
@@ -49,9 +62,12 @@ public class CommentServiceImpl implements CommentService {
         if (!existing.getAuthorId().equals(currentUserId)) {
             throw new SecurityException("Not authorized to update this comment");
         }
-        existing.setContent(request.getContent());
-        commentRepository.save(existing);
 
+        existing.setContent(request.getContent());
+        // if the user can change the file:
+        existing.setAttachmentFileId(request.getAttachmentFileId());
+
+        commentRepository.save(existing);
         return toDTO(existing, true);
     }
 
@@ -63,14 +79,27 @@ public class CommentServiceImpl implements CommentService {
         if (!existing.getAuthorId().equals(currentUserId)) {
             throw new SecurityException("Not authorized to delete this comment");
         }
-        // Hard delete
-        // optional recursion if you want to delete children as well
-        commentRepository.delete(existing);
+
+        // If there's an attachment, optionally delete from s3-core
+        if (existing.getAttachmentFileId() != null) {
+            fileClient.deleteFile(existing.getAttachmentFileId());
+        }
+
+        // also remove children if your logic requires it
+        deleteCommentAndChildren(existing);
+    }
+
+    private void deleteCommentAndChildren(Comment comment) {
+        List<Comment> children = commentRepository.findByParentIdOrderByCreatedAtAsc(comment.getId());
+        for (Comment child : children) {
+            deleteCommentAndChildren(child);
+        }
+        commentRepository.delete(comment);
     }
 
     @Override
     public Page<CommentResponseDTO> getTopLevelComments(UUID postId, Pageable pageable) {
-        Page<Comment> page = commentRepository.findByPostIdAndParentIdIsNullOrderByCreatedAtAsc(postId, pageable);
+        var page = commentRepository.findByPostIdAndParentIdIsNullOrderByCreatedAtAsc(postId, pageable);
         return page.map(comment -> toDTO(comment, false));
     }
 
@@ -82,39 +111,13 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public CommentResponseDTO reactToComment(UUID commentId, String reactionType) {
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new CommentNotFoundException("Comment not found"));
-
-        switch (reactionType.toLowerCase()) {
-            case "like":
-                comment.setLikeCount(comment.getLikeCount() + 1);
-                break;
-            case "laugh":
-                comment.setLaughCount(comment.getLaughCount() + 1);
-                break;
-            case "sad":
-                comment.setSadCount(comment.getSadCount() + 1);
-                break;
-            case "insightful":
-                comment.setInsightfulCount(comment.getInsightfulCount() + 1);
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown reaction type: " + reactionType);
-        }
-        commentRepository.save(comment);
-        return toDTO(comment, true);
-    }
-
-    @Override
     public CommentResponseDTO buildCommentThread(UUID commentId) {
         Comment root = commentRepository.findById(commentId)
                 .orElseThrow(() -> new CommentNotFoundException("Comment not found"));
         return toDTO(root, true);
     }
 
-    // ---------- Helpers ----------
-
+    // ---------- toDTO Helper ----------
     private CommentResponseDTO toDTO(Comment comment, boolean buildReplies) {
         CommentResponseDTO dto = new CommentResponseDTO();
         dto.setId(comment.getId());
@@ -124,19 +127,33 @@ public class CommentServiceImpl implements CommentService {
         dto.setCreatedAt(comment.getCreatedAt());
         dto.setUpdatedAt(comment.getUpdatedAt());
         dto.setParentId(comment.getParentId());
-        dto.setLikeCount(comment.getLikeCount());
-        dto.setLaughCount(comment.getLaughCount());
-        dto.setSadCount(comment.getSadCount());
-        dto.setInsightfulCount(comment.getInsightfulCount());
+
+        // Reaction summary
+        var summary = reactionService.getReactionSummary(comment.getId());
+        dto.setLikeCount(summary.getLikeCount());
+        dto.setLaughCount(summary.getLaughCount());
+        dto.setSadCount(summary.getSadCount());
+        dto.setInsightfulCount(summary.getInsightfulCount());
+
+        // if there's an attachment, fetch presigned URL
+        dto.setAttachmentFileId(comment.getAttachmentFileId());
+        if (comment.getAttachmentFileId() != null) {
+            try {
+                var fileMeta = fileClient.getFileMetadata(comment.getAttachmentFileId(), false);
+                dto.setAttachmentFileUrl(fileMeta.getUrl());
+            } catch (Exception e) {
+                dto.setAttachmentFileUrl(null);
+            }
+        }
 
         if (buildReplies) {
-            // gather replies
-            List<Comment> children = commentRepository.findByParentIdOrderByCreatedAtAsc(comment.getId());
-            List<CommentResponseDTO> childDTOs = children.stream()
+            var children = commentRepository.findByParentIdOrderByCreatedAtAsc(comment.getId());
+            var childDTOs = children.stream()
                     .map(child -> toDTO(child, true))
                     .collect(Collectors.toList());
             dto.setReplies(childDTOs);
         }
+
         return dto;
     }
 }

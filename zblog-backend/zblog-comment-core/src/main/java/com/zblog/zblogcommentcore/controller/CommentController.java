@@ -2,6 +2,7 @@ package com.zblog.zblogcommentcore.controller;
 
 import com.zblog.zblogcommentcore.dto.*;
 import com.zblog.zblogcommentcore.service.CommentService;
+import com.zblog.zblogcommentcore.service.CommentReactionService;
 import com.zblog.zblogcommentcore.util.SecurityUtil;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,15 +14,18 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/comments")
+@RequestMapping("/comment/api/comments")
 @Validated
 public class CommentController {
 
     private final CommentService commentService;
+    private final CommentReactionService reactionService;
 
     @Autowired
-    public CommentController(CommentService commentService) {
+    public CommentController(CommentService commentService,
+                             CommentReactionService reactionService) {
         this.commentService = commentService;
+        this.reactionService = reactionService;
     }
 
     @PostMapping
@@ -45,7 +49,8 @@ public class CommentController {
     }
 
     @GetMapping("/post/{postId}")
-    public Page<CommentResponseDTO> getTopLevelComments(@PathVariable("postId") UUID postId, Pageable pageable) {
+    public Page<CommentResponseDTO> getTopLevelComments(@PathVariable("postId") UUID postId,
+                                                        Pageable pageable) {
         return commentService.getTopLevelComments(postId, pageable);
     }
 
@@ -54,15 +59,24 @@ public class CommentController {
         return commentService.getComment(commentId);
     }
 
-    @PatchMapping("/{commentId}/react")
-    public CommentResponseDTO reactToComment(@PathVariable("commentId") UUID commentId,
-                                             @RequestParam("type") String reactionType) {
-        return commentService.reactToComment(commentId, reactionType);
-    }
-
-    // optional route to get entire comment subtree
     @GetMapping("/{commentId}/thread")
     public CommentResponseDTO getCommentThread(@PathVariable("commentId") UUID commentId) {
         return commentService.buildCommentThread(commentId);
+    }
+
+    /**
+     * Toggle a reaction. If the user already has the reaction => remove it.
+     * Otherwise => create it.
+     * Then return the full updated comment (with new counts).
+     */
+    @PatchMapping("/{commentId}/react")
+    public CommentResponseDTO toggleReaction(@PathVariable("commentId") UUID commentId,
+                                             @RequestParam("type") String reactionType) {
+        String userId = SecurityUtil.getCurrentUserId();
+
+        reactionService.toggleReaction(commentId, userId, reactionType);
+
+        // after toggling, get the updated comment with fresh reaction counts
+        return commentService.getComment(commentId);
     }
 }

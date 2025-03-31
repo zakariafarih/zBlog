@@ -1,5 +1,6 @@
 package com.zblog.zblogusercore.service.impl;
 
+import com.zblog.zblogusercore.exception.PostNotFoundException;
 import com.zblog.zblogusercore.domain.entity.Bookmark;
 import com.zblog.zblogusercore.dto.BookmarkDTO;
 import com.zblog.zblogusercore.exception.UserNotFoundException;
@@ -18,13 +19,15 @@ public class BookmarkServiceImpl implements BookmarkService {
 
     private final BookmarkRepository bookmarkRepository;
     private final UserProfileRepository userProfileRepo;
-    // possibly a postCoreClient to validate post existence
+    private final PostCoreClient postCoreClient;
 
     @Autowired
     public BookmarkServiceImpl(BookmarkRepository bookmarkRepository,
-                               UserProfileRepository userProfileRepo) {
+                               UserProfileRepository userProfileRepo,
+                               PostCoreClient postCoreClient) {
         this.bookmarkRepository = bookmarkRepository;
         this.userProfileRepo = userProfileRepo;
+        this.postCoreClient = postCoreClient;
     }
 
     @Override
@@ -33,7 +36,10 @@ public class BookmarkServiceImpl implements BookmarkService {
         if (!userProfileRepo.existsById(userId)) {
             throw new UserNotFoundException("User not found: " + userId);
         }
-        // optionally call postCore to validate the post
+
+        if (!postCoreClient.postExists(postId)) {
+            throw new PostNotFoundException("Post not found in post-core");
+        }
 
         Bookmark bookmark = new Bookmark();
         bookmark.setUserId(userId);
@@ -45,10 +51,8 @@ public class BookmarkServiceImpl implements BookmarkService {
 
     @Override
     public void removeBookmark(String userId, UUID postId) {
-        // optionally check user existence
-        Bookmark bookmark = bookmarkRepository.findAll().stream()
-                .filter(b -> b.getUserId().equals(userId) && b.getPostId().equals(postId))
-                .findFirst().orElse(null);
+        // check user existence
+        Bookmark bookmark = bookmarkRepository.findByUserIdAndPostId(userId, postId).orElse(null);
         if (bookmark != null) {
             bookmarkRepository.delete(bookmark);
         }

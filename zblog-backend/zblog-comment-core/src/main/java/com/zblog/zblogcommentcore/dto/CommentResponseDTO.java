@@ -22,6 +22,9 @@ public class CommentResponseDTO {
     // Nested replies for convenience
     private List<CommentResponseDTO> replies;
 
+    private String attachmentFileId;
+    private String attachmentFileUrl; // resolved from s3-core
+
     // Getters & Setters
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
@@ -58,4 +61,20 @@ public class CommentResponseDTO {
 
     public List<CommentResponseDTO> getReplies() { return replies; }
     public void setReplies(List<CommentResponseDTO> replies) { this.replies = replies; }
+
+    public String getAttachmentFileId() {
+        return attachmentFileId;
+    }
+
+    public void setAttachmentFileId(String attachmentFileId) {
+        this.attachmentFileId = attachmentFileId;
+    }
+
+    public String getAttachmentFileUrl() {
+        return attachmentFileUrl;
+    }
+
+    public void setAttachmentFileUrl(String attachmentFileUrl) {
+        this.attachmentFileUrl = attachmentFileUrl;
+    }
 }

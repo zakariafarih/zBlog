@@ -9,17 +9,23 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 @Configuration
 public class S3Config {
 
+    private final S3Properties s3Properties;
+
+    public S3Config(S3Properties s3Properties) {
+        this.s3Properties = s3Properties;
+    }
+
     @Bean
-    public S3Client s3Client(S3Properties properties) {
+    public S3Client s3Client() {
         return S3Client.builder()
-                .region(Region.of(properties.getRegion()))
+                .region(Region.of(s3Properties.getRegion()))
                 .build();
     }
 
     @Bean
-    public S3Presigner s3Presigner(S3Properties properties) {
+    public S3Presigner s3Presigner() {
         return S3Presigner.builder()
-                .region(Region.of(properties.getRegion()))
+                .region(Region.of(s3Properties.getRegion()))
                 .build();
     }
 }

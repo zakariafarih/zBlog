@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/follow")
+@RequestMapping("/user/api/follow")
 public class FollowController {
 
     private final FollowService followService;

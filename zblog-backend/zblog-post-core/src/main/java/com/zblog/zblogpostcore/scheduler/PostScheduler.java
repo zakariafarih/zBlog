@@ -27,11 +27,7 @@ public class PostScheduler {
     @Scheduled(fixedRate = 60000)
     public void publishScheduledPosts() {
         Instant now = Instant.now();
-        // fetch all un-published and see if they should be published
-        List<Post> unpublished = postRepository.findAll().stream()
-                .filter(p -> !p.isPublished())
-                .filter(p -> p.getScheduledPublishAt() != null && !p.getScheduledPublishAt().isAfter(now))
-                .toList();
+        List<Post> unpublished = postRepository.findReadyToPublish(now);
 
         if (!unpublished.isEmpty()) {
             for (Post post : unpublished) {
