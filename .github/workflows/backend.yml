@@ -20,6 +20,10 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Install Heroku CLI
+        run: |
+          curl https://cli-assets.heroku.com/install.sh | sh
+
       - name: Set up environment variables
         run: |
           echo DB_USERNAME=${{ secrets.DB_USERNAME }} >> .env
@@ -36,7 +40,9 @@ jobs:
           echo POST_CORE_URL=${{ secrets.POST_CORE_URL }} >> .env
           echo S3_CORE_URL=${{ secrets.S3_CORE_URL }} >> .env
 
-      # Log in to Heroku using the API key
+      - name: Build backend (optional, if necessary)
+        run: mvn clean install
+
       - name: Login to Heroku
         run: |
           echo ${{ secrets.HEROKU_API_KEY }} | heroku auth:token
