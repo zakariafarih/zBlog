@@ -1,0 +1,45 @@
+name: Deploy Backend to Heroku
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: zblog-backend
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Set up environment variables
+        run: |
+          echo DB_USERNAME=${{ secrets.DB_USERNAME }} >> .env
+          echo DB_PASSWORD=${{ secrets.DB_PASSWORD }} >> .env
+          echo DB_URL_USER=${{ secrets.DB_URL_USER }} >> .env
+          echo DB_URL_POST=${{ secrets.DB_URL_POST }} >> .env
+          echo DB_URL_COMMENT=${{ secrets.DB_URL_COMMENT }} >> .env
+          echo COGNITO_ISSUER_URI=${{ secrets.COGNITO_ISSUER_URI }} >> .env
+          echo INTERNAL_SHARED_SECRET=${{ secrets.INTERNAL_SHARED_SECRET }} >> .env
+          echo AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }} >> .env
+          echo AWS_S3_REGION=${{ secrets.AWS_S3_REGION }} >> .env
+          echo AWS_S3_UPLOAD_EXPIRY_SECONDS=${{ secrets.AWS_S3_UPLOAD_EXPIRY_SECONDS }} >> .env
+          echo AWS_S3_MAX_FILE_SIZE=${{ secrets.AWS_S3_MAX_FILE_SIZE }} >> .env
+          echo POST_CORE_URL=${{ secrets.POST_CORE_URL }} >> .env
+          echo S3_CORE_URL=${{ secrets.S3_CORE_URL }} >> .env
+
+      - name: Deploy to Heroku
+        uses: akhileshns/heroku-deploy@v3.12.12
+        with:
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_app_name: "your-heroku-backend-app"
+          heroku_email: "your-email@example.com"
+          usedocker: false

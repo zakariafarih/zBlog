@@ -1,0 +1,32 @@
+name: Deploy Frontend to Heroku
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: zblog-frontend
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Set environment variables
+        run: |
+          echo NEXT_PUBLIC_COGNITO_AUTHORITY=${{ secrets.NEXT_PUBLIC_COGNITO_AUTHORITY }} >> .env
+          echo NEXT_PUBLIC_COGNITO_CLIENT_ID=${{ secrets.NEXT_PUBLIC_COGNITO_CLIENT_ID }} >> .env
+          echo NEXT_PUBLIC_COGNITO_REDIRECT_URI=${{ secrets.NEXT_PUBLIC_COGNITO_REDIRECT_URI }} >> .env
+
+      - name: Deploy to Heroku
+        uses: akhileshns/heroku-deploy@v3.12.12
+        with:
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_app_name: "your-heroku-frontend-app"
+          heroku_email: "your-email@example.com"
+          usedocker: false
