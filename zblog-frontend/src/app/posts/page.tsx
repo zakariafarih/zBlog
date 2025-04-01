@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import React, { Suspense, useEffect, useState } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import dynamic from "next/dynamic"
 import NoPostsHolder from "@/components/posts/NoPostsHolder"
@@ -13,7 +13,7 @@ const ExplorePostsFilter = dynamic(() => import("@/components/posts/ExplorePosts
   ssr: false,
 })
 
-export default function ExplorePostsPage() {
+function ExplorePostsContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const initialTag = searchParams.get("tag") || ""
@@ -45,30 +45,38 @@ export default function ExplorePostsPage() {
   }, [filters])
 
   return (
+    <section className="max-w-7xl mx-auto px-4 md:px-8">
+      <AnimatedHeaderPost />
+
+      {/* Filters */}
+      <ExplorePostsFilter filters={filters} setFilters={setFilters} />
+
+      {/* Posts or Empty State */}
+      {filteredPosts.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+          {filteredPosts.map((post) => (
+            <PostCard
+              key={post.id}
+              {...post}
+              onClick={() => router.push("/posts/react-the-good-parts")}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="mt-10">
+          <NoPostsHolder />
+        </div>
+      )}
+    </section>
+  )
+}
+
+export default function ExplorePostsPage() {
+  return (
     <main className="bg-slate-900 text-white min-h-screen pt-4 pb-16 overflow-hidden">
-      <section className="max-w-7xl mx-auto px-4 md:px-8">
-        <AnimatedHeaderPost />
-
-        {/* Filters */}
-        <ExplorePostsFilter filters={filters} setFilters={setFilters} />
-
-        {/* Posts or Empty State */}
-        {filteredPosts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-            {filteredPosts.map((post) => (
-              <PostCard
-                key={post.id}
-                {...post}
-                onClick={() => router.push("/posts/react-the-good-parts")} // TEMPORARY redirection
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="mt-10">
-            <NoPostsHolder />
-          </div>
-        )}
-      </section>
+      <Suspense fallback={<div>Loading...</div>}>
+        <ExplorePostsContent />
+      </Suspense>
     </main>
   )
 }

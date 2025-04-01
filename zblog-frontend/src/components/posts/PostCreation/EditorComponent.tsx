@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import hljs from "highlight.js";
 import "highlight.js/styles/github-dark.css";
+import type { Editor } from 'tinymce';
 
 // 1. Dynamically import the TinyMCE React wrapper (to avoid SSR).
 const TinyMCEEditor = dynamic(
@@ -138,7 +139,7 @@ export default function EditorComponent({
           ],
 
           // 9. Optional: Insert a trailing paragraph if needed
-          setup: (editor: TinyMCEEditor) => {
+          setup: (editor: Editor) => {
             // On init, ensure there's a blank paragraph at the end
             editor.on("init", () => {
               const raw = editor.getContent({ format: "raw" });
