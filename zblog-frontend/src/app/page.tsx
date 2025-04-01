@@ -1,10 +1,12 @@
 "use client"
 
 import { motion } from "framer-motion"
-import HeroSection from "@/components/landingPage/HeroSection"
-import FeaturesSection from "@/components/landingPage/FeaturesSection"
-import PostsSection from "@/components/landingPage/PostsSection"
-import ArticlesSection from "@/components/landingPage/ArticlesSection"
+import dynamic from "next/dynamic"
+
+const HeroSection = dynamic(() => import("@/components/landingPage/HeroSection"), { ssr: false })
+const FeaturesSection = dynamic(() => import("@/components/landingPage/FeaturesSection"), { ssr: false })
+const PostsSection = dynamic(() => import("@/components/landingPage/PostsSection"), { ssr: false })
+const ArticlesSection = dynamic(() => import("@/components/landingPage/ArticlesSection"), { ssr: false })
 
 export default function Home() {
   return (
