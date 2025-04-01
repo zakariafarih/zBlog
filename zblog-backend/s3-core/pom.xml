@@ -79,6 +79,7 @@
                 <version>3.4.4</version>
                 <configuration>
                     <mainClass>com.zblog.s3core.S3CoreApplication</mainClass>
+                    <excludeDevtools>true</excludeDevtools>
                 </configuration>
                 <executions>
                     <execution>

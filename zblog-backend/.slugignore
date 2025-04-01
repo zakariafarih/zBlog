@@ -4,3 +4,8 @@
 **/src/
 README.md
 *.log
+**/test/
+**/__tests__/
+node_modules/
+target/
+docs/

@@ -122,6 +122,7 @@
                 <version>3.4.4</version>
                 <configuration>
                     <mainClass>com.zblog.usercore.ZblogUserCoreApplication</mainClass>
+                    <excludeDevtools>true</excludeDevtools>
                 </configuration>
                 <executions>
                     <execution>

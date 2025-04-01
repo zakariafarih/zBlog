@@ -123,6 +123,7 @@
                 <version>${spring.boot.version}</version>
                 <configuration>
                     <mainClass>com.zblog.commentcore.ZblogCommentCoreApplication</mainClass>
+                    <excludeDevtools>true</excludeDevtools>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>
