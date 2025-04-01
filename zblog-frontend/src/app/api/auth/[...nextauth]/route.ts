@@ -1,7 +1,7 @@
-import NextAuth from "next-auth"
+import NextAuth, { AuthOptions, SessionStrategy } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 
-export const authOptions = {
+const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -32,7 +32,7 @@ export const authOptions = {
     }),
   ],
   session: {
-    strategy: "jwt",
+    strategy: "jwt" as SessionStrategy,
   },
   pages: {
     signIn: "/login",

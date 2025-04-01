@@ -138,7 +138,7 @@ export default function EditorComponent({
           ],
 
           // 9. Optional: Insert a trailing paragraph if needed
-          setup: (editor) => {
+          setup: (editor: TinyMCEEditor) => {
             // On init, ensure there's a blank paragraph at the end
             editor.on("init", () => {
               const raw = editor.getContent({ format: "raw" });
