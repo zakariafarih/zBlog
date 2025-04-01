@@ -1,12 +1,16 @@
 'use client'
+export const dynamic = "force-dynamic";
 
 import React, { useLayoutEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, useAnimationControls } from 'framer-motion'
 import Lottie from 'lottie-react'
 import tagAnimation from '@/assets/animations/tag-jiggle.json'
-import TagCard from '@/components/tags/TagCard'
 import { tagData } from './tagData'
+
+import nextDynamic from "next/dynamic"
+
+const TagCard = nextDynamic(() => import("@/components/tags/TagCard"), { ssr: false })
 
 export default function TagsPage() {
   const router = useRouter()
