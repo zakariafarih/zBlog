@@ -1,0 +1,6 @@
+.mvn/
+.git/
+**/target/
+**/src/
+README.md
+*.log
