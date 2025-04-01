@@ -121,7 +121,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>3.4.4</version>
                 <configuration>
-                    <mainClass>com.zblog.usercore.ZblogUserCoreApplication</mainClass>
+                    <mainClass>com.zblog.zblogusercore.ZblogUserCoreApplication</mainClass>
                     <excludeDevtools>true</excludeDevtools>
                 </configuration>
                 <executions>
