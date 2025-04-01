@@ -1,14 +1,9 @@
 "use client"
 
-export const dynamic = "force-dynamic";
-
-import nextDynamic from "next/dynamic";
-
-const PostPageClient = nextDynamic(
-  () => import("./PostPage.client"),
-  { ssr: false }
-);
+import React from "react"
+import PostDetail from "@/components/posts/PostDetail/PostDetail"
+import { mockPost } from "./mockPost"
 
 export default function PostPage() {
-  return <PostPageClient />;
+  return <PostDetail post={mockPost} />
 }

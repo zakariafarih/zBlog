@@ -1,0 +1,12 @@
+{
+    "name": "zblog-monorepo",
+    "private": true,
+    "engines": {
+      "node": "20.x",
+      "npm": "10.x"
+    },
+    "scripts": {
+      "heroku-postbuild": "cd zblog-frontend && npm install --legacy-peer-deps && npm run build:clean"
+    }
+  }
+  
