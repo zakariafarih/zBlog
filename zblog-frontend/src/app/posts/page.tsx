@@ -1,15 +1,16 @@
 "use client"
+export const dynamic = "force-dynamic";
 
 import React, { Suspense, useEffect, useState } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
-import dynamic from "next/dynamic"
+import nextDynamic from "next/dynamic"
 import NoPostsHolder from "@/components/posts/NoPostsHolder"
 import PostCard from "@/components/posts/PostCard"
 import { mockPosts } from "./mockPosts"
 import AnimatedHeaderPost from "@/components/posts/AnimatedHeaderPost"
 import type { FilterState } from "@/components/posts/ExplorePostsFilter"
 
-const ExplorePostsFilter = dynamic(() => import("@/components/posts/ExplorePostsFilter.client"), {
+const ExplorePostsFilter = nextDynamic(() => import("@/components/posts/ExplorePostsFilter.client"), {
   ssr: false,
 })
 
