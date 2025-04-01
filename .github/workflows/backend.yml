@@ -48,7 +48,7 @@ jobs:
       - name: Login to Heroku
         run: |
           echo "Logging in to Heroku"
-          echo ${{ secrets.HEROKU_API_KEY }} | heroku auth:login --api-key
+          echo ${{ secrets.HEROKU_API_KEY }} | heroku login --interactive false
 
       - name: Deploy to Heroku
         uses: akhileshns/heroku-deploy@v3.12.12
