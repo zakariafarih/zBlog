@@ -3,14 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "NODE_OPTIONS='--no-experimental-global-navigator' next dev",
+  "build": "NODE_OPTIONS='--no-experimental-global-navigator' next build",
+  "start": "NODE_OPTIONS='--no-experimental-global-navigator' next start",
     "heroku-prebuild": "npm install --legacy-peer-deps",
-    "heroku-postbuild": "npm run build",
-    "build": "next build",
-    "start": "next start",
+    "heroku-postbuild": "npm run build:clean",
     "lint": "next lint",
-    "clean": "rm -rf build-cache/ .next/cache/",
+    "clean": "rm -rf .next build-cache",
     "build:clean": "npm run clean && npm run build"
+  },
+  "engines": {
+    "node": "20.x"
   },
   "dependencies": {
     "@radix-ui/react-dropdown-menu": "^2.1.6",
@@ -46,10 +49,14 @@
     "@types/react-dom": "^19",
     "@types/tinymce": "^4.6.9",
     "case-sensitive-paths-webpack-plugin": "^2.4.0",
+    "crypto-browserify": "^3.12.1",
     "eslint": "^9",
     "eslint-config-next": "15.2.4",
+    "https-browserify": "^1.0.0",
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
+    "stream-browserify": "^3.0.0",
+    "stream-http": "^3.2.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
