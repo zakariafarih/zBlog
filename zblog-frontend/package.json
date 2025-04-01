@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "heroku-postbuild": "npm install --legacy-peer-deps && npm run build",
+    "heroku-prebuild": "npm install --legacy-peer-deps",
+    "heroku-postbuild": "npm run build",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -44,6 +45,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/tinymce": "^4.6.9",
+    "case-sensitive-paths-webpack-plugin": "^2.4.0",
     "eslint": "^9",
     "eslint-config-next": "15.2.4",
     "prettier": "^3.5.3",
