@@ -20,14 +20,14 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Set Java Buildpack for Backend
-        run: heroku buildpacks:set heroku/java
-        
       - name: Install Heroku CLI
         run: |
           curl https://cli-assets.heroku.com/install.sh | sh
           # Ensure the Heroku CLI is available in the path
           echo $PATH
+
+      - name: Set Java Buildpack for Backend
+        run: heroku buildpacks:set heroku/java
 
       - name: Set up environment variables
         run: |
