@@ -1,11 +1,14 @@
 "use client"
+export const dynamic = "force-dynamic";
 
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "react-oidc-context"
 import { motion } from "framer-motion"
 import { UserPlus } from "lucide-react"
-import AnimatedBackground from "@/components/landingPage/AnimatedBackground"
+import nextDynamic from "next/dynamic"
+
+const AnimatedBackground = nextDynamic(() => import("@/components/landingPage/AnimatedBackground"), { ssr: false })
 
 export default function RegisterPage() {
   const auth = useAuth()

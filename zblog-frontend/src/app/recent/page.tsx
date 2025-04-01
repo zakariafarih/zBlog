@@ -1,9 +1,12 @@
 "use client"
 
-import React from "react"
-import RecentPosts from "@/components/posts/RecentPosts"
-import type { PostCardProps } from "@/components/posts/PostCard"
+export const dynamic = "force-dynamic";
 
+import React from "react"
+import type { PostCardProps } from "@/components/posts/PostCard"
+import nextDynamic from "next/dynamic";
+
+const RecentPosts = nextDynamic(() => import("@/components/posts/RecentPosts"), { ssr: false })
 
 const mockPosts: PostCardProps[] = [
   {
