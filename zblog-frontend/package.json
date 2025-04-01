@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "NODE_OPTIONS='--no-experimental-global-navigator' next dev",
-  "build": "NODE_OPTIONS='--no-experimental-global-navigator' next build",
-  "start": "NODE_OPTIONS='--no-experimental-global-navigator' next start",
+    "dev": "next dev",
+  "build": "next build",
+  "start": "next start",
     "heroku-prebuild": "npm install --legacy-peer-deps",
     "heroku-postbuild": "npm run build:clean",
     "lint": "next lint",
