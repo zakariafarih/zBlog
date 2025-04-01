@@ -5,7 +5,11 @@ import { useRouter } from "next/navigation"
 import { useAuth } from "react-oidc-context"
 import { motion } from "framer-motion"
 import { LogIn } from "lucide-react"
-import AnimatedBackground from "@/components/landingPage/AnimatedBackground"
+import dynamic from "next/dynamic"
+
+const AnimatedBackground = dynamic(() => import("@/components/landingPage/AnimatedBackground"), {
+  ssr: false,
+});
 
 export default function LoginPage() {
   const auth = useAuth()
