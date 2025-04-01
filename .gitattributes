@@ -1,3 +1,4 @@
 *.java -linguist-detectable
 *.ts -linguist-detectable
 *.tsx -linguist-detectable
+*.pack filter=lfs diff=lfs merge=lfs -text
