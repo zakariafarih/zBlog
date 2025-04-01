@@ -5,99 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="52557961-8265-43bb-a8a2-baeed8e79ed3" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/deploy.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/dto/ReactionSummaryDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/s3-core/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/s3-core/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/s3-core/src/main/java/com/zblog/s3core/S3CoreApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/s3-core/src/main/java/com/zblog/s3core/S3CoreApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/s3-core/src/main/java/com/zblog/s3core/config/S3Config.java" beforeDir="false" afterPath="$PROJECT_DIR$/s3-core/src/main/java/com/zblog/s3core/config/S3Config.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/s3-core/src/main/java/com/zblog/s3core/config/S3Properties.java" beforeDir="false" afterPath="$PROJECT_DIR$/s3-core/src/main/java/com/zblog/s3core/config/S3Properties.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/s3-core/src/main/java/com/zblog/s3core/controller/S3Controller.java" beforeDir="false" afterPath="$PROJECT_DIR$/s3-core/src/main/java/com/zblog/s3core/controller/FileController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/s3-core/src/main/java/com/zblog/s3core/dto/S3FileMetadata.java" beforeDir="false" afterPath="$PROJECT_DIR$/s3-core/src/main/java/com/zblog/s3core/dto/S3FileMetadata.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/s3-core/src/main/java/com/zblog/s3core/exception/S3ServiceException.java" beforeDir="false" afterPath="$PROJECT_DIR$/s3-core/src/main/java/com/zblog/s3core/exception/S3ServiceException.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/s3-core/src/main/java/com/zblog/s3core/service/S3Service.java" beforeDir="false" afterPath="$PROJECT_DIR$/s3-core/src/main/java/com/zblog/s3core/service/S3Service.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/s3-core/src/main/java/com/zblog/s3core/service/S3ServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/s3-core/src/main/java/com/zblog/s3core/service/impl/S3ServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/s3-core/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/s3-core/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-auth-core/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-auth-core/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-auth-core/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-auth-core/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-comment-core/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-comment-core/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/ZblogCommentCoreApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/ZblogCommentCoreApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/config/SecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/controller/CommentController.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/controller/CommentController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/domain/entity/Comment.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/domain/entity/Comment.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/dto/CommentCreateRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/dto/CommentCreateRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/dto/CommentResponseDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/dto/CommentResponseDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/dto/CommentUpdateRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/dto/CommentUpdateRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/graphql/CommentGraphQLController.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/graphql/CommentGraphQLController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/service/CommentService.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/service/CommentService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/service/impl/CommentServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/service/impl/CommentServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-comment-core/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-comment-core/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-comment-core/src/main/resources/schema.graphqls" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-comment-core/src/main/resources/schema.graphqls" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-common-core/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-common-core/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-common-core/src/main/java/com/zblog/zblogcommoncore/dto/PostDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-common-core/src/main/java/com/zblog/zblogcommoncore/dto/SharedPostMetadataDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-common-core/src/main/java/com/zblog/zblogcommoncore/exception/GlobalExceptionHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-common-core/src/main/java/com/zblog/zblogcommoncore/exception/GlobalExceptionHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-post-core/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/ZblogPostCoreApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/ZblogPostCoreApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/config/WebSecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/config/WebSecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/controller/PostController.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/controller/PostController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/controller/TagController.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/controller/TagController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/graphql/PostGraphQLController.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/graphql/PostGraphQLController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/repository/PostRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/repository/PostRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/scheduler/PostScheduler.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/scheduler/PostScheduler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/service/impl/PostServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/service/impl/PostServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-user-core/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-user-core/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-user-core/src/main/java/com/zblog/zblogusercore/ZblogUserCoreApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-user-core/src/main/java/com/zblog/zblogusercore/ZblogUserCoreApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-user-core/src/main/java/com/zblog/zblogusercore/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-user-core/src/main/java/com/zblog/zblogusercore/config/SecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-user-core/src/main/java/com/zblog/zblogusercore/controller/BookmarkController.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-user-core/src/main/java/com/zblog/zblogusercore/controller/BookmarkController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-user-core/src/main/java/com/zblog/zblogusercore/controller/FollowController.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-user-core/src/main/java/com/zblog/zblogusercore/controller/FollowController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-user-core/src/main/java/com/zblog/zblogusercore/controller/ProfileController.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-user-core/src/main/java/com/zblog/zblogusercore/controller/ProfileController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-user-core/src/main/java/com/zblog/zblogusercore/repository/BookmarkRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-user-core/src/main/java/com/zblog/zblogusercore/repository/BookmarkRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-user-core/src/main/java/com/zblog/zblogusercore/repository/UserFollowRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-user-core/src/main/java/com/zblog/zblogusercore/repository/UserFollowRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-user-core/src/main/java/com/zblog/zblogusercore/service/impl/BookmarkServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-user-core/src/main/java/com/zblog/zblogusercore/service/impl/BookmarkServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-user-core/src/main/java/com/zblog/zblogusercore/service/impl/FollowServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-user-core/src/main/java/com/zblog/zblogusercore/service/impl/FollowServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-user-core/src/main/java/com/zblog/zblogusercore/service/impl/UserServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-user-core/src/main/java/com/zblog/zblogusercore/service/impl/UserServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-user-core/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-user-core/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/build-cache/app-build-manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/build-cache/app-build-manifest.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/build-cache/cache/images/4pGI1TzY9SNV1TIif4p1TfeXjLEBiib5_eogSa9q5xA/60.1743233976665.kJbCVTciyzfXq5UUmbHYJLqrmWXPFHb4ONeJ9u6_F2c.Vy8iMmYxZDY2LTE5NWUwMjI5ZjA0Ig.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/build-cache/cache/images/8y0ElP4o-wlfEy-GaEuUwx6Tl97yRULZ9O_DPEbljg0/60.1743233976667.CebiPNXhwdD-mAwArbwEQDB9r-8XSDQUaIlMEdFpSog.Vy8iMzk1MzJjLTE5NWUwMjE5OGZhIg.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/build-cache/cache/images/Nye9f4RMnvj3QjpwGcEgOMr-MaJiSx3pcNpC47qRT_E/60.1743233987579.ee-lEatXtAmxT-radxz2LL2zjPzStIkTHAMIdXjBq-k.Vy8iMjViZTItMTk1ZTBhNThhNTIi.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/build-cache/cache/images/V6RMG1j6H0omGzrvaGZ5MR1mzbTxeGMpgHPeKMK2xvs/60.1743233976661.2ciE3kHdUXPEtFN8Y3kPefC1RMEtu3eaXCLRVxE5lNA.Vy8iMWM5ZGRiLTE5NWUwMjA2YmY0Ig.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/build-cache/cache/images/WayG9hEc3aXj2a-okar5C7lT-g-c54dWcwH5yDO2a4A/60.1743233987635.tLHADJinoOlQ3BymNT6LOmAbkLxOfaQ2E1pZ980kR88.Vy8iMTY1ZGQxNy0xOTVlMGE5NTQ5NCI.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/build-cache/cache/images/fNV_RZ9_hE5sGYEz8ufssZuPz7DZcRbheeUomv2TADM/60.1743233976659.ugW2e0JguAAGnI71j3xOlriuxISiT3JkZcdl-NgOzlE.Vy8iMWE0ZjAyLTE5NWUwMWZiMDBmIg.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/build-cache/cache/images/fQaiFpbvVdRWLlIv-bA5CSNx4XOY-FcGfaoHfPy4TKc/60.1743233987612.xrT4sgA80fHMuadhvJPymEeG7qX6s_tx4ZmWiof3IFk.Vy8iY2ZhYmFlLTE5NWUwYTk1NTIxIg.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/build-cache/cache/images/gXXMjeISk502YR8rNpgVP8kAmXngoE52m9wZRc0_2Zs/60.1743233976663.MXY_tQEzlJ7RlxwuTCwhPHqkLgfAtRjtyeNU7Bjh6tk.Vy8iMjUxZGFjLTE5NWUwMjIzZmUzIg.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/build-cache/cache/images/ns7ugnmlnIiEPbpgWyysvkwTHdt7-oEF-vEorSaBCBM/60.1743233976659.uNPlkmu3_JkV6VcGgM6jISxYpWJ7jibftUX7jDj6DbA.Vy8iMTlmZDcwLTE5NWUwMjFmMzQ2Ig.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/build-cache/server/app-paths-manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/build-cache/server/app-paths-manifest.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/build-cache/server/chunks/ssr/[root of the server]__79319bf0._.js" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/build-cache/server/chunks/ssr/[root of the server]__79319bf0._.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/build-cache/server/chunks/ssr/[root of the server]__79319bf0._.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/build-cache/server/chunks/ssr/[root of the server]__79319bf0._.js.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/build-cache/server/chunks/ssr/[root of the server]__7c651551._.js" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/build-cache/server/chunks/ssr/[root of the server]__7c651551._.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/build-cache/server/chunks/ssr/[root of the server]__7c651551._.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/build-cache/server/chunks/ssr/[root of the server]__7c651551._.js.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/build-cache/server/chunks/ssr/_f87d348b._.js" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/build-cache/server/chunks/ssr/_f87d348b._.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/build-cache/server/chunks/ssr/_f87d348b._.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/build-cache/server/chunks/ssr/_f87d348b._.js.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/build-cache/static/chunks/[root of the server]__3a40d6d2._.js" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/build-cache/static/chunks/[root of the server]__3a40d6d2._.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/build-cache/static/chunks/[root of the server]__73499ecc._.js" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/build-cache/static/chunks/[root of the server]__73499ecc._.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/build-cache/static/chunks/_6a23876a._.js" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/build-cache/static/chunks/_6a23876a._.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/build-cache/static/chunks/_6a23876a._.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/build-cache/static/chunks/_6a23876a._.js.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/build-cache/static/chunks/src_2665f3cc._.js" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/build-cache/static/chunks/src_2665f3cc._.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/build-cache/static/chunks/src_2665f3cc._.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/build-cache/static/chunks/src_2665f3cc._.js.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/build-cache/static/chunks/src_5106a209._.js" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/build-cache/static/chunks/src_5106a209._.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/build-cache/static/chunks/src_5106a209._.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/build-cache/static/chunks/src_5106a209._.js.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/build-cache/static/chunks/src_app_globals_b52d8e88.css" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/build-cache/static/chunks/src_app_globals_b52d8e88.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/build-cache/static/chunks/src_app_globals_b52d8e88.css.map" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/build-cache/static/chunks/src_app_globals_b52d8e88.css.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/build-cache/static/chunks/src_app_globals_b805903d.css" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/build-cache/static/chunks/src_app_globals_b805903d.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/build-cache/static/chunks/src_app_globals_b805903d.css.map" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/build-cache/static/chunks/src_app_globals_b805903d.css.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/build-cache/trace" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/build-cache/trace" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.github/workflows/backend.yml" beforeDir="false" afterPath="$PROJECT_DIR$/../.github/workflows/backend.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.github/workflows/frontend.yml" beforeDir="false" afterPath="$PROJECT_DIR$/../.github/workflows/frontend.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../zblog-frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/package-lock.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../zblog-frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/app/login/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/app/login/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/components/landingPage/HeroSection.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/components/landingPage/HeroSection.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/components/landingPage/Navbar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/components/landingPage/Navbar.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/components/posts/PostDetail/PostDetail.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/components/posts/PostDetail/PostDetail.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/app/preview/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/app/preview/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/components/posts/PostCreation/EditorComponent.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/components/posts/PostCreation/EditorComponent.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/types/tinymce.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/types/tinymce.d.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -140,7 +54,7 @@
     "Spring Boot.ZblogUserCoreApplication.executor": "Run",
     "git-widget-placeholder": "main",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/home/zakaria/Desktop/projects/CopySpider-main",
+    "last_opened_file_path": "/home/zakaria/zBlog/zblog-backend",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -155,6 +69,11 @@
     ]
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+    </key>
+  </component>
   <component name="RunAnythingCache">
     <option name="myCommands">
       <command value="mvn clean insatll" />
@@ -181,13 +100,6 @@
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="ZblogAuthCoreApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
-      <module name="zblog-auth-core" />
-      <option name="SPRING_BOOT_MAIN_CLASS" value="com.zblog.zblogauthcore.ZblogAuthCoreApplication" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -234,7 +146,9 @@
       </method>
     </configuration>
     <configuration default="true" type="docker-deploy" factoryName="docker-compose.yml" temporary="true">
-      <deployment type="docker-compose.yml" />
+      <deployment type="docker-compose.yml">
+        <settings />
+      </deployment>
       <method v="2" />
     </configuration>
     <configuration name="zblog-post-core.zblog-post-core: Compose Deployment" type="docker-deploy" factoryName="docker-compose.yml" temporary="true" server-name="Docker">
@@ -281,6 +195,7 @@
       <workItem from="1743365718589" duration="8934000" />
       <workItem from="1743381120753" duration="6088000" />
       <workItem from="1743419014217" duration="14698000" />
+      <workItem from="1743448104353" duration="14507000" />
     </task>
     <servers />
   </component>

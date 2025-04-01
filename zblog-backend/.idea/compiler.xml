@@ -7,8 +7,6 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="s3-core" />
-        <module name="zblog-common-core" />
-        <module name="zblog-auth-core" />
         <module name="zblog-user-core" />
         <module name="zblog-post-core" />
       </profile>
@@ -23,6 +21,10 @@
         <module name="zblog-comment-core" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="zblog-auth-core" target="17" />
+      <module name="zblog-common-core" target="21" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">

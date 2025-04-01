@@ -7,9 +7,6 @@ on:
 jobs:
   deploy-backend:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: zblog-backend  # Set the working directory to backend
 
     steps:
       - uses: actions/checkout@v3
@@ -31,6 +28,7 @@ jobs:
 
       - name: Set up environment variables
         run: |
+          cd zblog-backend
           echo DB_USERNAME=${{ secrets.DB_USERNAME }} >> .env
           echo DB_PASSWORD=${{ secrets.DB_PASSWORD }} >> .env
           echo DB_URL_USER=${{ secrets.DB_URL_USER }} >> .env
@@ -46,7 +44,9 @@ jobs:
           echo S3_CORE_URL=${{ secrets.S3_CORE_URL }} >> .env
 
       - name: Build backend (optional, if necessary)
-        run: mvn clean install
+        run: |
+          cd zblog-backend
+          mvn clean install
 
       - name: Login to Heroku
         env:
@@ -56,9 +56,12 @@ jobs:
           heroku container:login
 
       - name: Deploy to Heroku
-        uses: akhileshns/heroku-deploy@v3.12.12
-        with:
-            heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
-            heroku_app_name: ${{ secrets.HEROKU_BACKEND_APP_NAME }}
-            heroku_email: ${{ secrets.HEROKU_EMAIL }}
-            usedocker: false
+        run: |
+          cd zblog-backend
+          git init
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git remote add heroku https://heroku:${{ secrets.HEROKU_API_KEY }}@git.heroku.com/${{ secrets.HEROKU_BACKEND_APP_NAME }}.git
+          git add .
+          git commit -m "Deploy backend"
+          git push heroku master --force
