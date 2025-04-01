@@ -1,12 +1,26 @@
 "use client";
+export const dynamic = "force-dynamic";
 
 import React from "react";
 import { motion } from "framer-motion";
-import AboutHeader from "@/components/About/AboutHeader";
-import TechStackOverview from "@/components/About/TechStackOverview";
-import PersonalNote from "@/components/About/PersonalNote";
-import UpcomingFeatures from "@/components/About/UpcomingFeatures";
-import ContactSection from "@/components/About/ContactSection";
+
+import nextDynamic from "next/dynamic"
+
+const AboutHeader = nextDynamic(() => import("@/components/About/AboutHeader"), {
+  ssr: false,
+});
+const TechStackOverview = nextDynamic(() => import("@/components/About/TechStackOverview"), {
+  ssr: false,
+});
+const PersonalNote = nextDynamic(() => import("@/components/About/PersonalNote"), {
+  ssr: false,
+});
+const UpcomingFeatures = nextDynamic(() => import("@/components/About/UpcomingFeatures"), {
+  ssr: false,
+});
+const ContactSection = nextDynamic(() => import("@/components/About/ContactSection"), {
+  ssr: false,
+});
 
 export default function AboutPage() {
   return (

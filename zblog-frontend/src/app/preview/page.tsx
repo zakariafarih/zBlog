@@ -1,8 +1,12 @@
 "use client";
+export const dynamic = "force-dynamic";
 
 import React, { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import PostDetail from "@/components/posts/PostDetail/PostDetail";
+
+import nextDynamic from "next/dynamic"
+
+const PostDetail = nextDynamic(() => import("@/components/posts/PostDetail/PostDetail"), { ssr: false })
 
 function PreviewContent() {
   const router = useRouter();

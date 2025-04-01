@@ -1,13 +1,24 @@
 "use client";
+export const dynamic = "force-dynamic";
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "react-oidc-context";
 
-import TopUtilityBar from "@/components/posts/PostCreation/TopUtilityBar";
-import PostMetadataSection from "@/components/posts/PostCreation/PostMetadataSection";
-import EditorComponent from "@/components/posts/PostCreation/EditorComponent";
-import BottomToolbar from "@/components/posts/PostCreation/BottomToolbar";
+import nextDynamic from "next/dynamic"
+
+const TopUtilityBar = nextDynamic(() => import("@/components/posts/PostCreation/TopUtilityBar"), {
+  ssr: false,
+});
+const PostMetadataSection = nextDynamic(() => import("@/components/posts/PostCreation/PostMetadataSection"), {
+  ssr: false,
+});
+const EditorComponent = nextDynamic(() => import("@/components/posts/PostCreation/EditorComponent"), {
+  ssr: false,
+});
+const BottomToolbar = nextDynamic(() => import("@/components/posts/PostCreation/BottomToolbar"), {
+  ssr: false,
+});
 
 const CreatePostPage: React.FC = () => {
   const auth = useAuth();
