@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: zblog-frontend
+        working-directory: zblog-frontend  # Set the working directory to frontend
 
     steps:
       - uses: actions/checkout@v3
@@ -29,9 +29,11 @@ jobs:
       - name: Install Heroku CLI
         run: |
           curl https://cli-assets.heroku.com/install.sh | sh
-          
+          echo $PATH
+
       - name: Set Node.js Buildpack for Frontend
-        run: heroku buildpacks:set heroku/nodejs --app ${{ secrets.HEROKU_FRONTEND_APP_NAME }}
+        run: |
+          heroku buildpacks:set heroku/nodejs --app ${{ secrets.HEROKU_FRONTEND_APP_NAME }}
 
       - name: Deploy to Heroku
         uses: akhileshns/heroku-deploy@v3.12.12

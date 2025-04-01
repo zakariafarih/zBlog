@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: zblog-backend
+        working-directory: zblog-backend  # Set the working directory to backend
 
     steps:
       - uses: actions/checkout@v3
@@ -23,11 +23,11 @@ jobs:
       - name: Install Heroku CLI
         run: |
           curl https://cli-assets.heroku.com/install.sh | sh
-          # Ensure the Heroku CLI is available in the path
           echo $PATH
 
       - name: Set Java Buildpack for Backend
-        run: heroku buildpacks:set heroku/java --app ${{ secrets.HEROKU_BACKEND_APP_NAME }}
+        run: |
+          heroku buildpacks:set heroku/java --app ${{ secrets.HEROKU_BACKEND_APP_NAME }}
 
       - name: Set up environment variables
         run: |
