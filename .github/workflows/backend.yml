@@ -23,6 +23,8 @@ jobs:
       - name: Install Heroku CLI
         run: |
           curl https://cli-assets.heroku.com/install.sh | sh
+          # Ensure the Heroku CLI is available in the path
+          echo $PATH
 
       - name: Set up environment variables
         run: |
@@ -45,7 +47,8 @@ jobs:
 
       - name: Login to Heroku
         run: |
-          echo ${{ secrets.HEROKU_API_KEY }} | heroku auth:token
+          echo "Logging in to Heroku"
+          echo ${{ secrets.HEROKU_API_KEY }} | heroku auth:login --api-key
 
       - name: Deploy to Heroku
         uses: akhileshns/heroku-deploy@v3.12.12
