@@ -108,7 +108,10 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${spring.boot.version}</version>
+                <version>3.4.4</version>
+                <configuration>
+                    <mainClass>com.zblog.postcore.ZblogPostCoreApplication</mainClass>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
