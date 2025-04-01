@@ -31,7 +31,7 @@ jobs:
           curl https://cli-assets.heroku.com/install.sh | sh
           
       - name: Set Node.js Buildpack for Frontend
-        run: heroku buildpacks:set heroku/nodejs
+        run: heroku buildpacks:set heroku/nodejs --app ${{ secrets.HEROKU_FRONTEND_APP_NAME }}
 
       - name: Deploy to Heroku
         uses: akhileshns/heroku-deploy@v3.12.12
