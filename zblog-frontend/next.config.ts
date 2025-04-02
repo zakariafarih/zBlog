@@ -10,6 +10,12 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'zblog-files.s3.eu-north-1.amazonaws.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 };

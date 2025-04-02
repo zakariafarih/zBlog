@@ -14,7 +14,7 @@ interface PostDetailProps {
       avatarUrl: string;
     };
     publishedAt: Date;
-    tag: string;
+    tags: string[];
     content: string;
   };
 }
@@ -36,7 +36,7 @@ export default function PostDetail({ post }: PostDetailProps) {
             coverImageUrl={post.coverImageUrl}
             author={post.author}
             publishedAt={post.publishedAt}
-            tag={post.tag}
+            tags={post.tags}
           />
 
           {/* Body Content rendered as HTML */}

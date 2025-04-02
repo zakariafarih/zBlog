@@ -1,18 +1,18 @@
-"use client"
+"use client";
 
-import React from "react"
-import Image from "next/image"
-import PostMetadata from "./PostMetadata"
+import React from "react";
+import Image from "next/image";
+import PostMetadata from "./PostMetadata";
 
 interface PostHeaderProps {
-  title: string
-  coverImageUrl: string
+  title: string;
+  coverImageUrl: string;
   author: {
-    name: string
-    avatarUrl: string
-  }
-  publishedAt: Date
-  tag: string
+    name: string;
+    avatarUrl: string;
+  };
+  publishedAt: Date;
+  tags: string[];
 }
 
 export default function PostHeader({
@@ -20,14 +20,23 @@ export default function PostHeader({
   coverImageUrl,
   author,
   publishedAt,
-  tag,
+  tags,
 }: PostHeaderProps) {
+  const isAbsoluteUrl = coverImageUrl.startsWith("http") || coverImageUrl.startsWith("/");
+
+  const baseUrl = process.env.NEXT_PUBLIC_S3_PUBLIC_BASE_URL?.replace(/\/+$/, "");
+  const resolvedCoverImageUrl = isAbsoluteUrl
+    ? coverImageUrl
+    : baseUrl
+    ? `${baseUrl}/${coverImageUrl}`
+    : "/default-cover.jpg"; // fallback image
+
   return (
     <div className="mb-6">
       {/* Banner image */}
       <div className="w-full h-48 md:h-56 lg:h-64 overflow-hidden rounded-md mb-6">
         <Image
-          src={coverImageUrl}
+          src={resolvedCoverImageUrl}
           alt="Post cover"
           width={1200}
           height={400}
@@ -40,8 +49,8 @@ export default function PostHeader({
         {title}
       </h1>
 
-      {/* Metadata (Author, time, tag) */}
-      <PostMetadata author={author} publishedAt={publishedAt} tag={tag} />
+      {/* Metadata */}
+      <PostMetadata author={author} publishedAt={publishedAt} tags={tags} />
     </div>
-  )
+  );
 }

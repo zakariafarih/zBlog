@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-  "build": "next build",
-  "start": "next start",
+    "build": "next build",
+    "start": "next start",
     "heroku-prebuild": "npm install --legacy-peer-deps",
     "heroku-postbuild": "npm run build:clean",
     "lint": "next lint",
@@ -20,6 +20,7 @@
     "@radix-ui/react-slot": "^1.1.2",
     "@shadcn/ui": "^0.0.4",
     "@tinymce/tinymce-react": "^6.0.0",
+    "axios": "^1.8.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",

@@ -1,53 +1,45 @@
 "use client";
 
-import React, { Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import React from "react";
+import { useRouter } from "next/navigation";
+import { usePostDraft } from "@/context/PostDraftContext";
 import PostDetail from "@/components/posts/PostDetail/PostDetail";
 
-function PreviewContent() {
+export default function PreviewPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const { draft } = usePostDraft();
 
-  // Extract data from query parameters
-  const title = searchParams.get("title") || "Untitled Post";
-  const coverImageUrl = searchParams.get("coverImageUrl") || "/default-cover.jpg";
-  const content = searchParams.get("content") || "";
-  const tag = searchParams.get("tag") || "General";
-
-  const publishedAt = new Date();
+  // Hard-coded author for preview
   const author = {
     name: "Preview Author",
     avatarUrl: "/avatars/default.png",
   };
 
+  // Build the post object for <PostDetail />
   const post = {
-    title,
-    coverImageUrl,
-    content,
-    tag,
-    publishedAt,
+    title: draft.title || "Untitled Post",
+    // Use draft.coverImageUrl here for immediate preview
+    coverImageUrl: draft.coverImageUrl || "/default-cover.jpg",
+    content: draft.content || "<p>No content yet</p>",
+    tags: draft.tags.length ? draft.tags : ["General"],
+    publishedAt: new Date(),
     author,
   };
 
   return (
     <div className="bg-slate-700 text-white min-h-screen">
-      <div className="p-2 border-b border-slate-700">
+      {/* Back button */}
+      <div className="p-2 border-b border-slate-600">
         <button
-          onClick={() => router.back()}
+          onClick={() => router.push("/express")}
           className="px-4 py-2 bg-slate-900 rounded hover:bg-slate-600 transition"
         >
           Back to Editor
         </button>
       </div>
+
+      {/* Post detail preview */}
       <PostDetail post={post} />
     </div>
-  );
-}
-
-export default function PreviewPage() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <PreviewContent />
-    </Suspense>
   );
 }

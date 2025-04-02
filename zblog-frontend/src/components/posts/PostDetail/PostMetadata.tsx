@@ -11,14 +11,14 @@ interface PostMetadataProps {
     avatarUrl: string
   }
   publishedAt: Date
-  tag: string
+  tags: string[];
   className?: string
 }
 
 export default function PostMetadata({
   author,
   publishedAt,
-  tag,
+  tags,
   className,
 }: PostMetadataProps) {
   return (
@@ -40,7 +40,17 @@ export default function PostMetadata({
         <span>•</span>
         <span>{formatDistanceToNow(publishedAt, { addSuffix: true })}</span>
         <span>•</span>
-        <span className="text-blue-400">{tag}</span>
+        <div className="flex gap-2 flex-wrap mt-1">
+        {Array.isArray(tags) &&
+          tags.map((tag) => (
+            <span
+              key={tag}
+              className="bg-blue-600 text-white px-2 py-0.5 rounded-full text-xs font-medium"
+            >
+              {tag}
+            </span>
+        ))}
+        </div>
       </div>
     </div>
   )
