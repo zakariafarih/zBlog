@@ -1,9 +1,12 @@
 package com.zblog.zblogpostcore.domain.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -11,7 +14,7 @@ import java.util.UUID;
 public class Post {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue
     private UUID id;
 
     private String authorId;
@@ -21,79 +24,127 @@ public class Post {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    private boolean isPublished;
-    private long viewCount;
+    private boolean published;
 
+    private long viewCount;
     private long likeCount;
     private long heartCount;
     private long bookmarkCount;
 
-    private String bannerImageFileId;
+    // Renamed from bannerImageFileId to bannerImageKey
+    private String bannerImageKey;
 
+    @CreationTimestamp
     private Instant createdAt;
+
+    @UpdateTimestamp
     private Instant updatedAt;
 
-    // for scheduling publication
     private Instant scheduledPublishAt;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(name = "post_tags",
             joinColumns = @JoinColumn(name = "post_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id"))
-    private List<Tag> tags = new ArrayList<>();
+    private Set<Tag> tags = new HashSet<>();
 
-    @PrePersist
-    protected void onCreate() {
-        createdAt = Instant.now();
-        updatedAt = createdAt;
+    // Getters and setters
+
+    public UUID getId() {
+        return id;
+    }
+    public void setId(UUID id) {
+        this.id = id;
     }
 
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = Instant.now();
+    public String getAuthorId() {
+        return authorId;
+    }
+    public void setAuthorId(String authorId) {
+        this.authorId = authorId;
     }
 
-    // Getters and Setters (no Lombok)
+    public String getTitle() {
+        return title;
+    }
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
-    public UUID getId() { return id; }
-    public void setId(UUID id) { this.id = id; }
+    public String getContent() {
+        return content;
+    }
+    public void setContent(String content) {
+        this.content = content;
+    }
 
-    public String getAuthorId() { return authorId; }
-    public void setAuthorId(String authorId) { this.authorId = authorId; }
+    public boolean isPublished() {
+        return published;
+    }
+    public void setPublished(boolean published) {
+        this.published = published;
+    }
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
+    public long getViewCount() {
+        return viewCount;
+    }
+    public void setViewCount(long viewCount) {
+        this.viewCount = viewCount;
+    }
 
-    public String getContent() { return content; }
-    public void setContent(String content) { this.content = content; }
+    public long getLikeCount() {
+        return likeCount;
+    }
+    public void setLikeCount(long likeCount) {
+        this.likeCount = likeCount;
+    }
 
-    public boolean isPublished() { return isPublished; }
-    public void setPublished(boolean published) { isPublished = published; }
+    public long getHeartCount() {
+        return heartCount;
+    }
+    public void setHeartCount(long heartCount) {
+        this.heartCount = heartCount;
+    }
 
-    public long getViewCount() { return viewCount; }
-    public void setViewCount(long viewCount) { this.viewCount = viewCount; }
+    public long getBookmarkCount() {
+        return bookmarkCount;
+    }
+    public void setBookmarkCount(long bookmarkCount) {
+        this.bookmarkCount = bookmarkCount;
+    }
 
-    public long getLikeCount() { return likeCount; }
-    public void setLikeCount(long likeCount) { this.likeCount = likeCount; }
+    public String getBannerImageKey() {
+        return bannerImageKey;
+    }
+    public void setBannerImageKey(String bannerImageKey) {
+        this.bannerImageKey = bannerImageKey;
+    }
 
-    public long getHeartCount() { return heartCount; }
-    public void setHeartCount(long heartCount) { this.heartCount = heartCount; }
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
 
-    public long getBookmarkCount() { return bookmarkCount; }
-    public void setBookmarkCount(long bookmarkCount) { this.bookmarkCount = bookmarkCount; }
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
+    public void setUpdatedAt(Instant updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 
-    public String getBannerImageFileId() { return bannerImageFileId; }
-    public void setBannerImageFileId(String bannerImageFileId) { this.bannerImageFileId = bannerImageFileId; }
+    public Instant getScheduledPublishAt() {
+        return scheduledPublishAt;
+    }
+    public void setScheduledPublishAt(Instant scheduledPublishAt) {
+        this.scheduledPublishAt = scheduledPublishAt;
+    }
 
-    public Instant getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
-
-    public Instant getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
-
-    public Instant getScheduledPublishAt() { return scheduledPublishAt; }
-    public void setScheduledPublishAt(Instant scheduledPublishAt) { this.scheduledPublishAt = scheduledPublishAt; }
-
-    public List<Tag> getTags() { return tags; }
-    public void setTags(List<Tag> tags) { this.tags = tags; }
+    public Set<Tag> getTags() {
+        return tags;
+    }
+    public void setTags(Set<Tag> tags) {
+        this.tags = tags;
+    }
 }

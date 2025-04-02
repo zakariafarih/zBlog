@@ -19,9 +19,9 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
     Page<Post> findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(
             String titleKeyword, String contentKeyword, Pageable pageable);
 
-    Page<Post> findByIsPublishedTrue(Pageable pageable);
-    Page<Post> findByIsPublishedTrueAndAuthorId(String authorId, Pageable pageable);
+    Page<Post> findByPublishedTrue(Pageable pageable);
+    Page<Post> findByPublishedTrueAndAuthorId(String authorId, Pageable pageable);
 
-    @Query("SELECT p FROM Post p WHERE p.isPublished = false AND p.scheduledPublishAt <= :now")
+    @Query("SELECT p FROM Post p WHERE p.published = false AND p.scheduledPublishAt <= :now")
     List<Post> findReadyToPublish(Instant now);
 }

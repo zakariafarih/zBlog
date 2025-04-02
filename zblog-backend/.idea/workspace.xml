@@ -5,13 +5,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="52557961-8265-43bb-a8a2-baeed8e79ed3" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../.github/workflows/backend.yml" beforeDir="false" afterPath="$PROJECT_DIR$/../.github/workflows/backend.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.github/workflows/frontend.yml" beforeDir="false" afterPath="$PROJECT_DIR$/../.github/workflows/frontend.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/s3-core/src/main/java/com/zblog/s3core/config/S3SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/s3-core/src/main/java/com/zblog/s3core/config/S3SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/config/WebSecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/config/WebSecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/domain/entity/Post.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/domain/entity/Post.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/dto/PostDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/dto/PostDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/repository/PostRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/repository/PostRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/service/impl/PostServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/service/impl/PostServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/resources/application.properties" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../zblog-frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/package-lock.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../zblog-frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/app/express/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/app/express/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/app/preview/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/app/preview/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/components/posts/PostCreation/EditorComponent.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/components/posts/PostCreation/EditorComponent.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/types/tinymce.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/types/tinymce.d.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/components/posts/PostCreation/CoverImageUploader.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/components/posts/PostCreation/CoverImageUploader.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,39 +43,39 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Docker.zblog-post-core.zblog-post-core: Compose Deployment.executor": "Run",
-    "Maven.zblog-backend [clean,insatll].executor": "Run",
-    "Maven.zblog-backend [clean,install].executor": "Run",
-    "RequestMappingsPanelOrder0": "0",
-    "RequestMappingsPanelOrder1": "1",
-    "RequestMappingsPanelWidth0": "75",
-    "RequestMappingsPanelWidth1": "75",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "Spring Boot.S3CoreApplication.executor": "Run",
-    "Spring Boot.ZblogCommentCoreApplication.executor": "Run",
-    "Spring Boot.ZblogPostCoreApplication.executor": "Run",
-    "Spring Boot.ZblogUserCoreApplication.executor": "Run",
-    "git-widget-placeholder": "main",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/home/zakaria/zBlog/zblog-backend",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "run.configurations.included.in.services": "true",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Docker.zblog-post-core.zblog-post-core: Compose Deployment.executor&quot;: &quot;Run&quot;,
+    &quot;Maven.zblog-backend [clean,insatll].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.zblog-backend [clean,install].executor&quot;: &quot;Run&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;Spring Boot.S3CoreApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Spring Boot.ZblogCommentCoreApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Spring Boot.ZblogPostCoreApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Spring Boot.ZblogUserCoreApplication.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/zakaria/zBlog/zblog-backend&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;run.configurations.included.in.services&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "mysql"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;mysql&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$" />
@@ -196,6 +203,7 @@
       <workItem from="1743381120753" duration="6088000" />
       <workItem from="1743419014217" duration="14698000" />
       <workItem from="1743448104353" duration="14507000" />
+      <workItem from="1743564726260" duration="15953000" />
     </task>
     <servers />
   </component>

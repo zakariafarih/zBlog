@@ -9,6 +9,7 @@ import com.zblog.zblogpostcore.exception.PostNotFoundException;
 import com.zblog.zblogpostcore.repository.PostRepository;
 import com.zblog.zblogpostcore.repository.TagRepository;
 import com.zblog.zblogpostcore.service.PostService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +24,12 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final TagRepository tagRepository;
     private final FileClient fileClient;
+
+    @Value("${aws.bucketName}")
+    private String bucketName;
+
+    @Value("${aws.region}")
+    private String awsRegion;
 
     public PostServiceImpl(PostRepository postRepository,
                            TagRepository tagRepository,
@@ -39,7 +46,7 @@ public class PostServiceImpl implements PostService {
         post.setTitle(postDTO.getTitle());
         post.setContent(postDTO.getContent());
         post.setPublished(postDTO.isPublished());
-        post.setBannerImageFileId(postDTO.getBannerImageFileId());
+        post.setBannerImageKey(postDTO.getBannerImageKey()); // store the S3 key
         post.setScheduledPublishAt(postDTO.getScheduledPublishAt());
 
         // Initialize counters
@@ -47,7 +54,6 @@ public class PostServiceImpl implements PostService {
         post.setHeartCount(0);
         post.setBookmarkCount(0);
 
-        // Attach tags
         if (postDTO.getTags() != null) {
             post.setTags(resolveTags(postDTO.getTags()));
         }
@@ -67,9 +73,10 @@ public class PostServiceImpl implements PostService {
         existing.setTitle(postDTO.getTitle());
         existing.setContent(postDTO.getContent());
         existing.setPublished(postDTO.isPublished());
-        existing.setBannerImageFileId(postDTO.getBannerImageFileId());
+        existing.setBannerImageKey(postDTO.getBannerImageKey());
         existing.setScheduledPublishAt(postDTO.getScheduledPublishAt());
 
+        // Update tags
         existing.getTags().clear();
         if (postDTO.getTags() != null) {
             existing.getTags().addAll(resolveTags(postDTO.getTags()));
@@ -88,15 +95,14 @@ public class PostServiceImpl implements PostService {
             throw new SecurityException("Not authorized to delete this post");
         }
 
-        // S3 Cleanup with REST client
-        if (existing.getBannerImageFileId() != null) {
+        // Optionally delete the S3 file
+        if (existing.getBannerImageKey() != null) {
             try {
-                fileClient.deleteFile(existing.getBannerImageFileId());
+                fileClient.deleteFile(existing.getBannerImageKey());
             } catch (Exception e) {
-                // swallow error or log it
+                // swallow or log
             }
         }
-
         postRepository.delete(existing);
     }
 
@@ -105,6 +111,7 @@ public class PostServiceImpl implements PostService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException("Post not found"));
 
+        // If not published, only the owner can see it
         if (!post.isPublished() && !post.getAuthorId().equals(currentUserId)) {
             throw new SecurityException("This post is unpublished and you are not the owner");
         }
@@ -114,7 +121,7 @@ public class PostServiceImpl implements PostService {
     @Override
     public Page<PostDTO> getAllPosts(boolean onlyPublished, Pageable pageable) {
         if (onlyPublished) {
-            return postRepository.findByIsPublishedTrue(pageable)
+            return postRepository.findByPublishedTrue(pageable)
                     .map(entity -> mapToDTO(entity, false));
         }
         return postRepository.findAll(pageable)
@@ -123,13 +130,13 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public Page<PostDTO> searchPosts(String keyword, boolean onlyPublished, Pageable pageable) {
-        var page = postRepository.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(keyword, keyword, pageable);
+        var page = postRepository.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(
+                keyword, keyword, pageable);
 
         if (onlyPublished) {
             var filtered = page.getContent().stream()
                     .filter(Post::isPublished)
                     .collect(Collectors.toList());
-
             return new PageImpl<>(
                     filtered.stream().map(p -> mapToDTO(p, false)).collect(Collectors.toList()),
                     pageable,
@@ -142,7 +149,7 @@ public class PostServiceImpl implements PostService {
     @Override
     public Page<PostDTO> getPostsByAuthor(String authorId, boolean onlyPublished, Pageable pageable) {
         if (onlyPublished) {
-            return postRepository.findByIsPublishedTrueAndAuthorId(authorId, pageable)
+            return postRepository.findByPublishedTrueAndAuthorId(authorId, pageable)
                     .map(entity -> mapToDTO(entity, false));
         } else {
             return postRepository.findByAuthorId(authorId, pageable)
@@ -181,8 +188,12 @@ public class PostServiceImpl implements PostService {
         }
     }
 
-    // -------------- Helpers ----------------
+    // ----------------- Helpers -----------------
 
+    /**
+     * Convert the Post entity to PostDTO,
+     * plus build a stable public bannerImageUrl (if any).
+     */
     private PostDTO mapToDTO(Post post, boolean resolveBannerUrl) {
         PostDTO dto = new PostDTO();
         dto.setId(post.getId());
@@ -194,7 +205,7 @@ public class PostServiceImpl implements PostService {
         dto.setLikeCount(post.getLikeCount());
         dto.setHeartCount(post.getHeartCount());
         dto.setBookmarkCount(post.getBookmarkCount());
-        dto.setBannerImageFileId(post.getBannerImageFileId());
+        dto.setBannerImageKey(post.getBannerImageKey());
         dto.setCreatedAt(post.getCreatedAt());
         dto.setUpdatedAt(post.getUpdatedAt());
         dto.setScheduledPublishAt(post.getScheduledPublishAt());
@@ -204,26 +215,50 @@ public class PostServiceImpl implements PostService {
                 .collect(Collectors.toList());
         dto.setTags(tagNames);
 
-        if (resolveBannerUrl && post.getBannerImageFileId() != null) {
+        // If we want the banner image URL, build the public URL
+        if (resolveBannerUrl && post.getBannerImageKey() != null) {
+            // 100% public approach:
+            String publicUrl = constructS3Url(post.getBannerImageKey());
+            dto.setBannerImageUrl(publicUrl);
+
+            /*
+            // Or if you still want to call s3-core to see if it returns something:
             try {
-                // We do a REST call to s3-core
-                FileMetadataDTO meta = fileClient.getFileMetadata(post.getBannerImageFileId(), false);
-                dto.setBannerImageUrl(meta.getUrl());
+                // isPublic=true => s3-core might simply return the direct S3 URL if your bucket is configured that way
+                FileMetadataDTO meta = fileClient.getFileMetadata(post.getBannerImageKey(), true);
+                if (meta != null && meta.getUrl() != null) {
+                    dto.setBannerImageUrl(meta.getUrl());
+                } else {
+                    dto.setBannerImageUrl(publicUrl);
+                }
             } catch (Exception e) {
-                dto.setBannerImageUrl(null);
+                dto.setBannerImageUrl(publicUrl);
             }
+            */
         }
 
         return dto;
     }
 
-    private List<Tag> resolveTags(List<String> tagNames) {
+    /**
+     * Construct a stable public S3 URL, assuming your bucket allows public read.
+     * Example: https://zblog-files.s3.eu-north-1.amazonaws.com/cover-images/abc.png
+     */
+    private String constructS3Url(String key) {
+        return String.format("https://%s.s3.%s.amazonaws.com/%s", bucketName, awsRegion, key);
+    }
+
+    /**
+     * Create or find Tag entities for the given list of tag names.
+     */
+    private Set<Tag> resolveTags(List<String> tagNames) {
         return tagNames.stream()
-                .map(tagName -> tagRepository.findByNameIgnoreCase(tagName).orElseGet(() -> {
-                    Tag newTag = new Tag();
-                    newTag.setName(tagName);
-                    return newTag;
-                }))
-                .collect(Collectors.toList());
+                .map(tagName -> tagRepository.findByNameIgnoreCase(tagName)
+                        .orElseGet(() -> {
+                            Tag newTag = new Tag();
+                            newTag.setName(tagName);
+                            return newTag;
+                        }))
+                .collect(Collectors.toSet());
     }
 }
