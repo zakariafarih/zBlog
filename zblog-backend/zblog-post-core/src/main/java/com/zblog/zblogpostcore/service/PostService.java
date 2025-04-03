@@ -1,9 +1,11 @@
 package com.zblog.zblogpostcore.service;
 
 import com.zblog.zblogpostcore.dto.PostDTO;
+import com.zblog.zblogpostcore.dto.PostDetailDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface PostService {
@@ -20,4 +22,22 @@ public interface PostService {
     PostDTO reactToPost(UUID postId, String reactionType, String currentUserId);
 
     void validatePostExists(UUID postId);
+
+    /**
+     * Returns posts filtered by optional keywords and tags, sorted by the provided option.
+     *
+     * @param keywords      full-text keyword search (optional)
+     * @param tags          list of tags to filter (optional)
+     * @param sort          "recent", "popular", or "mostLiked"
+     * @param pageable      pagination info
+     * @param currentUserId current user (can be null for public)
+     * @return a page of PostDTO results
+     */
+    Page<PostDTO> explorePosts(String keywords, List<String> tags, String sort, Pageable pageable, String currentUserId);
+
+    /**
+     * Returns the full post (with all content) for detail view.
+     * This does not truncate the content.
+     */
+    PostDetailDTO getFullPost(UUID postId, String currentUserId);
 }

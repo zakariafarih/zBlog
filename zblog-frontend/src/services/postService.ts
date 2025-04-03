@@ -3,24 +3,23 @@ import axios, { AxiosError } from 'axios';
 const postCoreBaseURL =
   (process.env.NEXT_PUBLIC_POST_CORE_URL ?? 'http://localhost:8081/post').replace(/\/+$/, '');
 
-// Basic PostDTO from your Java code
-export interface PostDTO {
-  id?: string; // UUID
-  authorId?: string;
-  title: string;
-  content: string;
-  published?: boolean;
-  viewCount?: number;
-  likeCount?: number;
-  heartCount?: number;
-  bookmarkCount?: number;
-  bannerImageFileId?: string;
-  bannerImageUrl?: string;
-  createdAt?: string;  // Instant -> string
-  updatedAt?: string;  // Instant -> string
-  scheduledPublishAt?: string; // Instant
-  tags?: string[];
-}
+  export interface PostDTO {
+    id?: string;
+    authorId?: string;
+    title: string;
+    content: string;
+    published?: boolean;
+    viewCount?: number;
+    likeCount?: number;
+    heartCount?: number;
+    bookmarkCount?: number;
+    bannerImageKey?: string;
+    bannerImageUrl?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    scheduledPublishAt?: string;
+    tags?: string[];
+  }
 
 // The Page<T> interface can be reused from userService (or define your own).
 import { Page } from './userService';
@@ -36,6 +35,31 @@ export async function getPostHealth(): Promise<string> {
   } catch (error) {
     handleAxiosError(error);
   }
+}
+
+/**
+ * Calls the new explore endpoint.
+ */
+export async function explorePosts(
+  keywords: string,
+  tags: string[],
+  sort: "recent" | "popular" | "mostLiked",
+  page: number,
+  size: number,
+  authToken?: string
+): Promise<Page<PostDTO>> {
+  const params = new URLSearchParams();
+  if (keywords) params.append("keywords", keywords);
+  if (tags.length > 0) params.append("tags", tags.join(","));
+  params.append("sort", sort);
+  params.append("page", page.toString());
+  params.append("size", size.toString());
+
+  const url = `${process.env.NEXT_PUBLIC_POST_CORE_URL?.replace(/\/+$/, "")}/api/posts/explore?${params.toString()}`;
+  const res = await axios.get<Page<PostDTO>>(url, {
+    headers: { ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}) },
+  });
+  return res.data;
 }
 
 // CREATE: POST /post/api/posts
@@ -57,23 +81,12 @@ export async function createPost(
   }
 }
 
-// GET single post: GET /post/api/posts/{postId}
-export async function getPost(
-  postId: string,
-  authToken?: string
-): Promise<PostDTO> {
-  try {
-    const url = `${postCoreBaseURL}/api/posts/${postId}`;
-    // currentUserIdOrNull is handled server-side, so we just pass token if any
-    const res = await axios.get<PostDTO>(url, {
-      headers: {
-        ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
-      },
-    });
-    return res.data;
-  } catch (error) {
-    handleAxiosError(error);
-  }
+export async function getPost(postId: string, authToken?: string): Promise<PostDTO> {
+  const url = `${postCoreBaseURL}/api/posts/${postId}`;
+  const res = await axios.get<PostDTO>(url, {
+    headers: { ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}) },
+  });
+  return res.data;
 }
 
 // UPDATE: PUT /post/api/posts/{postId}
@@ -117,15 +130,14 @@ export async function deletePost(
 export async function getAllPosts(
   publishedOnly: boolean,
   page: number,
-  size: number
+  size: number,
+  authToken?: string
 ): Promise<Page<PostDTO>> {
-  try {
-    const url = `${postCoreBaseURL}/api/posts?publishedOnly=${publishedOnly}&page=${page}&size=${size}`;
-    const res = await axios.get<Page<PostDTO>>(url);
-    return res.data;
-  } catch (error) {
-    handleAxiosError(error);
-  }
+  const url = `${postCoreBaseURL}/api/posts?publishedOnly=${publishedOnly}&page=${page}&size=${size}`;
+  const res = await axios.get<Page<PostDTO>>(url, {
+    headers: { ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}) },
+  });
+  return res.data;
 }
 
 // SEARCH: GET /post/api/posts/search?keyword=...&publishedOnly=...
@@ -133,17 +145,16 @@ export async function searchPosts(
   keyword: string,
   publishedOnly: boolean,
   page: number,
-  size: number
+  size: number,
+  authToken?: string
 ): Promise<Page<PostDTO>> {
-  try {
-    const url = `${postCoreBaseURL}/api/posts/search?keyword=${encodeURIComponent(
-      keyword
-    )}&publishedOnly=${publishedOnly}&page=${page}&size=${size}`;
-    const res = await axios.get<Page<PostDTO>>(url);
-    return res.data;
-  } catch (error) {
-    handleAxiosError(error);
-  }
+  const url = `${postCoreBaseURL}/api/posts/search?keyword=${encodeURIComponent(
+    keyword
+  )}&publishedOnly=${publishedOnly}&page=${page}&size=${size}`;
+  const res = await axios.get<Page<PostDTO>>(url, {
+    headers: { ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}) },
+  });
+  return res.data;
 }
 
 // LIST BY AUTHOR: GET /post/api/posts/by-author/{authorId}?publishedOnly=...

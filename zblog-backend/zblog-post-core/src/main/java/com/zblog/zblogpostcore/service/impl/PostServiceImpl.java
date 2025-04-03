@@ -1,22 +1,27 @@
 package com.zblog.zblogpostcore.service.impl;
 
 import com.zblog.zblogpostcore.client.FileClient;
-import com.zblog.zblogpostcore.client.dto.FileMetadataDTO;
 import com.zblog.zblogpostcore.domain.entity.Post;
 import com.zblog.zblogpostcore.domain.entity.Tag;
 import com.zblog.zblogpostcore.dto.PostDTO;
+import com.zblog.zblogpostcore.dto.PostDetailDTO;
 import com.zblog.zblogpostcore.exception.PostNotFoundException;
 import com.zblog.zblogpostcore.repository.PostRepository;
 import com.zblog.zblogpostcore.repository.TagRepository;
 import com.zblog.zblogpostcore.service.PostService;
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Safelist;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import jakarta.persistence.criteria.Predicate;
 
 @Service
 public class PostServiceImpl implements PostService {
@@ -46,7 +51,7 @@ public class PostServiceImpl implements PostService {
         post.setTitle(postDTO.getTitle());
         post.setContent(postDTO.getContent());
         post.setPublished(postDTO.isPublished());
-        post.setBannerImageKey(postDTO.getBannerImageKey()); // store the S3 key
+        post.setBannerImageKey(postDTO.getBannerImageKey()); 
         post.setScheduledPublishAt(postDTO.getScheduledPublishAt());
 
         // Initialize counters
@@ -191,15 +196,15 @@ public class PostServiceImpl implements PostService {
     // ----------------- Helpers -----------------
 
     /**
-     * Convert the Post entity to PostDTO,
-     * plus build a stable public bannerImageUrl (if any).
+     * Convert Post entity to PostDTO and resolve banner image URL if needed.
      */
     private PostDTO mapToDTO(Post post, boolean resolveBannerUrl) {
         PostDTO dto = new PostDTO();
         dto.setId(post.getId());
         dto.setAuthorId(post.getAuthorId());
         dto.setTitle(post.getTitle());
-        dto.setContent(post.getContent());
+        // Generate a sanitized excerpt from HTML content.
+        dto.setContent(generateExcerpt(post.getContent(), 150));
         dto.setPublished(post.isPublished());
         dto.setViewCount(post.getViewCount());
         dto.setLikeCount(post.getLikeCount());
@@ -209,32 +214,10 @@ public class PostServiceImpl implements PostService {
         dto.setCreatedAt(post.getCreatedAt());
         dto.setUpdatedAt(post.getUpdatedAt());
         dto.setScheduledPublishAt(post.getScheduledPublishAt());
+        dto.setTags(post.getTags().stream().map(Tag::getName).collect(Collectors.toList()));
 
-        var tagNames = post.getTags().stream()
-                .map(Tag::getName)
-                .collect(Collectors.toList());
-        dto.setTags(tagNames);
-
-        // If we want the banner image URL, build the public URL
         if (resolveBannerUrl && post.getBannerImageKey() != null) {
-            // 100% public approach:
-            String publicUrl = constructS3Url(post.getBannerImageKey());
-            dto.setBannerImageUrl(publicUrl);
-
-            /*
-            // Or if you still want to call s3-core to see if it returns something:
-            try {
-                // isPublic=true => s3-core might simply return the direct S3 URL if your bucket is configured that way
-                FileMetadataDTO meta = fileClient.getFileMetadata(post.getBannerImageKey(), true);
-                if (meta != null && meta.getUrl() != null) {
-                    dto.setBannerImageUrl(meta.getUrl());
-                } else {
-                    dto.setBannerImageUrl(publicUrl);
-                }
-            } catch (Exception e) {
-                dto.setBannerImageUrl(publicUrl);
-            }
-            */
+            dto.setBannerImageUrl(constructS3Url(post.getBannerImageKey()));
         }
 
         return dto;
@@ -260,5 +243,122 @@ public class PostServiceImpl implements PostService {
                             return newTag;
                         }))
                 .collect(Collectors.toSet());
+    }
+
+    @Override
+    public Page<PostDTO> explorePosts(String keywords, List<String> tags, String sort, Pageable pageable, String currentUserId) {
+        // Build a specification for filtering
+        Specification<Post> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            // Only published posts or posts by the owner (if authenticated)
+            if (currentUserId == null) {
+                predicates.add(cb.isTrue(root.get("published")));
+            } else {
+                predicates.add(cb.or(
+                        cb.isTrue(root.get("published")),
+                        cb.equal(root.get("authorId"), currentUserId)
+                ));
+            }
+
+            if (keywords != null && !keywords.isBlank()) {
+                String kw = "%" + keywords.toLowerCase() + "%";
+                predicates.add(cb.or(
+                        cb.like(cb.lower(root.get("title")), kw),
+                        cb.like(cb.lower(root.get("content")), kw)
+                ));
+            }
+
+            if (tags != null && !tags.isEmpty()) {
+                // Join to tags collection and match any of the provided tags (case-insensitive)
+                predicates.add(root.join("tags").get("name").in(
+                        tags.stream().map(String::toLowerCase).collect(Collectors.toList())
+                ));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        // Remove any sorting from the incoming Pageable to avoid conflicts
+        Pageable unsortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
+        Page<Post> postPage = postRepository.findAll(spec, unsortedPageable);
+
+        // Apply custom sorting in memory
+        List<Post> sortedPosts = new ArrayList<>(postPage.getContent());
+        switch (sort.toLowerCase()) {
+            case "popular":
+                sortedPosts.sort(Comparator.comparingLong(
+                        p -> -(p.getLikeCount() + p.getHeartCount())
+                ));
+                break;
+            case "mostliked":
+                sortedPosts.sort(Comparator.comparingLong(
+                        p -> -p.getLikeCount()
+                ));
+                break;
+            case "recent":
+            default:
+                sortedPosts.sort(Comparator.comparing(Post::getCreatedAt, Comparator.nullsLast(Comparator.reverseOrder())));
+                break;
+        }
+
+        // Map posts to DTOs (including generating a safe excerpt)
+        List<PostDTO> dtos = sortedPosts.stream()
+                .map(post -> mapToDTO(post, true))
+                .collect(Collectors.toList());
+
+        // Return a new PageImpl preserving the original pagination metadata.
+        return new PageImpl<>(dtos, pageable, postPage.getTotalElements());
+    }
+
+    /**
+     * Generates a safe excerpt from HTML content using Jsoup.
+     */
+    private String generateExcerpt(String htmlContent, int maxLength) {
+        String text = Jsoup.clean(htmlContent, Safelist.none());
+        if (text.length() > maxLength) {
+            return text.substring(0, maxLength).trim() + "...";
+        }
+        return text;
+    }
+
+    @Override
+    public PostDetailDTO getFullPost(UUID postId, String currentUserId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new PostNotFoundException("Post not found"));
+
+        // If post is unpublished, only the owner can view it
+        if (!post.isPublished() && !post.getAuthorId().equals(currentUserId)) {
+            throw new SecurityException("This post is unpublished and you are not the owner");
+        }
+
+        return mapToDetailDTO(post);
+    }
+
+    /**
+     * Converts a Post entity into a full-detail DTO (without truncation).
+     */
+    private PostDetailDTO mapToDetailDTO(Post post) {
+        PostDetailDTO dto = new PostDetailDTO();
+        dto.setId(post.getId());
+        dto.setAuthorId(post.getAuthorId());
+        dto.setTitle(post.getTitle());
+        // Return full content, not a truncated excerpt
+        dto.setContent(post.getContent());
+        dto.setPublished(post.isPublished());
+        dto.setViewCount(post.getViewCount());
+        dto.setLikeCount(post.getLikeCount());
+        dto.setHeartCount(post.getHeartCount());
+        dto.setBookmarkCount(post.getBookmarkCount());
+        dto.setBannerImageKey(post.getBannerImageKey());
+        dto.setCreatedAt(post.getCreatedAt());
+        dto.setUpdatedAt(post.getUpdatedAt());
+        dto.setScheduledPublishAt(post.getScheduledPublishAt());
+        dto.setTags(post.getTags().stream().map(Tag::getName).collect(Collectors.toList()));
+
+        if (post.getBannerImageKey() != null) {
+            dto.setBannerImageUrl(constructS3Url(post.getBannerImageKey()));
+        }
+        return dto;
     }
 }

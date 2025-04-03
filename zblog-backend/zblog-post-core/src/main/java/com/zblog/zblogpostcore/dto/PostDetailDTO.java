@@ -1,57 +1,48 @@
-package com.zblog.zblogpostcore.domain.entity;
+package com.zblog.zblogpostcore.dto;
 
-import jakarta.persistence.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
+import jakarta.validation.constraints.NotBlank;
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 import java.util.UUID;
 
-@Entity
-@Table(name = "posts")
-public class Post {
+public class PostDetailDTO {
 
-    @Id
-    @GeneratedValue
     private UUID id;
-
     private String authorId;
 
+    @NotBlank(message="Title cannot be blank")
     private String title;
 
-    @Column(columnDefinition = "TEXT")
-    private String content;
+    @NotBlank(message="Content cannot be blank")
+    private String content; // Full post content
 
     private boolean published;
-
     private long viewCount;
     private long likeCount;
     private long heartCount;
     private long bookmarkCount;
 
     private String bannerImageKey;
+    private String bannerImageUrl;   // Resolved URL for banner image
 
-    @CreationTimestamp
     private Instant createdAt;
-
-    @UpdateTimestamp
     private Instant updatedAt;
-
     private Instant scheduledPublishAt;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
-    @JoinTable(name = "post_tags",
-            joinColumns = @JoinColumn(name = "post_id"),
-            inverseJoinColumns = @JoinColumn(name = "tag_id"))
-    private Set<Tag> tags = new HashSet<>();
+    private List<String> tags;
 
-    // Getters and setters
+    public long getViewCount() {
+        return viewCount;
+    }
+
+    public void setViewCount(long viewCount) {
+        this.viewCount = viewCount;
+    }
 
     public UUID getId() {
         return id;
     }
+
     public void setId(UUID id) {
         this.id = id;
     }
@@ -59,6 +50,7 @@ public class Post {
     public String getAuthorId() {
         return authorId;
     }
+
     public void setAuthorId(String authorId) {
         this.authorId = authorId;
     }
@@ -66,6 +58,7 @@ public class Post {
     public String getTitle() {
         return title;
     }
+
     public void setTitle(String title) {
         this.title = title;
     }
@@ -73,6 +66,7 @@ public class Post {
     public String getContent() {
         return content;
     }
+
     public void setContent(String content) {
         this.content = content;
     }
@@ -80,20 +74,15 @@ public class Post {
     public boolean isPublished() {
         return published;
     }
+
     public void setPublished(boolean published) {
         this.published = published;
-    }
-
-    public long getViewCount() {
-        return viewCount;
-    }
-    public void setViewCount(long viewCount) {
-        this.viewCount = viewCount;
     }
 
     public long getLikeCount() {
         return likeCount;
     }
+
     public void setLikeCount(long likeCount) {
         this.likeCount = likeCount;
     }
@@ -101,6 +90,7 @@ public class Post {
     public long getHeartCount() {
         return heartCount;
     }
+
     public void setHeartCount(long heartCount) {
         this.heartCount = heartCount;
     }
@@ -108,6 +98,7 @@ public class Post {
     public long getBookmarkCount() {
         return bookmarkCount;
     }
+
     public void setBookmarkCount(long bookmarkCount) {
         this.bookmarkCount = bookmarkCount;
     }
@@ -115,13 +106,23 @@ public class Post {
     public String getBannerImageKey() {
         return bannerImageKey;
     }
+
     public void setBannerImageKey(String bannerImageKey) {
         this.bannerImageKey = bannerImageKey;
+    }
+
+    public String getBannerImageUrl() {
+        return bannerImageUrl;
+    }
+
+    public void setBannerImageUrl(String bannerImageUrl) {
+        this.bannerImageUrl = bannerImageUrl;
     }
 
     public Instant getCreatedAt() {
         return createdAt;
     }
+
     public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
     }
@@ -129,6 +130,7 @@ public class Post {
     public Instant getUpdatedAt() {
         return updatedAt;
     }
+
     public void setUpdatedAt(Instant updatedAt) {
         this.updatedAt = updatedAt;
     }
@@ -136,14 +138,16 @@ public class Post {
     public Instant getScheduledPublishAt() {
         return scheduledPublishAt;
     }
+
     public void setScheduledPublishAt(Instant scheduledPublishAt) {
         this.scheduledPublishAt = scheduledPublishAt;
     }
 
-    public Set<Tag> getTags() {
+    public List<String> getTags() {
         return tags;
     }
-    public void setTags(Set<Tag> tags) {
+
+    public void setTags(List<String> tags) {
         this.tags = tags;
     }
 }

@@ -1,15 +1,19 @@
 package com.zblog.zblogpostcore.controller;
 
 import com.zblog.zblogpostcore.dto.PostDTO;
+import com.zblog.zblogpostcore.dto.PostDetailDTO;
 import com.zblog.zblogpostcore.service.PostService;
 import com.zblog.zblogpostcore.util.SecurityUtil;
+import jakarta.validation.constraints.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/post/api/posts")
@@ -23,6 +27,31 @@ public class PostController {
         this.postService = postService;
     }
 
+    /**
+     * Explore posts with optional filtering by keywords and tags, sorting, and pagination.
+     *
+     * Query parameters:
+     * - tags: comma-separated list (optional)
+     * - keywords: full-text search (optional)
+     * - sort: "recent", "popular", or "mostLiked" (defaults to "recent")
+     * - page & size: pagination controls
+     */
+    @GetMapping("/explore")
+    public Page<PostDTO> explorePosts(
+            @RequestParam(required = false) String tags,
+            @RequestParam(required = false) String keywords,
+            @RequestParam(defaultValue = "recent")
+            @Pattern(regexp = "recent|popular|mostLiked", message = "Invalid sort value")
+            String sort,
+            Pageable pageable) {
+
+        String currentUserId = SecurityUtil.getCurrentUserIdOrNull();
+        List<String> tagList = (tags != null && !tags.isBlank())
+                ? List.of(tags.split(",")).stream().map(String::trim).filter(s -> !s.isEmpty()).collect(Collectors.toList())
+                : null;
+        return postService.explorePosts(keywords, tagList, sort, pageable, currentUserId);
+    }
+
     // CREATE
     @PostMapping
     public PostDTO createPost(@RequestBody PostDTO postDTO) {
@@ -32,9 +61,9 @@ public class PostController {
 
     // READ (single post)
     @GetMapping("/{postId}")
-    public PostDTO getPost(@PathVariable("postId") UUID postId) {
+    public PostDetailDTO getPost(@PathVariable("postId") UUID postId) {
         String currentUserId = SecurityUtil.getCurrentUserIdOrNull();
-        return postService.getPost(postId, currentUserId);
+        return postService.getFullPost(postId, currentUserId);
     }
 
     // UPDATE

@@ -3,59 +3,71 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useAuth } from "react-oidc-context";
-import { useGetPost } from "@/hooks/post/useGetPost";
+import DOMPurify from "dompurify";
+import { getPost, PostDTO } from "@/services/postService";
 import PostDetail from "@/components/posts/PostDetail/PostDetail";
+import Fallback from "@/components/Fallback/Fallback";
+import ErrorBoundary from "@/components/Fallback/ErrorBoundary";
 
 export default function SinglePostPage() {
-  const params = useParams(); 
+  const params = useParams();
   const auth = useAuth();
+  const postId =
+    typeof params?.id === "string"
+      ? params.id
+      : Array.isArray(params?.id)
+      ? params.id[0]
+      : "";
 
-  const id = typeof params?.id === "string" ? params.id : Array.isArray(params?.id) ? params.id[0] : "";
-
-  // Wait until auth is ready
-  const [ready, setReady] = useState(false);
+  const [post, setPost] = useState<PostDTO | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!auth.isLoading && auth.user) {
-      setReady(true);
+      const token = auth.user.access_token;
+      getPost(postId, token)
+        .then((data) => {
+          setPost(data);
+          setLoading(false);
+        })
+        .catch((err) => {
+          setError(err.message || "Error loading post");
+          setLoading(false);
+        });
     }
-  }, [auth.isLoading, auth.user]);
+  }, [postId, auth]);
 
-  const token = auth.user?.access_token;
-  const { data, error, loading } = useGetPost(ready ? id : "", token);
-
-  console.log("Auth token:", token);
-
-
-  if (auth.isLoading || !ready) {
-    return <div className="p-4 text-slate-300">Authenticating...</div>;
-  }
-
-  if (loading) {
-    return <div className="p-4 text-slate-300">Loading post...</div>;
+  if (auth.isLoading || loading) {
+    return <Fallback message="Loading post..." />;
   }
 
   if (error) {
-    return <div className="p-4 text-red-400">Error: {error}</div>;
+    return <Fallback message={`Error: ${error}`} />;
   }
 
-  if (!data) {
-    return <div className="p-4 text-slate-300">No post found.</div>;
+  if (!post) {
+    return <Fallback message="No post found." />;
   }
 
-  const createdAt = data.createdAt ? new Date(data.createdAt) : new Date();
+  // Sanitize HTML content
+  const safeContent = DOMPurify.sanitize(post.content);
 
-  const post = {
-    title: data.title,
-    coverImageUrl: data.bannerImageUrl || "/default-cover.jpg",
-    content: data.content,
-    tags: data.tags || [],
-    publishedAt: createdAt,
-    author: {
-      name: "User " + data.authorId?.slice(0, 6),
-      avatarUrl: "/avatars/default.png",
-    },
-  };
-
-  return <PostDetail post={post} />;
+  return (
+    <ErrorBoundary fallback={<Fallback message="Something went wrong while rendering the post." />}>
+      <PostDetail
+        post={{
+          title: post.title,
+          coverImageUrl: post.bannerImageUrl || "/default-cover.jpg",
+          content: safeContent,
+          tags: post.tags || [],
+          publishedAt: post.createdAt ? new Date(post.createdAt) : new Date(),
+          author: {
+            name: post.authorId ? `User ${post.authorId.substring(0, 6)}` : "Unknown Author",
+            avatarUrl: "/avatars/default.png",
+          },
+        }}
+      />
+    </ErrorBoundary>
+  );
 }

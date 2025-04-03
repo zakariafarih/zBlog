@@ -23,7 +23,6 @@ public class PostDTO {
     private long heartCount;
     private long bookmarkCount;
 
-    // Renamed from bannerImageFileId to bannerImageKey
     private String bannerImageKey;
 
     private String bannerImageUrl;   // ephemeral or fallback

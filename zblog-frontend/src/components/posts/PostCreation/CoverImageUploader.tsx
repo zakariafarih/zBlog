@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useState, DragEvent } from "react";
-import { useUploadFile } from "@/hooks/s3/useUploadFile";
+import { useUploadFile, UploadResult } from "@/hooks/s3/useUploadFile";
 import { useAuth } from "react-oidc-context";
+import Image from "next/image";
 
 interface CoverImageUploaderProps {
-  coverImageUrl: string;                       // ephemeral URL for preview
+  coverImageUrl: string;
   onCoverImageUrlChange: (url: string) => void;
-  coverImageKey: string;                       // S3 key (stored in DB upon publish)
+  coverImageKey: string;
   onCoverImageKeyChange: (key: string) => void;
 }
 
@@ -18,25 +19,24 @@ export default function CoverImageUploader({
   onCoverImageKeyChange,
 }: CoverImageUploaderProps) {
   const [uploading, setUploading] = useState(false);
-  const [errorDup, setErrorDup] = useState<string | null>(null);
-  const { upload } = useUploadFile();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { upload, loading, error } = useUploadFile();
   const auth = useAuth();
 
   async function handleFileUpload(file: File) {
     setUploading(true);
-    setErrorDup(null);
+    setErrorMessage(null);
     try {
       const token = auth.user?.access_token;
-      const res = await upload(file, "cover-images", token);
-      if (!res) throw new Error("No response from S3 service");
-
-      // Set ephemeral preview URL (presigned or direct)
-      onCoverImageUrlChange(res.url);
-      // Store the S3 key to send to the backend
-      onCoverImageKeyChange(res.key);
+      const result: UploadResult | undefined = await upload(file, "cover-images", token);
+      if (!result) {
+        throw new Error("No response from S3 service");
+      }
+      onCoverImageUrlChange(result.previewUrl);
+      onCoverImageKeyChange(result.fileKey);
     } catch (err: any) {
       console.error("Upload error:", err);
-      setErrorDup(err.message || "Upload failed");
+      setErrorMessage(err.message || "Upload failed");
     } finally {
       setUploading(false);
     }
@@ -69,13 +69,18 @@ export default function CoverImageUploader({
             Cover Image
           </span>
         </div>
+
         <div className="flex flex-col items-center justify-center min-h-[100px] gap-3">
           {coverImageUrl ? (
-            <img
-              src={coverImageUrl}
-              alt="Cover"
-              className="w-full h-40 object-cover rounded-md shadow-lg"
-            />
+            <div className="relative w-full h-40 rounded-md overflow-hidden shadow-lg">
+              <Image
+                src={coverImageUrl}
+                alt="Cover"
+                fill
+                className="object-cover rounded-md"
+                unoptimized 
+              />
+            </div>
           ) : (
             <div className="flex flex-col items-center gap-2 text-slate-400">
               <svg
@@ -97,6 +102,7 @@ export default function CoverImageUploader({
             </div>
           )}
         </div>
+
         <input
           type="file"
           accept="image/*"
@@ -104,14 +110,18 @@ export default function CoverImageUploader({
           className="absolute inset-0 opacity-0 cursor-pointer"
         />
       </div>
-      {uploading && (
+
+      {(uploading || loading) && (
         <div className="flex items-center justify-center text-sm text-teal-300">
           <div className="animate-spin mr-2 h-4 w-4 border-2 border-teal-500 rounded-full border-t-transparent"></div>
           Uploading...
         </div>
       )}
-      {errorDup && (
-        <div className="text-sm text-red-400 text-center">{errorDup}</div>
+
+      {(errorMessage || error) && (
+        <div className="text-sm text-red-400 text-center">
+          {errorMessage || error}
+        </div>
       )}
     </div>
   );

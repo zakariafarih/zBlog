@@ -5,20 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="52557961-8265-43bb-a8a2-baeed8e79ed3" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/s3-core/src/main/java/com/zblog/s3core/config/S3SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/s3-core/src/main/java/com/zblog/s3core/config/S3SecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/config/WebSecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/config/WebSecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/domain/entity/Post.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/domain/entity/Post.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/dto/PostDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/dto/PostDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/repository/PostRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/repository/PostRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/service/impl/PostServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/service/impl/PostServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../zblog-frontend/next.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/next.config.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../zblog-frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/app/express/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/app/express/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/app/preview/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/app/preview/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/components/posts/PostCreation/CoverImageUploader.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/components/posts/PostCreation/CoverImageUploader.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -203,7 +192,7 @@
       <workItem from="1743381120753" duration="6088000" />
       <workItem from="1743419014217" duration="14698000" />
       <workItem from="1743448104353" duration="14507000" />
-      <workItem from="1743564726260" duration="15953000" />
+      <workItem from="1743564726260" duration="16554000" />
     </task>
     <servers />
   </component>

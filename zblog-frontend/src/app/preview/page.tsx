@@ -1,44 +1,41 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { usePostDraft } from "@/context/PostDraftContext";
+import DOMPurify from "dompurify";
 import PostDetail from "@/components/posts/PostDetail/PostDetail";
 
 export default function PreviewPage() {
   const router = useRouter();
-  const { draft } = usePostDraft();
+  const [post, setPost] = useState<any>(null);
 
-  // Hard-coded author for preview
-  const author = {
-    name: "Preview Author",
-    avatarUrl: "/avatars/default.png",
-  };
+  useEffect(() => {
+    const stored = localStorage.getItem("post_preview");
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      // Sanitize the content for safe HTML rendering.
+      parsed.content = DOMPurify.sanitize(parsed.content);
+      setPost(parsed);
+    }
+  }, []);
 
-  // Build the post object for <PostDetail />
-  const post = {
-    title: draft.title || "Untitled Post",
-    // Use draft.coverImageUrl here for immediate preview
-    coverImageUrl: draft.coverImageUrl || "/default-cover.jpg",
-    content: draft.content || "<p>No content yet</p>",
-    tags: draft.tags.length ? draft.tags : ["General"],
-    publishedAt: new Date(),
-    author,
-  };
+  if (!post) {
+    return <div className="p-4">Loading preview...</div>;
+  }
+
+  console.log(post);
 
   return (
-    <div className="bg-slate-700 text-white min-h-screen">
+    <div className="bg-slate-900 text-white min-h-screen">
       {/* Back button */}
-      <div className="p-2 border-b border-slate-600">
+      <div className="p-4 border-b border-slate-800">
         <button
           onClick={() => router.push("/express")}
-          className="px-4 py-2 bg-slate-900 rounded hover:bg-slate-600 transition"
+          className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded text-white transition"
         >
-          Back to Editor
+          ← Back to Editor
         </button>
       </div>
-
-      {/* Post detail preview */}
       <PostDetail post={post} />
     </div>
   );

@@ -3,14 +3,16 @@ package com.zblog.zblogpostcore.repository;
 import com.zblog.zblogpostcore.domain.entity.Post;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-public interface PostRepository extends JpaRepository<Post, UUID> {
+public interface PostRepository extends JpaRepository<Post, UUID>, JpaSpecificationExecutor<Post> {
 
     Page<Post> findByAuthorId(String authorId, Pageable pageable);
 
@@ -24,4 +26,6 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
 
     @Query("SELECT p FROM Post p WHERE p.published = false AND p.scheduledPublishAt <= :now")
     List<Post> findReadyToPublish(Instant now);
+
+    Page<Post> findAll(Specification<Post> spec, Pageable pageable);
 }

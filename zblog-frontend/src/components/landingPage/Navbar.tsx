@@ -203,12 +203,18 @@ export default function Navbar() {
     ) : (
       <div className="h-full flex items-center px-6 border-l border-r border-slate-800">
         <div className="flex items-center gap-4">
-          <button
-            onClick={() => auth.signinRedirect()}
-            className="text-sm text-slate-300 hover:text-white"
-          >
-            Login
-          </button>
+        <button
+  onClick={() => {
+    auth.signinRedirect().catch((err) => {
+      console.error("Cognito login redirect failed", err);
+      alert("Login failed. Check console for details.");
+    });
+  }}
+  className="text-sm text-slate-300 hover:text-white"
+>
+  Login
+</button>
+
           <div className="w-px h-4 bg-slate-800" />
           <Link
             href="/register"

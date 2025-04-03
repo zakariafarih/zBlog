@@ -12,78 +12,57 @@ export default function AnimatedHeaderPost() {
 
   useLayoutEffect(() => {
     let isMounted = true
-
     if (!containerRef.current) return
 
     const containerWidth = containerRef.current.offsetWidth
-    const detectiveWidth = 96
-    const travelDistance = containerWidth - detectiveWidth - 80
+    const detectiveWidth = 64 
+    const travelDistance = (containerWidth - detectiveWidth - 30) + containerWidth * 0.25;
 
     const runAnimation = async () => {
       if (!isMounted) return
-      await controls.start({
-        x: travelDistance,
-        scaleX: 1,
-        transition: { duration: 3.2, ease: [0.33, 1, 0.68, 1] },
-      })
-
-      if (!isMounted) return
-      await controls.start({
-        scaleX: -1,
-        transition: { duration: 0.4 },
-      })
-
-      if (!isMounted) return
-      await controls.start({
-        x: 0,
-        transition: { duration: 2.8, ease: [0.33, 1, 0.68, 1] },
-      })
-
-      if (!isMounted) return
-      await controls.start({
-        scaleX: 1,
-        transition: { duration: 0.4 },
-      })
+      await controls.start({ x: travelDistance, scaleX: 1, transition: { duration: 3.2 } })
+      await controls.start({ scaleX: -1, transition: { duration: 0.4 } })
+      await controls.start({ x: 0, transition: { duration: 2.8 } })
+      await controls.start({ scaleX: 1, transition: { duration: 0.4 } })
 
       if (!isMounted) return
       setShowText(true)
     }
 
     runAnimation()
-
-    return () => {
-      isMounted = false
-    }
+    return () => { isMounted = false }
   }, [controls])
 
   return (
     <div
       ref={containerRef}
-      className="relative w-full mb-6 h-24 flex items-center overflow-hidden"
+      className="relative bg-slate-900 border border-slate-700 mb-4 px-6 py-2 shadow-inner neon-glow-box"
     >
       {/* Detective Animation */}
       <motion.div
-        className="absolute top-1/2 -translate-y-1/2 w-24 h-24 z-10"
+        className="absolute top-1/2 -translate-y-1/2 w-16 h-16 z-10 scale-[0.8]" // ⬅️ Smaller and tighter
         initial={{ x: 0, scaleX: 1 }}
         animate={controls}
       >
         <Lottie animationData={explorerAnimation} loop />
       </motion.div>
 
-      {/* Title & Description */}
+      {/* Text Content */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: showText ? 1 : 0 }}
         transition={{ duration: 0.6, delay: 0.2 }}
-        className="relative z-0 flex flex-col md:flex-row md:items-end md:justify-between w-full pl-28"
+        className="relative z-0 flex flex-col md:flex-row md:items-end md:justify-between w-full pl-20"
       >
-        <h1 className="text-3xl md:text-4xl font-bold flex items-center gap-2">
+        <h1 className="text-xl md:text-2xl font-bold uppercase tracking-wider text-cyan-300">
           Explore Posts
         </h1>
-        <p className="text-slate-400 text-sm md:text-base md:text-right max-w-xl mt-2 md:mt-0">
-          Search and filter through various posts.
+        <p className="text-slate-400 text-xs md:text-sm md:text-right max-w-md mt-1 md:mt-0">
+          Use filters and keywords to find the freshest, most relevant content.
         </p>
       </motion.div>
+
+      <div className="absolute bottom-0 left-0 w-full h-px bg-slate-700" />
     </div>
   )
 }

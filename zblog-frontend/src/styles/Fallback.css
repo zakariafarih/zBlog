@@ -1,0 +1,28 @@
+.fallback-wrapper {
+  width: 100%;
+  height: calc(100vh - 4rem); /* Adjust if your navbar/footer takes more or less space */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #0f172a; /* Tailwind slate-900 */
+  padding: 2rem;
+}
+
+.fallback-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.fallback-animation {
+  width: 220px;
+  height: 220px;
+  margin-bottom: 1.5rem;
+}
+
+.fallback-message {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #cbd5e1; /* slate-300 */
+}

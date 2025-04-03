@@ -11,24 +11,24 @@ export default function ContactSection() {
       </h2>
       <div className="grid gap-6">
         <p className="text-lg text-slate-200">
-          I'm always open to collaboration, code reviews, or feedback.
+          I’m always open to collaboration, code reviews, or feedback.
         </p>
         <div className="flex flex-col sm:flex-row gap-4">
           <a
             href="https://github.com/zakariafarih"
             target="_blank"
             rel="noreferrer"
-            className="flex items-center gap-3 px-6 py-3 bg-slate-800/50 rounded-xl border border-slate-700 hover:border-blue-500/50 hover:bg-slate-800 transition-all group"
+            className="flex items-center gap-3 px-6 py-3 bg-slate-800/50 border border-slate-700 hover:border-blue-500/50 transition-transform transform hover:scale-105"
           >
-            <GithubIcon className="w-5 h-5 text-blue-400 group-hover:text-blue-300" />
-            <span className="text-slate-200 group-hover:text-white">GitHub</span>
+            <GithubIcon className="w-5 h-5 text-blue-400" />
+            <span className="text-slate-200">GitHub</span>
           </a>
           <a
             href="mailto:zakariafarih142@gmail.com"
-            className="flex items-center gap-3 px-6 py-3 bg-slate-800/50 rounded-xl border border-slate-700 hover:border-teal-500/50 hover:bg-slate-800 transition-all group"
+            className="flex items-center gap-3 px-6 py-3 bg-slate-800/50 border border-slate-700 hover:border-teal-500/50 transition-transform transform hover:scale-105"
           >
-            <Mail className="w-5 h-5 text-teal-400 group-hover:text-teal-300" />
-            <span className="text-slate-200 group-hover:text-white">Email</span>
+            <Mail className="w-5 h-5 text-teal-400" />
+            <span className="text-slate-200">Email</span>
           </a>
         </div>
       </div>

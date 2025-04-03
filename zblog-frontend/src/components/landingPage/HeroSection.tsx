@@ -64,7 +64,7 @@ export default function HeroSection({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             style={{ originX: 0.5, originY: 0.5 }}
-            className="inline-block ml-6" // <-- SHIFT BUTTON RIGHT
+            className="inline-block ml-6"
           >
             <Link href="/register" className="inline-block">
               <button className="px-8 py-4 bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-slate-200 rounded-lg font-medium shadow-xl transition-all hover:shadow-slate-500/20">

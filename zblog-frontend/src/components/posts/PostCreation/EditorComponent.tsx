@@ -18,7 +18,7 @@ interface EditorComponentProps {
 }
 
 /**
- * A production-ready, dark-mode TinyMCE with:
+ * Dark-mode TinyMCE with:
  * - Autoresize (no internal scroll)
  * - Codesample plugin for code blocks
  * - Forced paragraphs so you can type after code

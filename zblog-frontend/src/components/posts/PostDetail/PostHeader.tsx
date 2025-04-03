@@ -22,14 +22,11 @@ export default function PostHeader({
   publishedAt,
   tags,
 }: PostHeaderProps) {
-  const isAbsoluteUrl = coverImageUrl.startsWith("http") || coverImageUrl.startsWith("/");
+  // Check if the coverImageUrl is valid (e.g. non-empty and begins with "http" or "/")
+  const isValidUrl = coverImageUrl && (coverImageUrl.startsWith("http") || coverImageUrl.startsWith("/"));
 
-  const baseUrl = process.env.NEXT_PUBLIC_S3_PUBLIC_BASE_URL?.replace(/\/+$/, "");
-  const resolvedCoverImageUrl = isAbsoluteUrl
-    ? coverImageUrl
-    : baseUrl
-    ? `${baseUrl}/${coverImageUrl}`
-    : "/default-cover.jpg"; // fallback image
+  // If not valid, use a fallback default image.
+  const resolvedCoverImageUrl = isValidUrl ? coverImageUrl : "/default-cover.jpg";
 
   return (
     <div className="mb-6">
@@ -41,6 +38,7 @@ export default function PostHeader({
           width={1200}
           height={400}
           className="w-full h-full object-cover object-center"
+          unoptimized
         />
       </div>
 
