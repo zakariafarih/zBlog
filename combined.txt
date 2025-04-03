@@ -1,160 +1,89 @@
------ /home/zakaria/zBlog/zblog-frontend/src/app/express/page.tsx -----
-"use client";
+----- /home/zakaria/zBlog/zblog-frontend/src/app/recent/page.tsx -----
+"use client"
 
-import React from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "react-oidc-context";
+import React from "react"
+import RecentPosts from "@/components/posts/RecentPosts"
+import type { PostCardProps } from "@/components/posts/PostCard"
 
-import TopUtilityBar from "@/components/posts/PostCreation/TopUtilityBar";
-import PostMetadataSection from "@/components/posts/PostCreation/PostMetadataSection";
-import EditorComponent from "@/components/posts/PostCreation/EditorComponent";
-import BottomToolbar from "@/components/posts/PostCreation/BottomToolbar";
-import { PostDTO } from "@/services/postService";
-import { useDraftManager } from "@/hooks/drafts/useDraftManager";
-import { useCreatePost } from "@/hooks/post/useCreatePost";
 
-const CreatePostPage: React.FC = () => {
-  const auth = useAuth();
-  const router = useRouter();
+const mockPosts: PostCardProps[] = [
+  {
+    id: "1",
+    title: "Mastering TypeScript",
+    description: "Discover the power of static typing in JavaScript and how it can improve your productivity.",
+    author: "Zakaria",
+    timestamp: "2 hours ago",
+    tags: ["Coding", "TypeScript"],
+    imageUrl: "https://picsum.photos/600/400?random=1",
+    reactionCount: 24,
+    commentCount: 5,
+  },
+  {
+    id: "2",
+    title: "Exploring Microservices Architecture",
+    description: "Learn how a microservices architecture can help you build scalable applications.",
+    author: "Alice",
+    timestamp: "3 hours ago",
+    tags: ["Microservices", "Architecture"],
+    imageUrl: "https://picsum.photos/600/400?random=2",
+    reactionCount: 35,
+    commentCount: 12,
+  },
+  {
+    id: "3",
+    title: "UI/UX Best Practices",
+    description: "Designing interfaces that are not only visually appealing but also provide great user experience.",
+    author: "Bob",
+    timestamp: "5 hours ago",
+    tags: ["Design", "UI/UX"],
+    imageUrl: "https://picsum.photos/600/400?random=3",
+    reactionCount: 10,
+    commentCount: 8,
+  },
+  {
+    id: "4",
+    title: "Understanding Cloud-Native Development",
+    description: "An in-depth look into building applications using cloud-native technologies and microservices.",
+    author: "Clara",
+    timestamp: "1 day ago",
+    tags: ["Cloud", "Microservices"],
+    imageUrl: "https://picsum.photos/600/400?random=4",
+    reactionCount: 18,
+    commentCount: 3,
+  },
+  {
+    id: "5",
+    title: "The Future of AI in Software Development",
+    description: "How artificial intelligence is reshaping coding, testing, and deployment workflows.",
+    author: "Derek",
+    timestamp: "2 days ago",
+    tags: ["AI", "Software Development"],
+    imageUrl: "https://picsum.photos/600/400?random=5",
+    reactionCount: 44,
+    commentCount: 16,
+  },
+  {
+    id: "6",
+    title: "Boosting Productivity with VS Code",
+    description: "Tips, tricks, and essential extensions to make Visual Studio Code your power tool.",
+    author: "Eva",
+    timestamp: "3 days ago",
+    tags: ["Productivity", "VS Code"],
+    imageUrl: "https://picsum.photos/600/400?random=6",
+    reactionCount: 27,
+    commentCount: 6,
+  },
+]
 
-  const {
-    draft,
-    setDraftField,
-    hasChanges,
-    autoSaveStatus,
-    showResumeModal,
-    handleResumeDraft,
-    handleDiscardLocalDraft,
-    handleDiscardFromEditor,
-    clearDraft,
-  } = useDraftManager({
-    userId: auth.user?.profile?.sub,
-    contentType: "express",
-  });
-
-  const { create, loading: creatingPost, error: createPostError } = useCreatePost();
-
-  async function handlePublish() {
-    if (!draft.title || !draft.content) {
-      alert("Title and content are required!");
-      return;
-    }
-    const postPayload: PostDTO = {
-      title: draft.title,
-      content: draft.content,
-      tags: draft.tags,
-      published: true,
-      authorId: auth.user?.profile?.sub ?? "",
-      bannerImageFileId: draft.coverImageKey,
-    };
-    try {
-      const token = auth.user?.access_token;
-      const newPost = await create(postPayload, token);
-      if (newPost) {
-        alert("Post published successfully!");
-        clearDraft();
-        router.push(`/posts/${newPost.id}`);
-      }
-    } catch (err) {
-      console.error("Create post error:", err);
-    }
-  }
-
-  function handlePreview() {
-    localStorage.setItem(
-      `zblog_express_draft_v2_${auth.user?.profile?.sub ?? "guest"}`,
-      JSON.stringify(draft)
-    );
-    router.push("/preview");
-  }  
-
-  function setTitle(title: string) {
-    setDraftField("title", title);
-  }
-  function setTags(tags: string[]) {
-    setDraftField("tags", tags);
-  }
-  function setCoverImageUrl(url: string) {
-    setDraftField("coverImageUrl", url);
-  }
-  function setCoverImageKey(key: string) {
-    setDraftField("coverImageKey", key);
-  }
-  function setContent(content: string) {
-    setDraftField("content", content);
+export default function RecentPostsPage() {
+  const handleLoadMore = () => {
+    console.log("Load more posts")
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 relative">
-      {showResumeModal && (
-        <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6 w-80 shadow-xl">
-            <h2 className="text-lg font-semibold text-white mb-4">
-              Resume previous draft?
-            </h2>
-            <p className="text-slate-300 text-sm mb-6">
-              We found a local draft from a previous session. Continue editing or discard?
-            </p>
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={handleDiscardLocalDraft}
-                className="px-3 py-1 rounded bg-red-600 hover:bg-red-500 text-white text-sm"
-              >
-                Discard
-              </button>
-              <button
-                onClick={handleResumeDraft}
-                className="px-4 py-1 rounded bg-teal-600 hover:bg-teal-500 text-white text-sm"
-              >
-                Continue
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <TopUtilityBar
-        autoSaveStatus={autoSaveStatus}
-        onPreview={handlePreview}
-        onPublish={handlePublish}
-      />
-
-      {createPostError && (
-        <div className="p-2 bg-red-800 text-red-100 text-sm">
-          Error creating post: {createPostError}
-        </div>
-      )}
-      {creatingPost && (
-        <div className="p-2 text-teal-400 text-sm">
-          Publishing post, please wait...
-        </div>
-      )}
-
-      <PostMetadataSection
-        title={draft.title}
-        onTitleChange={setTitle}
-        tags={draft.tags}
-        onTagsChange={setTags}
-        coverImageUrl={draft.coverImageUrl}
-        onCoverImageUrlChange={setCoverImageUrl}
-        coverImageKey={draft.coverImageKey}
-        onCoverImageKeyChange={setCoverImageKey}
-      />
-
-      <div className="p-4">
-        <EditorComponent content={draft.content} onContentChange={setContent} />
-      </div>
-
-      <BottomToolbar
-        content={draft.content}
-        readingTime="2 min"
-        onDiscard={handleDiscardFromEditor}
-      />
-    </div>
-  );
-};
-
-export default CreatePostPage;
+    <RecentPosts posts={mockPosts} onLoadMore={handleLoadMore} hasMore={true} />
+  )
+}
 
 
 ----- /home/zakaria/zBlog/zblog-frontend/src/components/Fallback/Fallback.tsx -----
@@ -328,7 +257,7 @@ export default function HeroSection({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             style={{ originX: 0.5, originY: 0.5 }}
-            className="inline-block ml-6" // <-- SHIFT BUTTON RIGHT
+            className="inline-block ml-6"
           >
             <Link href="/register" className="inline-block">
               <button className="px-8 py-4 bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-slate-200 rounded-lg font-medium shadow-xl transition-all hover:shadow-slate-500/20">
@@ -868,12 +797,18 @@ export default function Navbar() {
     ) : (
       <div className="h-full flex items-center px-6 border-l border-r border-slate-800">
         <div className="flex items-center gap-4">
-          <button
-            onClick={() => auth.signinRedirect()}
-            className="text-sm text-slate-300 hover:text-white"
-          >
-            Login
-          </button>
+        <button
+  onClick={() => {
+    auth.signinRedirect().catch((err) => {
+      console.error("Cognito login redirect failed", err);
+      alert("Login failed. Check console for details.");
+    });
+  }}
+  className="text-sm text-slate-300 hover:text-white"
+>
+  Login
+</button>
+
           <div className="w-px h-4 bg-slate-800" />
           <Link
             href="/register"
@@ -905,13 +840,13 @@ export default function PersonalNote() {
       <div className="grid gap-6 text-lg leading-relaxed">
         <p className="text-slate-200">
           zBlog is my full‑stack learning project — built from scratch with no
-          generators, no shortcuts. I'm continuously evolving my skills from
+          generators or shortcuts. I’m continuously evolving my skills from
           GraphQL schemas to OAuth security, all while refining a creative and
           seamless developer experience.
         </p>
         <p className="text-slate-300">
-          Every new feature is a step toward mastering modern software
-          engineering, and zBlog is the living document of that journey.
+          Every new feature is a step toward mastering modern software engineering,
+          and zBlog is the living document of that journey.
         </p>
       </div>
     </section>
@@ -933,24 +868,24 @@ export default function ContactSection() {
       </h2>
       <div className="grid gap-6">
         <p className="text-lg text-slate-200">
-          I'm always open to collaboration, code reviews, or feedback.
+          I’m always open to collaboration, code reviews, or feedback.
         </p>
         <div className="flex flex-col sm:flex-row gap-4">
           <a
             href="https://github.com/zakariafarih"
             target="_blank"
             rel="noreferrer"
-            className="flex items-center gap-3 px-6 py-3 bg-slate-800/50 rounded-xl border border-slate-700 hover:border-blue-500/50 hover:bg-slate-800 transition-all group"
+            className="flex items-center gap-3 px-6 py-3 bg-slate-800/50 border border-slate-700 hover:border-blue-500/50 transition-transform transform hover:scale-105"
           >
-            <GithubIcon className="w-5 h-5 text-blue-400 group-hover:text-blue-300" />
-            <span className="text-slate-200 group-hover:text-white">GitHub</span>
+            <GithubIcon className="w-5 h-5 text-blue-400" />
+            <span className="text-slate-200">GitHub</span>
           </a>
           <a
             href="mailto:zakariafarih142@gmail.com"
-            className="flex items-center gap-3 px-6 py-3 bg-slate-800/50 rounded-xl border border-slate-700 hover:border-teal-500/50 hover:bg-slate-800 transition-all group"
+            className="flex items-center gap-3 px-6 py-3 bg-slate-800/50 border border-slate-700 hover:border-teal-500/50 transition-transform transform hover:scale-105"
           >
-            <Mail className="w-5 h-5 text-teal-400 group-hover:text-teal-300" />
-            <span className="text-slate-200 group-hover:text-white">Email</span>
+            <Mail className="w-5 h-5 text-teal-400" />
+            <span className="text-slate-200">Email</span>
           </a>
         </div>
       </div>
@@ -968,19 +903,19 @@ export default function TechStackOverview() {
   return (
     <section className="grid gap-8">
       <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-teal-500">
-        Tech Stack & Architecture
+        Tech Stack &amp; Architecture
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Backend */}
-        <div className="bg-slate-800/50 p-6 rounded-2xl shadow-lg border border-slate-700 hover:border-blue-500/50 transition-colors">
+        <div className="bg-slate-800/50 p-6 shadow-[0_0_8px_#0ff6] border border-slate-700 hover:border-blue-500/50 transition-transform transform hover:scale-105">
           <h3 className="text-xl font-semibold mb-4 text-blue-400">Backend</h3>
           <ul className="space-y-3 text-slate-300">
             {[
               "Spring Boot 3+ microservices",
               "AWS Cognito + OIDC authentication",
               "MySQL on AWS RDS",
-              "HTTP/Kafka/event-driven comms",
-              "Dockerized, AWS deployment-ready",
+              "HTTP/Kafka/event‑driven comms",
+              "Dockerized, AWS deployment‑ready",
             ].map((item) => (
               <li key={item} className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
@@ -990,12 +925,12 @@ export default function TechStackOverview() {
           </ul>
         </div>
         {/* Frontend */}
-        <div className="bg-slate-800/50 p-6 rounded-2xl shadow-lg border border-slate-700 hover:border-teal-500/50 transition-colors">
+        <div className="bg-slate-800/50 p-6 shadow-[0_0_8px_#0ff6] border border-slate-700 hover:border-teal-500/50 transition-transform transform hover:scale-105">
           <h3 className="text-xl font-semibold mb-4 text-teal-400">Frontend</h3>
           <ul className="space-y-3 text-slate-300">
             {[
               "Next.js (App Router)",
-              "Shadcn/ui & Tailwind CSS",
+              "Shadcn/ui &amp; Tailwind CSS",
               "Framer Motion for animations",
               "Rich TinyMCE editor (dark mode)",
               "Modular, component‑based architecture",
@@ -1008,14 +943,14 @@ export default function TechStackOverview() {
           </ul>
         </div>
         {/* DevOps */}
-        <div className="bg-slate-800/50 p-6 rounded-2xl shadow-lg border border-slate-700 hover:border-purple-500/50 transition-colors">
+        <div className="bg-slate-800/50 p-6 shadow-[0_0_8px_#0ff6] border border-slate-700 hover:border-purple-500/50 transition-transform transform hover:scale-105">
           <h3 className="text-xl font-semibold mb-4 text-purple-400">DevOps</h3>
           <ul className="space-y-3 text-slate-300">
             {[
               "Dockerized services",
               "AWS ECS, API Gateway",
               "CI/CD pipelines",
-              "Monitoring & logging",
+              "Monitoring &amp; logging",
               "AWS Secrets Manager",
             ].map((item) => (
               <li key={item} className="flex items-center gap-2">
@@ -1041,21 +976,22 @@ export default function AboutHeader() {
   return (
     <section className="grid gap-8">
       <motion.h1
-        className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-500 to-teal-500 text-transparent bg-clip-text"
+        className="text-5xl md:text-6xl font-extrabold bg-gradient-to-r from-blue-500 to-teal-500 text-transparent bg-clip-text tracking-wide"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
       >
         About zBlog
       </motion.h1>
       <div className="grid gap-6">
         <p className="text-xl text-slate-200 leading-relaxed">
-          zBlog is a sleek, developer-centric blogging platform built with modern
-          microservice architecture and cutting-edge UI design. It's a technical
-          playground for creative developers.
+          zBlog is a sleek, developer‑centric blogging platform built with a
+          futuristic microservice architecture and cutting‑edge UI design. It’s
+          a technical playground for creative developers.
         </p>
         <blockquote className="border-l-4 border-blue-500 pl-6 py-1">
           <p className="text-lg text-slate-300 italic">
-            "zBlog is more than a portfolio piece — it's my technical playground to
+            "zBlog is more than a portfolio piece — it’s my technical playground to
             push the limits of what I can create while sharing the journey with the
             community."
           </p>
@@ -1083,15 +1019,17 @@ export default function UpcomingFeatures() {
   return (
     <section className="grid gap-8">
       <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-teal-500">
-        What's Next
+        What’s Next
       </h2>
       <div className="grid gap-4">
         {features.map((feature, index) => (
           <div
             key={feature}
-            className="flex items-center gap-4 p-4 bg-slate-800/50 rounded-xl border border-slate-700"
+            className="flex items-center gap-4 p-4 bg-slate-800/50 shadow-[0_0_8px_#0ff6] border border-slate-700 hover:border-cyan-500/50 transition-transform transform hover:scale-105"
           >
-            <span className="text-blue-500 font-mono text-sm">0{index + 1}</span>
+            <span className="text-cyan-500 font-mono text-sm">
+              0{index + 1}
+            </span>
             <p className="text-slate-200">{feature}</p>
           </div>
         ))}
@@ -2002,7 +1940,7 @@ interface EditorComponentProps {
 }
 
 /**
- * A production-ready, dark-mode TinyMCE with:
+ * Dark-mode TinyMCE with:
  * - Autoresize (no internal scroll)
  * - Codesample plugin for code blocks
  * - Forced paragraphs so you can type after code
@@ -2288,7 +2226,7 @@ export default function CoverImageUploader({
                 alt="Cover"
                 fill
                 className="object-cover rounded-md"
-                unoptimized // Important for dynamic S3 URLs
+                unoptimized 
               />
             </div>
           ) : (
@@ -2627,6 +2565,7 @@ export default function PostHeader({
           width={1200}
           height={400}
           className="w-full h-full object-cover object-center"
+          unoptimized
         />
       </div>
 
@@ -2927,52 +2866,58 @@ import { motion } from "framer-motion"
 export default function HeaderRecentPosts() {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="mb-6 flex flex-col md:flex-row md:items-end md:justify-between gap-4"
+      className="mb-4 border border-slate-700 bg-slate-900 px-4 py-2 md:px-6 md:py-2.5 shadow-inner neon-glow-box"
     >
-      {/* Icon + Title */}
-      <div className="flex items-center gap-4">
-        <motion.div
-          whileHover={{ scale: 1.2 }}
-          transition={{ type: "spring", stiffness: 300 }}
-          className="w-14 h-14 md:w-16 md:h-16"
-        >
-          <Lottie animationData={newspaperAnimation} loop autoplay />
-        </motion.div>
-        <h1 className="text-3xl md:text-4xl font-bold">Recent Posts</h1>
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+        {/* Icon + Title */}
+        <div className="flex items-center gap-3">
+          <motion.div
+            whileHover={{ scale: 1.1 }}
+            transition={{ type: "spring", stiffness: 300 }}
+            className="w-10 h-10 md:w-12 md:h-12"
+          >
+            <Lottie animationData={newspaperAnimation} loop autoplay />
+          </motion.div>
+          <h1 className="text-xl md:text-2xl font-bold uppercase tracking-wide text-cyan-300">
+            Recent Posts
+          </h1>
+        </div>
+
+        {/* Description */}
+        <p className="text-slate-400 text-xs md:text-sm md:text-right max-w-md leading-snug mt-1 md:mt-0">
+          Catch up on what the community is talking about!
+        </p>
       </div>
 
-      {/* Description */}
-      <p className="text-slate-400 text-sm md:text-base md:text-right max-w-xl">
-        Catch up on what the community is talking about!
-      </p>
+      <div className="absolute bottom-0 left-0 w-full h-px bg-slate-700" />
     </motion.div>
   )
 }
 
 
 ----- /home/zakaria/zBlog/zblog-frontend/src/components/posts/PostCard.tsx -----
-"use client"
+"use client";
 
-import React from "react"
-import { motion } from "framer-motion"
-import { ThumbsUp, MessageCircle } from "lucide-react"
-import Image from "next/image"
-import DOMPurify from "dompurify"
+import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { ThumbsUp, MessageCircle } from "lucide-react";
+import Image from "next/image";
+import DOMPurify from "dompurify";
 
 export interface PostCardProps {
-  id: string
-  title: string
-  description: string
-  author: string
-  timestamp: string
-  tags?: string[]
-  imageUrl?: string
-  reactionCount?: number
-  commentCount?: number
-  onClick?: (postId: string) => void
+  id: string;
+  title: string;
+  description: string;
+  author: string;
+  timestamp: string;
+  tags?: string[];
+  imageUrl?: string;
+  reactionCount?: number;
+  commentCount?: number;
+  onClick?: (postId: string) => void;
 }
 
 export default function PostCard({
@@ -2987,7 +2932,14 @@ export default function PostCard({
   commentCount = 0,
   onClick,
 }: PostCardProps) {
-  const safeDescription = DOMPurify.sanitize(description);
+  const [safeDescription, setSafeDescription] = useState("");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setSafeDescription(DOMPurify.sanitize(description));
+    }
+  }, [description]);
+
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
@@ -2995,22 +2947,18 @@ export default function PostCard({
       onClick={() => onClick?.(id)}
       className="relative h-64 w-full rounded-xl overflow-hidden shadow-md bg-slate-800 cursor-pointer"
     >
-      {/* Background image (blurred) */}
       {imageUrl && (
         <Image
           src={imageUrl}
           alt={title}
           fill
           className="object-cover blur-sm opacity-60"
-          sizes="(max-width: 768px) 100vw,
-                 (max-width: 1200px) 50vw,
-                 33vw"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          unoptimized
         />
       )}
 
-      {/* Overlay content */}
       <div className="relative z-10 flex flex-col justify-end h-full p-4">
-        {/* Tag chips */}
         <div className="flex flex-wrap gap-2 mb-2">
           {tags.map((tag) => (
             <span
@@ -3022,13 +2970,14 @@ export default function PostCard({
           ))}
         </div>
 
-        {/* Title + Description */}
         <h3 className="text-white text-lg font-semibold line-clamp-1">{title}</h3>
         <p className="text-gray-300 text-sm line-clamp-2 mt-1">
-          <span dangerouslySetInnerHTML={{ __html: safeDescription }} />
+          {/* Only render if it's sanitized (i.e. on the client) */}
+          {safeDescription && (
+            <span dangerouslySetInnerHTML={{ __html: safeDescription }} />
+          )}
         </p>
 
-        {/* Footer row: author, time, reactions, comments */}
         <div className="flex justify-between items-center mt-3 text-xs text-gray-400 bg-slate-950 -mx-4 -mb-4 p-3 border-t border-slate-800">
           <span>
             By {author} · {timestamp}
@@ -3046,7 +2995,7 @@ export default function PostCard({
         </div>
       </div>
     </motion.div>
-  )
+  );
 }
 
 
@@ -3140,13 +3089,7 @@ import PostCard from "@/components/posts/PostCard";
 import AnimatedHeaderPost from "@/components/posts/AnimatedHeaderPost";
 import { useAuth } from "react-oidc-context";
 import { explorePosts, PostDTO } from "@/services/postService";
-import Fallback from "@/components/Fallback/Fallback";
-
-export interface FilterState {
-  keyword: string;
-  tag: string;
-  sort: "recent" | "popular" | "mostLiked";
-}
+import { FilterState } from "@/types/filters";
 
 const ExplorePostsFilter = dynamic(
   () => import("@/components/posts/ExplorePostsFilter.client"),
@@ -3163,36 +3106,25 @@ export default function ExplorePostsContent() {
     keyword: "",
     tag: initialTag,
     sort: "recent",
+    dateRange: "all",
   });
 
   const [posts, setPosts] = useState<PostDTO[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPosts = async () => {
-      setLoading(true);
-      try {
-        const token = auth.user?.access_token;
-        const page = 0;
-        const size = 30;
-        const tagList = filters.tag ? [filters.tag] : [];
-        const dataPage = await explorePosts(filters.keyword, tagList, filters.sort, page, size, token);
-        setPosts(dataPage.content || []);
-      } catch (err: any) {
-        setError(err.message || "Failed to load posts.");
-      } finally {
-        setLoading(false);
-      }
+      const token = auth.user?.access_token;
+      const page = 0;
+      const size = 30;
+      const tagList = filters.tag ? [filters.tag] : [];
+      const dataPage = await explorePosts(filters.keyword, tagList, filters.sort, page, size, token);
+      setPosts(dataPage.content || []);
     };
 
     if (auth.user) {
       fetchPosts();
     }
   }, [filters, auth.user]);
-
-  if (loading) return <Fallback message="Loading your awesome posts..." />;
-  if (error) return <Fallback message={`❌ ${error}`} />;
 
   return (
     <section className="max-w-7xl mx-auto px-4 md:px-8">
@@ -3230,10 +3162,10 @@ export default function ExplorePostsContent() {
 "use client";
 
 import React, { useState } from "react";
-import { FilterState } from "./ExplorePostsFilter";
 import Lottie from "lottie-react";
 import searchLottie from "@/assets/animations/searchLottie.json";
 import CyberpunkSelect from "@/components/ui/CyberpunkSelect";
+import { FilterState } from "@/types/filters";
 
 interface ExplorePostsFilterProps {
   filters: FilterState;
@@ -3299,69 +3231,6 @@ const ExplorePostsFilter: React.FC<ExplorePostsFilterProps> = ({ filters, setFil
 };
 
 export default ExplorePostsFilter;
-
-
------ /home/zakaria/zBlog/zblog-frontend/src/context/PostDraftContext.tsx -----
-"use client";
-
-import React, { createContext, useContext, useState, ReactNode } from "react";
-
-interface PostDraft {
-  title: string;
-  tags: string[];
-  coverImageUrl: string;  // ephemeral or public URL for immediate preview
-  coverImageKey: string;  // the S3 key stored for back-end (bannerImageKey)
-  content: string;
-}
-
-interface PostDraftContextValue {
-  draft: PostDraft;
-  setDraft: React.Dispatch<React.SetStateAction<PostDraft>>;
-  resetDraft: () => void;
-}
-
-const defaultDraft: PostDraft = {
-  title: "",
-  tags: [],
-  coverImageUrl: "",
-  coverImageKey: "",
-  content: "",
-};
-
-const PostDraftContext = createContext<PostDraftContextValue | undefined>(undefined);
-
-export function PostDraftProvider({ children }: { children: ReactNode }) {
-  const [draft, setDraft] = useState<PostDraft>(defaultDraft);
-
-  function resetDraft() {
-    setDraft(defaultDraft);
-  }
-
-  return (
-    <PostDraftContext.Provider value={{ draft, setDraft, resetDraft }}>
-      {children}
-    </PostDraftContext.Provider>
-  );
-}
-
-export function usePostDraft() {
-  const context = useContext(PostDraftContext);
-  if (!context) {
-    throw new Error("usePostDraft must be used within a PostDraftProvider");
-  }
-  return context;
-}
-
-
------ /home/zakaria/zBlog/zblog-frontend/src/providers/CognitoProvider.tsx -----
-"use client"
-
-import { AuthProvider } from "react-oidc-context";
-import { cognitoConfig } from "@/lib/cognitoConfig";
-
-export default function CognitoProvider({ children }: { children: React.ReactNode }) {
-  return <AuthProvider {...cognitoConfig}>{children}</AuthProvider>;
-}
 
 
 ----- /home/zakaria/zBlog/zblog-frontend/src/services/userService.ts -----
@@ -4224,6 +4093,17 @@ function handleAxiosError(error: unknown): never {
 }
 
 
+----- /home/zakaria/zBlog/zblog-frontend/src/providers/CognitoProvider.tsx -----
+"use client"
+
+import { AuthProvider } from "react-oidc-context";
+import { cognitoConfig } from "@/lib/cognitoConfig";
+
+export default function CognitoProvider({ children }: { children: React.ReactNode }) {
+  return <AuthProvider {...cognitoConfig}>{children}</AuthProvider>;
+}
+
+
 ----- /home/zakaria/zBlog/zblog-frontend/src/hooks/comment/useCreateComment.ts -----
 import { useState } from 'react';
 import {
@@ -4639,2561 +4519,55 @@ export function useDraftManager({
 }
 
 
------ /home/zakaria/zBlog/zblog-frontend/src/app/posts/page.tsx -----
+----- /home/zakaria/zBlog/zblog-frontend/src/context/PostDraftContext.tsx -----
 "use client";
 
-import React from "react";
-import ExplorePostsContent from "@/components/posts/ExplorePostsContent";
+import React, { createContext, useContext, useState, ReactNode } from "react";
 
-export default function ExplorePostsPage() {
+interface PostDraft {
+  title: string;
+  tags: string[];
+  coverImageUrl: string;  // ephemeral or public URL for immediate preview
+  coverImageKey: string;  // the S3 key stored for back-end (bannerImageKey)
+  content: string;
+}
+
+interface PostDraftContextValue {
+  draft: PostDraft;
+  setDraft: React.Dispatch<React.SetStateAction<PostDraft>>;
+  resetDraft: () => void;
+}
+
+const defaultDraft: PostDraft = {
+  title: "",
+  tags: [],
+  coverImageUrl: "",
+  coverImageKey: "",
+  content: "",
+};
+
+const PostDraftContext = createContext<PostDraftContextValue | undefined>(undefined);
+
+export function PostDraftProvider({ children }: { children: ReactNode }) {
+  const [draft, setDraft] = useState<PostDraft>(defaultDraft);
+
+  function resetDraft() {
+    setDraft(defaultDraft);
+  }
+
   return (
-    <main className="bg-slate-900 text-white min-h-screen pt-4 pb-16 overflow-hidden">
-      <ExplorePostsContent />
-    </main>
+    <PostDraftContext.Provider value={{ draft, setDraft, resetDraft }}>
+      {children}
+    </PostDraftContext.Provider>
   );
 }
 
-
------ /home/zakaria/zBlog/zblog-frontend/src/app/posts/mockPosts.ts -----
-import type { PostCardProps } from "@/components/posts/PostCard";
-
-export const mockPosts: PostCardProps[] = [
-  {
-    id: "1",
-    title: "Mastering TypeScript",
-    description: "Discover the power of static typing in JavaScript and how it can improve your productivity.",
-    author: "Zakaria",
-    timestamp: "2 hours ago",
-    tags: ["Coding", "TypeScript"],
-    imageUrl: "https://picsum.photos/600/400?random=1",
-    reactionCount: 24,
-    commentCount: 5,
-  },
-  {
-    id: "2",
-    title: "Exploring Microservices Architecture",
-    description: "Learn how a microservices architecture can help you build scalable applications.",
-    author: "Alice",
-    timestamp: "3 hours ago",
-    tags: ["Microservices", "Architecture"],
-    imageUrl: "https://picsum.photos/600/400?random=2",
-    reactionCount: 35,
-    commentCount: 12,
-  },
-  {
-    id: "3",
-    title: "UI/UX Best Practices",
-    description: "Designing interfaces that are not only visually appealing but also provide great user experience.",
-    author: "Bob",
-    timestamp: "5 hours ago",
-    tags: ["Design", "UI/UX"],
-    imageUrl: "https://picsum.photos/600/400?random=3",
-    reactionCount: 10,
-    commentCount: 8,
-  },
-  {
-    id: "4",
-    title: "Understanding Cloud-Native Development",
-    description: "An in-depth look into building applications using cloud-native technologies and microservices.",
-    author: "Clara",
-    timestamp: "1 day ago",
-    tags: ["Cloud", "Microservices"],
-    imageUrl: "https://picsum.photos/600/400?random=4",
-    reactionCount: 18,
-    commentCount: 3,
-  },
-  {
-    id: "5",
-    title: "The Future of AI in Software Development",
-    description: "How artificial intelligence is reshaping coding, testing, and deployment workflows.",
-    author: "Derek",
-    timestamp: "2 days ago",
-    tags: ["AI", "Software Development"],
-    imageUrl: "https://picsum.photos/600/400?random=5",
-    reactionCount: 44,
-    commentCount: 16,
-  },
-  {
-    id: "6",
-    title: "Boosting Productivity with VS Code",
-    description: "Tips, tricks, and essential extensions to make Visual Studio Code your power tool.",
-    author: "Eva",
-    timestamp: "3 days ago",
-    tags: ["Productivity", "VS Code"],
-    imageUrl: "https://picsum.photos/600/400?random=6",
-    reactionCount: 27,
-    commentCount: 6,
-  },
-  {
-    id: "7",
-    title: "Learning Python: A Beginner's Guide",
-    description: "Get started with Python programming with practical examples and exercises.",
-    author: "Frank",
-    timestamp: "4 days ago",
-    tags: ["Coding", "Python"],
-    imageUrl: "https://picsum.photos/600/400?random=7",
-    reactionCount: 30,
-    commentCount: 10,
-  },
-  {
-    id: "8",
-    title: "Exploring the World of Data Science",
-    description: "Data science and analytics explained with real-world projects and examples.",
-    author: "Grace",
-    timestamp: "5 days ago",
-    tags: ["Data Science", "Analytics"],
-    imageUrl: "https://picsum.photos/600/400?random=8",
-    reactionCount: 22,
-    commentCount: 7,
-  },
-];
-
-
------ /home/zakaria/zBlog/zblog-frontend/src/app/posts/[id]/page.tsx -----
-"use client";
-
-import React, { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
-import { useAuth } from "react-oidc-context";
-import DOMPurify from "dompurify";
-import { getPost, PostDTO } from "@/services/postService";
-import PostDetail from "@/components/posts/PostDetail/PostDetail";
-import Fallback from "@/components/Fallback/Fallback";
-import ErrorBoundary from "@/components/Fallback/ErrorBoundary";
-
-export default function SinglePostPage() {
-  const params = useParams();
-  const auth = useAuth();
-  const postId =
-    typeof params?.id === "string"
-      ? params.id
-      : Array.isArray(params?.id)
-      ? params.id[0]
-      : "";
-
-  const [post, setPost] = useState<PostDTO | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!auth.isLoading && auth.user) {
-      const token = auth.user.access_token;
-      getPost(postId, token)
-        .then((data) => {
-          setPost(data);
-          setLoading(false);
-        })
-        .catch((err) => {
-          setError(err.message || "Error loading post");
-          setLoading(false);
-        });
-    }
-  }, [postId, auth]);
-
-  if (auth.isLoading || loading) {
-    return <Fallback message="Loading post..." />;
+export function usePostDraft() {
+  const context = useContext(PostDraftContext);
+  if (!context) {
+    throw new Error("usePostDraft must be used within a PostDraftProvider");
   }
-
-  if (error) {
-    return <Fallback message={`Error: ${error}`} />;
-  }
-
-  if (!post) {
-    return <Fallback message="No post found." />;
-  }
-
-  // Sanitize HTML content
-  const safeContent = DOMPurify.sanitize(post.content);
-
-  return (
-    <ErrorBoundary fallback={<Fallback message="Something went wrong while rendering the post." />}>
-      <PostDetail
-        post={{
-          title: post.title,
-          coverImageUrl: post.bannerImageUrl || "/default-cover.jpg",
-          content: safeContent,
-          tags: post.tags || [],
-          publishedAt: post.createdAt ? new Date(post.createdAt) : new Date(),
-          author: {
-            name: post.authorId ? `User ${post.authorId.substring(0, 6)}` : "Unknown Author",
-            avatarUrl: "/avatars/default.png",
-          },
-        }}
-      />
-    </ErrorBoundary>
-  );
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/s3-core/src/main/java/com/zblog/s3core/config/S3SecurityConfig.java -----
-package com.zblog.s3core.config;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpMethod;
-import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.List;
-
-@Configuration
-@EnableWebSecurity
-public class S3SecurityConfig {
-
-    @Value("${aws.cognito.issuer-uri}")
-    private String issuerUri;
-
-    /**
-     * Allow all origins/methods/headers (temporary dev setup).
-     */
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-
-        config.setAllowedOrigins(List.of("*"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(false); // cannot be true when using wildcard origin
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return source;
-    }
-
-    /**
-     * Secures /internal/files/** with JWT.
-     */
-    @Bean
-    @Order(1)
-    public SecurityFilterChain internalFilesSecurityChain(HttpSecurity http) throws Exception {
-        http
-                .securityMatcher("/internal/files/**")
-                .cors(Customizer.withDefaults())
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
-        return http.build();
-    }
-
-    /**
-     * Default open policy for all public endpoints (including /s3/files).
-     */
-    @Bean
-    @Order(2)
-    public SecurityFilterChain defaultSecurityChain(HttpSecurity http) throws Exception {
-        http
-                .cors(Customizer.withDefaults())
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/s3/health").permitAll()
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .anyRequest().permitAll()
-                )
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
-        return http.build();
-    }
-
-    @Bean
-    public JwtDecoder jwtDecoder() {
-        return NimbusJwtDecoder.withJwkSetUri(issuerUri + "/.well-known/jwks.json").build();
-    }
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/s3-core/src/main/java/com/zblog/s3core/config/S3Config.java -----
-package com.zblog.s3core.config;
-
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.presigner.S3Presigner;
-
-@Configuration
-public class S3Config {
-
-    private final S3Properties s3Properties;
-
-    public S3Config(S3Properties s3Properties) {
-        this.s3Properties = s3Properties;
-    }
-
-    @Bean
-    public S3Client s3Client() {
-        return S3Client.builder()
-                .region(Region.of(s3Properties.getRegion()))
-                .build();
-    }
-
-    @Bean
-    public S3Presigner s3Presigner() {
-        return S3Presigner.builder()
-                .region(Region.of(s3Properties.getRegion()))
-                .build();
-    }
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/s3-core/src/main/java/com/zblog/s3core/config/S3Properties.java -----
-package com.zblog.s3core.config;
-
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
-
-@Component
-@ConfigurationProperties(prefix = "aws.s3")
-public class S3Properties {
-
-    private String bucketName;
-    private String region;
-    private long uploadExpirySeconds;
-    private long maxFileSize;
-    private List<String> allowedMimeTypes;
-    private List<String> disallowedMimeTypes;
-
-    public String getBucketName() {
-        return bucketName;
-    }
-    public void setBucketName(String bucketName) {
-        this.bucketName = bucketName;
-    }
-
-    public String getRegion() {
-        return region;
-    }
-    public void setRegion(String region) {
-        this.region = region;
-    }
-
-    public long getUploadExpirySeconds() {
-        return uploadExpirySeconds;
-    }
-    public void setUploadExpirySeconds(long uploadExpirySeconds) {
-        this.uploadExpirySeconds = uploadExpirySeconds;
-    }
-
-    public long getMaxFileSize() {
-        return maxFileSize;
-    }
-    public void setMaxFileSize(long maxFileSize) {
-        this.maxFileSize = maxFileSize;
-    }
-
-    public List<String> getAllowedMimeTypes() {
-        return allowedMimeTypes;
-    }
-    public void setAllowedMimeTypes(List<String> allowedMimeTypes) {
-        this.allowedMimeTypes = allowedMimeTypes;
-    }
-
-    public List<String> getDisallowedMimeTypes() {
-        return disallowedMimeTypes;
-    }
-    public void setDisallowedMimeTypes(List<String> disallowedMimeTypes) {
-        this.disallowedMimeTypes = disallowedMimeTypes;
-    }
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/s3-core/src/main/java/com/zblog/s3core/controller/HealthCheckController.java -----
-package com.zblog.s3core.controller;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-@RestController
-@RequestMapping("/s3/health")
-public class HealthCheckController {
-
-    @GetMapping
-    public String health() {
-        return "OK";
-    }
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/s3-core/src/main/java/com/zblog/s3core/controller/FileController.java -----
-package com.zblog.s3core.controller;
-
-import com.zblog.s3core.dto.S3FileMetadata;
-import com.zblog.s3core.exception.S3ServiceException;
-import com.zblog.s3core.service.S3Service;
-import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.net.URL;
-import java.util.List;
-
-@RestController
-@RequestMapping("/s3/files")
-public class FileController {
-
-    private final S3Service s3Service;
-
-    public FileController(S3Service s3Service) {
-        this.s3Service = s3Service;
-    }
-
-    /**
-     * Upload a file to S3. Returns the file metadata (key, url, etc.).
-     */
-    @PostMapping
-    public ResponseEntity<S3FileMetadata> uploadFile(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam(value = "directory", defaultValue = "posts") String directory) throws S3ServiceException {
-
-        S3FileMetadata metadata = s3Service.uploadFile(file, directory);
-        return ResponseEntity.ok(metadata);
-    }
-
-    /**
-     * Get a presigned download URL or a direct public URL if isPublic=true.
-     */
-    @GetMapping(value = "/**", params = "!prefix")
-    public ResponseEntity<String> getFileUrl(
-            HttpServletRequest request,
-            @RequestParam(value = "public", defaultValue = "false") boolean isPublic) throws S3ServiceException {
-
-        String fullPath = request.getRequestURI().substring(
-                request.getRequestURI().indexOf("/internal/files/") + "/internal/files/".length()
-        );
-
-        URL url = s3Service.getFileUrl(fullPath, isPublic);
-        return ResponseEntity.ok(url.toString());
-    }
-
-    /**
-     * Generate a presigned upload URL for direct client PUT.
-     */
-    @GetMapping("/{fileKey}/presign-upload")
-    public ResponseEntity<String> getPresignedUploadUrl(
-            @PathVariable("fileKey") String fileKey) throws S3ServiceException {
-
-        URL url = s3Service.generatePresignedUploadUrl(fileKey);
-        return ResponseEntity.ok(url.toString());
-    }
-
-    /**
-     * Delete an existing file from S3.
-     */
-    @DeleteMapping("/**")
-    public ResponseEntity<String> deleteFile(HttpServletRequest request) throws S3ServiceException {
-        // Extract full path after "/internal/files/"
-        String fullPath = request.getRequestURI().substring(
-                request.getRequestURI().indexOf("/internal/files/") + "/internal/files/".length()
-        );
-
-        s3Service.deleteFile(fullPath);
-        return ResponseEntity.ok("File deleted successfully");
-    }
-
-    /**
-     * List files by prefix (e.g., "posts/").
-     * GET /internal/files?prefix=avatars/
-     */
-    @GetMapping
-    public ResponseEntity<List<S3FileMetadata>> listFiles(@RequestParam("prefix") String prefix) throws S3ServiceException {
-        List<S3FileMetadata> files = s3Service.listFiles(prefix);
-        return ResponseEntity.ok(files);
-    }
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/s3-core/src/main/java/com/zblog/s3core/dto/S3FileMetadata.java -----
-package com.zblog.s3core.dto;
-
-import java.net.URL;
-import java.time.Instant;
-
-public class S3FileMetadata {
-    private String key;
-    private long size;
-    private String mimeType;
-    private Instant uploadTimestamp;
-    private URL url;
-
-    public String getKey() {
-        return key;
-    }
-    public void setKey(String key) {
-        this.key = key;
-    }
-
-    public long getSize() {
-        return size;
-    }
-    public void setSize(long size) {
-        this.size = size;
-    }
-
-    public String getMimeType() {
-        return mimeType;
-    }
-    public void setMimeType(String mimeType) {
-        this.mimeType = mimeType;
-    }
-
-    public Instant getUploadTimestamp() {
-        return uploadTimestamp;
-    }
-    public void setUploadTimestamp(Instant uploadTimestamp) {
-        this.uploadTimestamp = uploadTimestamp;
-    }
-
-    public URL getUrl() {
-        return url;
-    }
-    public void setUrl(URL url) {
-        this.url = url;
-    }
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/s3-core/src/main/java/com/zblog/s3core/S3CoreApplication.java -----
-package com.zblog.s3core;
-
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-@SpringBootApplication
-public class S3CoreApplication {
-
-    public static void main(String[] args) {
-        SpringApplication.run(S3CoreApplication.class, args);
-    }
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/s3-core/src/main/java/com/zblog/s3core/service/impl/S3ServiceImpl.java -----
-package com.zblog.s3core.service.impl;
-
-import com.zblog.s3core.config.S3Properties;
-import com.zblog.s3core.dto.S3FileMetadata;
-import com.zblog.s3core.exception.S3ServiceException;
-import com.zblog.s3core.service.S3Service;
-import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
-import software.amazon.awssdk.core.sync.RequestBody;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.*;
-import software.amazon.awssdk.services.s3.presigner.S3Presigner;
-import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
-import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
-
-import java.io.IOException;
-import java.net.URL;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-@Service
-public class S3ServiceImpl implements S3Service {
-
-    private final S3Client s3Client;
-    private final S3Presigner s3Presigner;
-    private final S3Properties s3Properties;
-
-    public S3ServiceImpl(S3Client s3Client, S3Presigner s3Presigner, S3Properties s3Properties) {
-        this.s3Client = s3Client;
-        this.s3Presigner = s3Presigner;
-        this.s3Properties = s3Properties;
-    }
-
-    @Override
-    public S3FileMetadata uploadFile(MultipartFile file, String directoryPrefix) throws S3ServiceException {
-        if (file.isEmpty()) {
-            throw new S3ServiceException("File is empty");
-        }
-        if (file.getSize() > s3Properties.getMaxFileSize()) {
-            throw new S3ServiceException("File exceeds maximum allowed size");
-        }
-
-        // MIME type checks
-        String mimeType = file.getContentType();
-        if (s3Properties.getAllowedMimeTypes() != null && !s3Properties.getAllowedMimeTypes().isEmpty() &&
-                !s3Properties.getAllowedMimeTypes().contains(mimeType)) {
-            throw new S3ServiceException("MIME type not allowed: " + mimeType);
-        }
-        if (s3Properties.getDisallowedMimeTypes() != null &&
-                s3Properties.getDisallowedMimeTypes().contains(mimeType)) {
-            throw new S3ServiceException("MIME type is disallowed: " + mimeType);
-        }
-
-        // Generate a unique key
-        String originalFilename = StringUtils.cleanPath(file.getOriginalFilename());
-        String uniqueKey = generateUniqueKey(directoryPrefix, originalFilename);
-
-        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                .bucket(s3Properties.getBucketName())
-                .key(uniqueKey)
-                .contentType(mimeType)
-                .build();
-
-        try {
-            s3Client.putObject(
-                    putObjectRequest,
-                    RequestBody.fromInputStream(file.getInputStream(), file.getSize())
-            );
-        } catch (IOException e) {
-            throw new S3ServiceException("Failed to read file input stream", e);
-        } catch (S3Exception e) {
-            throw new S3ServiceException("Error uploading file to S3: " + e.awsErrorDetails().errorMessage(), e);
-        }
-
-        // Retrieve a presigned or direct URL
-        URL fileUrl = getFileUrl(uniqueKey, false);
-
-        // Build response
-        S3FileMetadata metadata = new S3FileMetadata();
-        metadata.setKey(uniqueKey);
-        metadata.setSize(file.getSize());
-        metadata.setMimeType(mimeType);
-        metadata.setUploadTimestamp(Instant.now());
-        metadata.setUrl(fileUrl);
-
-        return metadata;
-    }
-
-    @Override
-    public URL getFileUrl(String key, boolean isPublic) throws S3ServiceException {
-        if (isPublic) {
-            // Direct S3 URL
-            String urlString = String.format(
-                    "https://%s.s3.%s.amazonaws.com/%s",
-                    s3Properties.getBucketName(),
-                    s3Properties.getRegion(),
-                    key
-            );
-            return buildUrl(urlString);
-        } else {
-            // Generate a presigned URL with a time-limited expiry
-            GetObjectRequest getObjectRequest = GetObjectRequest.builder()
-                    .bucket(s3Properties.getBucketName())
-                    .key(key)
-                    .build();
-
-            GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
-                    .signatureDuration(Duration.ofSeconds(s3Properties.getUploadExpirySeconds()))
-                    .getObjectRequest(getObjectRequest)
-                    .build();
-
-            return s3Presigner.presignGetObject(presignRequest).url();
-        }
-    }
-
-    @Override
-    public URL generatePresignedUploadUrl(String key) throws S3ServiceException {
-        try {
-            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                    .bucket(s3Properties.getBucketName())
-                    .key(key)
-                    .build();
-
-            PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
-                    .signatureDuration(Duration.ofSeconds(s3Properties.getUploadExpirySeconds()))
-                    .putObjectRequest(putObjectRequest)
-                    .build();
-
-            return s3Presigner.presignPutObject(presignRequest).url();
-        } catch (S3Exception e) {
-            throw new S3ServiceException("Error generating presigned upload URL: " + e.awsErrorDetails().errorMessage(), e);
-        }
-    }
-
-    @Override
-    public void deleteFile(String key) throws S3ServiceException {
-        try {
-            DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
-                    .bucket(s3Properties.getBucketName())
-                    .key(key)
-                    .build();
-            s3Client.deleteObject(deleteObjectRequest);
-        } catch (S3Exception e) {
-            throw new S3ServiceException("Error deleting file from S3: " + e.awsErrorDetails().errorMessage(), e);
-        }
-    }
-
-    @Override
-    public List<S3FileMetadata> listFiles(String prefix) throws S3ServiceException {
-        List<S3FileMetadata> files = new ArrayList<>();
-
-        try {
-            ListObjectsV2Request listReq = ListObjectsV2Request.builder()
-                    .bucket(s3Properties.getBucketName())
-                    .prefix(prefix)
-                    .build();
-
-            ListObjectsV2Response listRes = s3Client.listObjectsV2(listReq);
-
-            for (S3Object s3Object : listRes.contents()) {
-                // Retrieve additional metadata (HEAD) if needed
-                HeadObjectRequest headReq = HeadObjectRequest.builder()
-                        .bucket(s3Properties.getBucketName())
-                        .key(s3Object.key())
-                        .build();
-                HeadObjectResponse headRes = s3Client.headObject(headReq);
-
-                S3FileMetadata metadata = new S3FileMetadata();
-                metadata.setKey(s3Object.key());
-                metadata.setSize(s3Object.size());
-                metadata.setMimeType(headRes.contentType());
-                metadata.setUploadTimestamp(s3Object.lastModified());
-                metadata.setUrl(getFileUrl(s3Object.key(), false));
-
-                files.add(metadata);
-            }
-        } catch (S3Exception e) {
-            throw new S3ServiceException("Error listing files: " + e.awsErrorDetails().errorMessage(), e);
-        }
-
-        return files;
-    }
-
-    /**
-     * Generate a unique S3 object key in the specified directory.
-     */
-    private String generateUniqueKey(String directoryPrefix, String originalFilename) {
-        String sanitizedFilename = originalFilename.replaceAll("[^a-zA-Z0-9.\\-]", "_");
-        String uniqueId = UUID.randomUUID().toString();
-        if (!directoryPrefix.endsWith("/")) {
-            directoryPrefix += "/";
-        }
-        return directoryPrefix + uniqueId + "_" + sanitizedFilename;
-    }
-
-    private URL buildUrl(String urlString) throws S3ServiceException {
-        try {
-            return new URL(urlString);
-        } catch (Exception e) {
-            throw new S3ServiceException("Malformed URL: " + urlString, e);
-        }
-    }
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/s3-core/src/main/java/com/zblog/s3core/service/S3Service.java -----
-package com.zblog.s3core.service;
-
-import com.zblog.s3core.dto.S3FileMetadata;
-import com.zblog.s3core.exception.S3ServiceException;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.net.URL;
-import java.util.List;
-
-public interface S3Service {
-    S3FileMetadata uploadFile(MultipartFile file, String directoryPrefix) throws S3ServiceException;
-    URL getFileUrl(String key, boolean isPublic) throws S3ServiceException;
-    URL generatePresignedUploadUrl(String key) throws S3ServiceException;
-    void deleteFile(String key) throws S3ServiceException;
-    List<S3FileMetadata> listFiles(String prefix) throws S3ServiceException;
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/s3-core/src/main/java/com/zblog/s3core/exception/S3ServiceException.java -----
-package com.zblog.s3core.exception;
-
-public class S3ServiceException extends Exception {
-    public S3ServiceException(String message) {
-        super(message);
-    }
-
-    public S3ServiceException(String message, Throwable cause) {
-        super(message, cause);
-    }
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/s3-core/src/main/java/com/zblog/s3core/exception/GlobalExceptionHandler.java -----
-package com.zblog.s3core.exception;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.time.Instant;
-
-@RestControllerAdvice
-public class GlobalExceptionHandler {
-
-    @ExceptionHandler(S3ServiceException.class)
-    public ResponseEntity<ErrorResponse> handleS3ServiceException(S3ServiceException ex) {
-        ErrorResponse response = new ErrorResponse(
-                "S3_ERROR",
-                ex.getMessage(),
-                Instant.now()
-        );
-        // You could differentiate 4xx vs. 5xx if needed
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-    }
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
-        ErrorResponse response = new ErrorResponse(
-                "GENERIC_ERROR",
-                ex.getMessage(),
-                Instant.now()
-        );
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-    }
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/s3-core/src/main/java/com/zblog/s3core/exception/ErrorResponse.java -----
-package com.zblog.s3core.exception;
-
-import java.time.Instant;
-
-public class ErrorResponse {
-    private String code;
-    private String message;
-    private Instant timestamp;
-
-    public ErrorResponse() {}
-
-    public ErrorResponse(String code, String message, Instant timestamp) {
-        this.code = code;
-        this.message = message;
-        this.timestamp = timestamp;
-    }
-
-    public String getCode() {
-        return code;
-    }
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public Instant getTimestamp() {
-        return timestamp;
-    }
-    public void setTimestamp(Instant timestamp) {
-        this.timestamp = timestamp;
-    }
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/config/SchedulerConfig.java -----
-package com.zblog.zblogpostcore.config;
-
-import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.EnableScheduling;
-
-@Configuration
-@EnableScheduling
-public class SchedulerConfig {
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/config/GraphQLConfig.java -----
-package com.zblog.zblogpostcore.config;
-
-import graphql.language.IntValue;
-import graphql.schema.*;
-import graphql.schema.idl.RuntimeWiring;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.graphql.execution.RuntimeWiringConfigurer;
-
-@Configuration
-public class GraphQLConfig implements RuntimeWiringConfigurer {
-
-    @Override
-    public void configure(RuntimeWiring.Builder builder) {
-        GraphQLScalarType longScalar = GraphQLScalarType.newScalar()
-                .name("Long")
-                .description("A custom scalar for 64-bit integers")
-                .coercing(new Coercing<Long, Long>() {
-                    @Override
-                    public Long serialize(Object dataFetcherResult) throws CoercingSerializeException {
-                        if (dataFetcherResult instanceof Long) {
-                            return (Long) dataFetcherResult;
-                        }
-                        throw new CoercingSerializeException("Unable to serialize non-Long");
-                    }
-
-                    @Override
-                    public Long parseValue(Object input) throws CoercingParseValueException {
-                        if (input instanceof Number) {
-                            return ((Number) input).longValue();
-                        }
-                        throw new CoercingParseValueException("Value is not a valid Long");
-                    }
-
-                    @Override
-                    public Long parseLiteral(Object input) throws CoercingParseLiteralException {
-                        if (input instanceof IntValue) {
-                            return ((IntValue) input).getValue().longValue();
-                        }
-                        throw new CoercingParseLiteralException("Value is not a valid Long literal");
-                    }
-                })
-                .build();
-
-        builder.scalar(longScalar);
-    }
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/config/WebConfig.java -----
-package com.zblog.zblogpostcore.config;
-
-import com.zblog.zblogpostcore.ratelimit.RateLimitInterceptor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-@Configuration
-public class WebConfig implements WebMvcConfigurer {
-
-    private final RateLimitInterceptor rateLimitInterceptor;
-
-    @Autowired
-    public WebConfig(RateLimitInterceptor rateLimitInterceptor) {
-        this.rateLimitInterceptor = rateLimitInterceptor;
-    }
-
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(rateLimitInterceptor);
-    }
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/config/WebSecurityConfig.java -----
-package com.zblog.zblogpostcore.config;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
-import org.springframework.http.HttpMethod;
-import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.List;
-
-@Configuration
-@EnableWebSecurity
-public class WebSecurityConfig {
-
-    @Value("${aws.cognito.issuer-uri}")
-    private String issuerUri;
-
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable())
-                .cors(Customizer.withDefaults())
-                .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/post/health").permitAll()
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // ✅ Allow preflight
-                        .requestMatchers("/post/api/public/**").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
-
-        return http.build();
-    }
-
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-
-        config.setAllowedOrigins(List.of("*")); // Use your frontend domain in prod!
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(false); // Cannot be true with wildcard origin
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return source;
-    }
-
-    @Bean
-    @Primary
-    public JwtDecoder jwtDecoder() {
-        return NimbusJwtDecoder.withJwkSetUri(issuerUri + "/.well-known/jwks.json").build();
-    }
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/repository/TagRepository.java -----
-package com.zblog.zblogpostcore.repository;
-
-import com.zblog.zblogpostcore.domain.entity.Tag;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-import java.util.Optional;
-import java.util.UUID;
-
-@Repository
-public interface TagRepository extends JpaRepository<Tag, UUID> {
-    Optional<Tag> findByNameIgnoreCase(String name);
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/repository/PostRepository.java -----
-package com.zblog.zblogpostcore.repository;
-
-import com.zblog.zblogpostcore.domain.entity.Post;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
-
-import java.time.Instant;
-import java.util.List;
-import java.util.UUID;
-
-public interface PostRepository extends JpaRepository<Post, UUID>, JpaSpecificationExecutor<Post> {
-
-    Page<Post> findByAuthorId(String authorId, Pageable pageable);
-
-    Page<Post> findByTitleContainingIgnoreCase(String keyword, Pageable pageable);
-
-    Page<Post> findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(
-            String titleKeyword, String contentKeyword, Pageable pageable);
-
-    Page<Post> findByPublishedTrue(Pageable pageable);
-    Page<Post> findByPublishedTrueAndAuthorId(String authorId, Pageable pageable);
-
-    @Query("SELECT p FROM Post p WHERE p.published = false AND p.scheduledPublishAt <= :now")
-    List<Post> findReadyToPublish(Instant now);
-
-    Page<Post> findAll(Specification<Post> spec, Pageable pageable);
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/scheduler/PostScheduler.java -----
-package com.zblog.zblogpostcore.scheduler;
-
-import com.zblog.zblogpostcore.domain.entity.Post;
-import com.zblog.zblogpostcore.repository.PostRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-
-import java.time.Instant;
-import java.util.List;
-
-@Component
-public class PostScheduler {
-
-    private final PostRepository postRepository;
-
-    @Autowired
-    public PostScheduler(PostRepository postRepository) {
-        this.postRepository = postRepository;
-    }
-
-    /**
-     * Runs every minute (60000 ms)
-     * to publish posts whose scheduledPublishAt <= now
-     * and isPublished == false.
-     */
-    @Scheduled(fixedRate = 60000)
-    public void publishScheduledPosts() {
-        Instant now = Instant.now();
-        List<Post> unpublished = postRepository.findReadyToPublish(now);
-
-        if (!unpublished.isEmpty()) {
-            for (Post post : unpublished) {
-                post.setPublished(true);
-            }
-            postRepository.saveAll(unpublished);
-        }
-    }
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/controller/HealthCheckController.java -----
-package com.zblog.zblogpostcore.controller;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-@RestController
-@RequestMapping("/post/health")
-public class HealthCheckController {
-
-    @GetMapping
-    public String health() {
-        return "OK";
-    }
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/controller/TagController.java -----
-package com.zblog.zblogpostcore.controller;
-
-import com.zblog.zblogpostcore.service.TagService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
-@RestController
-@RequestMapping("/post/api/tags")
-public class TagController {
-
-    private final TagService tagService;
-
-    @Autowired
-    public TagController(TagService tagService) {
-        this.tagService = tagService;
-    }
-
-    // GET /api/tags -> returns a list of tag names
-    @GetMapping
-    public List<String> getAllTags() {
-        return tagService.listAllTags().stream()
-                .map(tag -> tag.getName())
-                .collect(Collectors.toList());
-    }
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/controller/PostController.java -----
-package com.zblog.zblogpostcore.controller;
-
-import com.zblog.zblogpostcore.dto.PostDTO;
-import com.zblog.zblogpostcore.dto.PostDetailDTO;
-import com.zblog.zblogpostcore.service.PostService;
-import com.zblog.zblogpostcore.util.SecurityUtil;
-import jakarta.validation.constraints.Pattern;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-@RestController
-@RequestMapping("/post/api/posts")
-@Validated
-public class PostController {
-
-    private final PostService postService;
-
-    @Autowired
-    public PostController(PostService postService) {
-        this.postService = postService;
-    }
-
-    /**
-     * Explore posts with optional filtering by keywords and tags, sorting, and pagination.
-     *
-     * Query parameters:
-     * - tags: comma-separated list (optional)
-     * - keywords: full-text search (optional)
-     * - sort: "recent", "popular", or "mostLiked" (defaults to "recent")
-     * - page & size: pagination controls
-     */
-    @GetMapping("/explore")
-    public Page<PostDTO> explorePosts(
-            @RequestParam(required = false) String tags,
-            @RequestParam(required = false) String keywords,
-            @RequestParam(defaultValue = "recent")
-            @Pattern(regexp = "recent|popular|mostLiked", message = "Invalid sort value")
-            String sort,
-            Pageable pageable) {
-
-        String currentUserId = SecurityUtil.getCurrentUserIdOrNull();
-        List<String> tagList = (tags != null && !tags.isBlank())
-                ? List.of(tags.split(",")).stream().map(String::trim).filter(s -> !s.isEmpty()).collect(Collectors.toList())
-                : null;
-        return postService.explorePosts(keywords, tagList, sort, pageable, currentUserId);
-    }
-
-    // CREATE
-    @PostMapping
-    public PostDTO createPost(@RequestBody PostDTO postDTO) {
-        String currentUserId = SecurityUtil.getCurrentUserId();
-        return postService.createPost(postDTO, currentUserId);
-    }
-
-    // READ (single post)
-    @GetMapping("/{postId}")
-    public PostDetailDTO getPost(@PathVariable("postId") UUID postId) {
-        String currentUserId = SecurityUtil.getCurrentUserIdOrNull();
-        return postService.getFullPost(postId, currentUserId);
-    }
-
-    // UPDATE
-    @PutMapping("/{postId}")
-    public PostDTO updatePost(@PathVariable("postId") UUID postId, @RequestBody PostDTO postDTO) {
-        String currentUserId = SecurityUtil.getCurrentUserId();
-        return postService.updatePost(postId, postDTO, currentUserId);
-    }
-
-    // DELETE
-    @DeleteMapping("/{postId}")
-    public void deletePost(@PathVariable("postId") UUID postId) {
-        String currentUserId = SecurityUtil.getCurrentUserId();
-        postService.deletePost(postId, currentUserId);
-    }
-
-    // LIST/PAGINATION - gets all or only published
-    @GetMapping
-    public Page<PostDTO> getAllPosts(@RequestParam(value = "publishedOnly", defaultValue = "true") boolean publishedOnly,
-                                     Pageable pageable) {
-        return postService.getAllPosts(publishedOnly, pageable);
-    }
-
-    // SEARCH
-    @GetMapping("/search")
-    public Page<PostDTO> searchPosts(@RequestParam("keyword") String keyword,
-                                     @RequestParam(value = "publishedOnly", defaultValue = "true") boolean publishedOnly,
-                                     Pageable pageable) {
-        return postService.searchPosts(keyword, publishedOnly, pageable);
-    }
-
-    // LIST BY AUTHOR
-    @GetMapping("/by-author/{authorId}")
-    public Page<PostDTO> getPostsByAuthor(@PathVariable("authorId") String authorId,
-                                          @RequestParam(value = "publishedOnly", defaultValue = "true") boolean publishedOnly,
-                                          Pageable pageable) {
-        return postService.getPostsByAuthor(authorId, publishedOnly, pageable);
-    }
-
-    // INCREMENT VIEW COUNT
-    @PatchMapping("/{postId}/view")
-    public PostDTO incrementView(@PathVariable("postId") UUID postId) {
-        return postService.incrementViewCount(postId);
-    }
-
-    // REACT
-    @PatchMapping("/{postId}/react")
-    public PostDTO react(@PathVariable("postId") UUID postId,
-                         @RequestParam("type") String reactionType) {
-        String currentUserId = SecurityUtil.getCurrentUserId();
-        return postService.reactToPost(postId, reactionType, currentUserId);
-    }
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/dto/PostDTO.java -----
-package com.zblog.zblogpostcore.dto;
-
-import jakarta.validation.constraints.NotBlank;
-
-import java.time.Instant;
-import java.util.List;
-import java.util.UUID;
-
-public class PostDTO {
-
-    private UUID id;
-    private String authorId;
-
-    @NotBlank(message="Title cannot be blank")
-    private String title;
-
-    @NotBlank(message="Content cannot be blank")
-    private String content;
-
-    private boolean published;
-    private long viewCount;
-    private long likeCount;
-    private long heartCount;
-    private long bookmarkCount;
-
-    // Renamed from bannerImageFileId to bannerImageKey
-    private String bannerImageKey;
-
-    private String bannerImageUrl;   // ephemeral or fallback
-    private Instant createdAt;
-    private Instant updatedAt;
-    private Instant scheduledPublishAt;
-
-    private List<String> tags;
-
-    public UUID getId() {
-        return id;
-    }
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public String getAuthorId() {
-        return authorId;
-    }
-    public void setAuthorId(String authorId) {
-        this.authorId = authorId;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getContent() {
-        return content;
-    }
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public boolean isPublished() {
-        return published;
-    }
-    public void setPublished(boolean published) {
-        this.published = published;
-    }
-
-    public long getViewCount() {
-        return viewCount;
-    }
-    public void setViewCount(long viewCount) {
-        this.viewCount = viewCount;
-    }
-
-    public long getLikeCount() {
-        return likeCount;
-    }
-    public void setLikeCount(long likeCount) {
-        this.likeCount = likeCount;
-    }
-
-    public long getHeartCount() {
-        return heartCount;
-    }
-    public void setHeartCount(long heartCount) {
-        this.heartCount = heartCount;
-    }
-
-    public long getBookmarkCount() {
-        return bookmarkCount;
-    }
-    public void setBookmarkCount(long bookmarkCount) {
-        this.bookmarkCount = bookmarkCount;
-    }
-
-    public String getBannerImageKey() {
-        return bannerImageKey;
-    }
-    public void setBannerImageKey(String bannerImageKey) {
-        this.bannerImageKey = bannerImageKey;
-    }
-
-    public String getBannerImageUrl() {
-        return bannerImageUrl;
-    }
-    public void setBannerImageUrl(String bannerImageUrl) {
-        this.bannerImageUrl = bannerImageUrl;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Instant getUpdatedAt() {
-        return updatedAt;
-    }
-    public void setUpdatedAt(Instant updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public Instant getScheduledPublishAt() {
-        return scheduledPublishAt;
-    }
-    public void setScheduledPublishAt(Instant scheduledPublishAt) {
-        this.scheduledPublishAt = scheduledPublishAt;
-    }
-
-    public List<String> getTags() {
-        return tags;
-    }
-    public void setTags(List<String> tags) {
-        this.tags = tags;
-    }
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/dto/PostDetailDTO.java -----
-package com.zblog.zblogpostcore.dto;
-
-import jakarta.validation.constraints.NotBlank;
-import java.time.Instant;
-import java.util.List;
-import java.util.UUID;
-
-public class PostDetailDTO {
-
-    private UUID id;
-    private String authorId;
-
-    @NotBlank(message="Title cannot be blank")
-    private String title;
-
-    @NotBlank(message="Content cannot be blank")
-    private String content; // Full post content
-
-    private boolean published;
-    private long viewCount;
-    private long likeCount;
-    private long heartCount;
-    private long bookmarkCount;
-
-    private String bannerImageKey;
-    private String bannerImageUrl;   // Resolved URL for banner image
-
-    private Instant createdAt;
-    private Instant updatedAt;
-    private Instant scheduledPublishAt;
-
-    private List<String> tags;
-
-    public long getViewCount() {
-        return viewCount;
-    }
-
-    public void setViewCount(long viewCount) {
-        this.viewCount = viewCount;
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public String getAuthorId() {
-        return authorId;
-    }
-
-    public void setAuthorId(String authorId) {
-        this.authorId = authorId;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public boolean isPublished() {
-        return published;
-    }
-
-    public void setPublished(boolean published) {
-        this.published = published;
-    }
-
-    public long getLikeCount() {
-        return likeCount;
-    }
-
-    public void setLikeCount(long likeCount) {
-        this.likeCount = likeCount;
-    }
-
-    public long getHeartCount() {
-        return heartCount;
-    }
-
-    public void setHeartCount(long heartCount) {
-        this.heartCount = heartCount;
-    }
-
-    public long getBookmarkCount() {
-        return bookmarkCount;
-    }
-
-    public void setBookmarkCount(long bookmarkCount) {
-        this.bookmarkCount = bookmarkCount;
-    }
-
-    public String getBannerImageKey() {
-        return bannerImageKey;
-    }
-
-    public void setBannerImageKey(String bannerImageKey) {
-        this.bannerImageKey = bannerImageKey;
-    }
-
-    public String getBannerImageUrl() {
-        return bannerImageUrl;
-    }
-
-    public void setBannerImageUrl(String bannerImageUrl) {
-        this.bannerImageUrl = bannerImageUrl;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Instant getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(Instant updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public Instant getScheduledPublishAt() {
-        return scheduledPublishAt;
-    }
-
-    public void setScheduledPublishAt(Instant scheduledPublishAt) {
-        this.scheduledPublishAt = scheduledPublishAt;
-    }
-
-    public List<String> getTags() {
-        return tags;
-    }
-
-    public void setTags(List<String> tags) {
-        this.tags = tags;
-    }
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/ratelimit/RateLimitInterceptor.java -----
-package com.zblog.zblogpostcore.ratelimit;
-
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.HandlerInterceptor;
-
-import java.time.Instant;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-@Component
-public class RateLimitInterceptor implements HandlerInterceptor {
-
-    // userId + endpoint + postId -> last 5 timestamps
-    private final Map<String, CircularBuffer> callsMap = new ConcurrentHashMap<>();
-
-    // Limit: 5 calls in 1 minute
-    private static final int MAX_CALLS = 5;
-    private static final long INTERVAL_MS = 60_000;
-
-    @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
-            throws Exception {
-
-        // Only handle certain endpoints
-        String uri = request.getRequestURI();
-        if (isRateLimitedEndpoint(uri) && "PATCH".equalsIgnoreCase(request.getMethod())) {
-
-            String userId = request.getUserPrincipal() != null ? request.getUserPrincipal().getName() : "anonymous";
-            String postId = extractPostId(uri); // e.g. from /api/posts/{postId}/react or /view
-            if (postId == null) {
-                return true; // no rate limit if no postId
-            }
-
-            String key = userId + "_" + uri;
-
-            CircularBuffer timestamps = callsMap.computeIfAbsent(key, k -> new CircularBuffer(MAX_CALLS));
-
-            Instant now = Instant.now();
-            // Add timestamp, check oldest
-            if (!timestamps.allow(now.toEpochMilli(), INTERVAL_MS)) {
-                response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
-                response.getWriter().write("Rate limit exceeded. Try again later.");
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private boolean isRateLimitedEndpoint(String uri) {
-        return uri.matches(".*/api/posts/.*/react.*") || uri.matches(".*/api/posts/.*/view.*");
-    }
-
-    private String extractPostId(String uri) {
-        // naive approach: /api/posts/{postId}/react
-        String[] parts = uri.split("/");
-        if (parts.length >= 4) {
-            return parts[3]; // the part after /api/posts/
-        }
-        return null;
-    }
-
-    // Circular buffer storing timestamps in ms
-    static class CircularBuffer {
-        private final long[] times;
-        private int index;
-
-        public CircularBuffer(int size) {
-            this.times = new long[size];
-            this.index = 0;
-        }
-
-        public synchronized boolean allow(long now, long intervalMs) {
-            // Check oldest
-            long oldest = times[index];
-            if (now - oldest < intervalMs) {
-                // within interval => not allowed
-                return false;
-            }
-            times[index] = now;
-            index = (index + 1) % times.length;
-            return true;
-        }
-    }
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/util/SecurityUtil.java -----
-package com.zblog.zblogpostcore.util;
-
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-
-public class SecurityUtil {
-
-    public static String getCurrentUserId() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || auth.getName() == null) {
-            throw new SecurityException("No authenticated user");
-        }
-        // 'auth.getName()' is typically the 'sub' from the JWT
-        return auth.getName();
-    }
-
-    public static String getCurrentUserIdOrNull() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null) {
-            return null;
-        }
-        return auth.getName();
-    }
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/client/FileClient.java -----
-package com.zblog.zblogpostcore.client;
-
-import com.zblog.zblogpostcore.client.dto.FileMetadataDTO;
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import io.github.resilience4j.retry.annotation.Retry;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
-
-/**
- * A REST-based client to communicate with the s3-core microservice.
- * This ensures post-core does NOT rely on s3-core's Java code,
- * but only on a well-defined REST contract.
- */
-@Component
-public class FileClient {
-
-    private final RestTemplate restTemplate;
-    private final String s3CoreUrl;
-
-    public FileClient(@Value("${s3.core.url}") String s3CoreUrl,
-                      RestTemplateBuilder restTemplateBuilder) {
-        this.s3CoreUrl = s3CoreUrl;
-        this.restTemplate = restTemplateBuilder.build();
-    }
-
-    /**
-     * Retrieve metadata (including a presigned URL) for a given fileId.
-     * The s3-core endpoint is assumed:
-     *  GET /internal/files/{fileId}?public=false
-     * returning JSON with the final presigned or public URL.
-     */
-    @CircuitBreaker(name = "s3CoreCircuitBreaker", fallbackMethod = "getFileMetadataFallback")
-    @Retry(name = "s3CoreRetry")
-    public FileMetadataDTO getFileMetadata(String fileId, boolean isPublic) {
-        String url = String.format("%s/s3/files/%s?public=%s", s3CoreUrl, fileId, isPublic);
-        ResponseEntity<FileMetadataDTO> response = restTemplate.getForEntity(url, FileMetadataDTO.class);
-        return response.getBody();
-    }
-
-    /**
-     * Delete a file from s3-core.
-     * The s3-core endpoint is:
-     *  DELETE /internal/files/{fileId}
-     */
-    @CircuitBreaker(name = "s3CoreCircuitBreaker", fallbackMethod = "deleteFileFallback")
-    @Retry(name = "s3CoreRetry")
-    public void deleteFile(String fileId) {
-        String url = String.format("%s/internal/files/%s", s3CoreUrl, fileId);
-        restTemplate.exchange(url, HttpMethod.DELETE, null, Void.class);
-    }
-
-    // --- Fallbacks if s3-core is unreachable ---
-
-    private FileMetadataDTO getFileMetadataFallback(String fileId, boolean isPublic, Throwable t) {
-        // Return an empty or placeholder object
-        FileMetadataDTO fallback = new FileMetadataDTO();
-        fallback.setKey(fileId);
-        fallback.setUrl(null);
-        fallback.setMimeType(null);
-        fallback.setSize(0);
-        return fallback;
-    }
-
-    private void deleteFileFallback(String fileId, Throwable t) {
-        // Possibly log or do nothing. The file won't get deleted in s3.
-        // You could queue a retry or mark "orphan" file references.
-    }
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/client/dto/FileMetadataDTO.java -----
-package com.zblog.zblogpostcore.client.dto;
-
-import java.time.Instant;
-
-/**
- * Mirrors the file response from s3-core:
- * GET /internal/files/{fileId}
- */
-public class FileMetadataDTO {
-    private String key;
-    private long size;
-    private String mimeType;
-    private Instant uploadTimestamp;
-    private String url; // final presigned or public URL
-
-    public String getKey() { return key; }
-    public void setKey(String key) { this.key = key; }
-
-    public long getSize() { return size; }
-    public void setSize(long size) { this.size = size; }
-
-    public String getMimeType() { return mimeType; }
-    public void setMimeType(String mimeType) { this.mimeType = mimeType; }
-
-    public Instant getUploadTimestamp() { return uploadTimestamp; }
-    public void setUploadTimestamp(Instant uploadTimestamp) { this.uploadTimestamp = uploadTimestamp; }
-
-    public String getUrl() { return url; }
-    public void setUrl(String url) { this.url = url; }
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/service/TagService.java -----
-package com.zblog.zblogpostcore.service;
-
-import com.zblog.zblogpostcore.domain.entity.Tag;
-import com.zblog.zblogpostcore.repository.TagRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.UUID;
-
-@Service
-public class TagService {
-
-    private final TagRepository tagRepository;
-
-    @Autowired
-    public TagService(TagRepository tagRepository) {
-        this.tagRepository = tagRepository;
-    }
-
-    public List<Tag> listAllTags() {
-        return tagRepository.findAll();
-    }
-
-    public Tag getTagById(UUID id) {
-        return tagRepository.findById(id).orElse(null);
-    }
-
-    public Tag createOrUpdateTag(String name) {
-        return tagRepository.findByNameIgnoreCase(name)
-                .orElseGet(() -> {
-                    Tag newTag = new Tag();
-                    newTag.setName(name);
-                    return tagRepository.save(newTag);
-                });
-    }
-
-    public void deleteTag(UUID id) {
-        tagRepository.deleteById(id);
-    }
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/service/impl/PostServiceImpl.java -----
-package com.zblog.zblogpostcore.service.impl;
-
-import com.zblog.zblogpostcore.client.FileClient;
-import com.zblog.zblogpostcore.domain.entity.Post;
-import com.zblog.zblogpostcore.domain.entity.Tag;
-import com.zblog.zblogpostcore.dto.PostDTO;
-import com.zblog.zblogpostcore.dto.PostDetailDTO;
-import com.zblog.zblogpostcore.exception.PostNotFoundException;
-import com.zblog.zblogpostcore.repository.PostRepository;
-import com.zblog.zblogpostcore.repository.TagRepository;
-import com.zblog.zblogpostcore.service.PostService;
-import org.jsoup.Jsoup;
-import org.jsoup.safety.Safelist;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
-
-import java.util.*;
-import java.util.stream.Collectors;
-import jakarta.persistence.criteria.Predicate;
-
-@Service
-public class PostServiceImpl implements PostService {
-
-    private final PostRepository postRepository;
-    private final TagRepository tagRepository;
-    private final FileClient fileClient;
-
-    @Value("${aws.bucketName}")
-    private String bucketName;
-
-    @Value("${aws.region}")
-    private String awsRegion;
-
-    public PostServiceImpl(PostRepository postRepository,
-                           TagRepository tagRepository,
-                           FileClient fileClient) {
-        this.postRepository = postRepository;
-        this.tagRepository = tagRepository;
-        this.fileClient = fileClient;
-    }
-
-    @Override
-    public PostDTO createPost(PostDTO postDTO, String currentUserId) {
-        Post post = new Post();
-        post.setAuthorId(currentUserId);
-        post.setTitle(postDTO.getTitle());
-        post.setContent(postDTO.getContent());
-        post.setPublished(postDTO.isPublished());
-        post.setBannerImageKey(postDTO.getBannerImageKey()); // store the S3 key
-        post.setScheduledPublishAt(postDTO.getScheduledPublishAt());
-
-        // Initialize counters
-        post.setLikeCount(0);
-        post.setHeartCount(0);
-        post.setBookmarkCount(0);
-
-        if (postDTO.getTags() != null) {
-            post.setTags(resolveTags(postDTO.getTags()));
-        }
-        Post saved = postRepository.save(post);
-        return mapToDTO(saved, true);
-    }
-
-    @Override
-    public PostDTO updatePost(UUID postId, PostDTO postDTO, String currentUserId) {
-        Post existing = postRepository.findById(postId)
-                .orElseThrow(() -> new PostNotFoundException("Post not found"));
-
-        if (!existing.getAuthorId().equals(currentUserId)) {
-            throw new SecurityException("Not authorized to edit this post");
-        }
-
-        existing.setTitle(postDTO.getTitle());
-        existing.setContent(postDTO.getContent());
-        existing.setPublished(postDTO.isPublished());
-        existing.setBannerImageKey(postDTO.getBannerImageKey());
-        existing.setScheduledPublishAt(postDTO.getScheduledPublishAt());
-
-        // Update tags
-        existing.getTags().clear();
-        if (postDTO.getTags() != null) {
-            existing.getTags().addAll(resolveTags(postDTO.getTags()));
-        }
-
-        Post saved = postRepository.save(existing);
-        return mapToDTO(saved, true);
-    }
-
-    @Override
-    public void deletePost(UUID postId, String currentUserId) {
-        Post existing = postRepository.findById(postId)
-                .orElseThrow(() -> new PostNotFoundException("Post not found"));
-
-        if (!existing.getAuthorId().equals(currentUserId)) {
-            throw new SecurityException("Not authorized to delete this post");
-        }
-
-        // Optionally delete the S3 file
-        if (existing.getBannerImageKey() != null) {
-            try {
-                fileClient.deleteFile(existing.getBannerImageKey());
-            } catch (Exception e) {
-                // swallow or log
-            }
-        }
-        postRepository.delete(existing);
-    }
-
-    @Override
-    public PostDTO getPost(UUID postId, String currentUserId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new PostNotFoundException("Post not found"));
-
-        // If not published, only the owner can see it
-        if (!post.isPublished() && !post.getAuthorId().equals(currentUserId)) {
-            throw new SecurityException("This post is unpublished and you are not the owner");
-        }
-        return mapToDTO(post, true);
-    }
-
-    @Override
-    public Page<PostDTO> getAllPosts(boolean onlyPublished, Pageable pageable) {
-        if (onlyPublished) {
-            return postRepository.findByPublishedTrue(pageable)
-                    .map(entity -> mapToDTO(entity, false));
-        }
-        return postRepository.findAll(pageable)
-                .map(entity -> mapToDTO(entity, false));
-    }
-
-    @Override
-    public Page<PostDTO> searchPosts(String keyword, boolean onlyPublished, Pageable pageable) {
-        var page = postRepository.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(
-                keyword, keyword, pageable);
-
-        if (onlyPublished) {
-            var filtered = page.getContent().stream()
-                    .filter(Post::isPublished)
-                    .collect(Collectors.toList());
-            return new PageImpl<>(
-                    filtered.stream().map(p -> mapToDTO(p, false)).collect(Collectors.toList()),
-                    pageable,
-                    filtered.size()
-            );
-        }
-        return page.map(post -> mapToDTO(post, false));
-    }
-
-    @Override
-    public Page<PostDTO> getPostsByAuthor(String authorId, boolean onlyPublished, Pageable pageable) {
-        if (onlyPublished) {
-            return postRepository.findByPublishedTrueAndAuthorId(authorId, pageable)
-                    .map(entity -> mapToDTO(entity, false));
-        } else {
-            return postRepository.findByAuthorId(authorId, pageable)
-                    .map(entity -> mapToDTO(entity, false));
-        }
-    }
-
-    @Override
-    public PostDTO incrementViewCount(UUID postId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new PostNotFoundException("Post not found"));
-        post.setViewCount(post.getViewCount() + 1);
-        Post saved = postRepository.save(post);
-        return mapToDTO(saved, false);
-    }
-
-    @Override
-    public PostDTO reactToPost(UUID postId, String reactionType, String currentUserId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new PostNotFoundException("Post not found"));
-
-        switch (reactionType.toLowerCase()) {
-            case "like" -> post.setLikeCount(post.getLikeCount() + 1);
-            case "heart" -> post.setHeartCount(post.getHeartCount() + 1);
-            case "bookmark" -> post.setBookmarkCount(post.getBookmarkCount() + 1);
-            default -> throw new IllegalArgumentException("Unknown reaction type: " + reactionType);
-        }
-        Post saved = postRepository.save(post);
-        return mapToDTO(saved, false);
-    }
-
-    @Override
-    public void validatePostExists(UUID postId) {
-        if (!postRepository.existsById(postId)) {
-            throw new PostNotFoundException("Post not found for id: " + postId);
-        }
-    }
-
-    // ----------------- Helpers -----------------
-
-    /**
-     * Convert Post entity to PostDTO and resolve banner image URL if needed.
-     */
-    private PostDTO mapToDTO(Post post, boolean resolveBannerUrl) {
-        PostDTO dto = new PostDTO();
-        dto.setId(post.getId());
-        dto.setAuthorId(post.getAuthorId());
-        dto.setTitle(post.getTitle());
-        // Generate a sanitized excerpt from HTML content.
-        dto.setContent(generateExcerpt(post.getContent(), 150));
-        dto.setPublished(post.isPublished());
-        dto.setViewCount(post.getViewCount());
-        dto.setLikeCount(post.getLikeCount());
-        dto.setHeartCount(post.getHeartCount());
-        dto.setBookmarkCount(post.getBookmarkCount());
-        dto.setBannerImageKey(post.getBannerImageKey());
-        dto.setCreatedAt(post.getCreatedAt());
-        dto.setUpdatedAt(post.getUpdatedAt());
-        dto.setScheduledPublishAt(post.getScheduledPublishAt());
-        dto.setTags(post.getTags().stream().map(Tag::getName).collect(Collectors.toList()));
-
-        if (resolveBannerUrl && post.getBannerImageKey() != null) {
-            dto.setBannerImageUrl(constructS3Url(post.getBannerImageKey()));
-        }
-
-        return dto;
-    }
-
-    /**
-     * Construct a stable public S3 URL, assuming your bucket allows public read.
-     * Example: https://zblog-files.s3.eu-north-1.amazonaws.com/cover-images/abc.png
-     */
-    private String constructS3Url(String key) {
-        return String.format("https://%s.s3.%s.amazonaws.com/%s", bucketName, awsRegion, key);
-    }
-
-    /**
-     * Create or find Tag entities for the given list of tag names.
-     */
-    private Set<Tag> resolveTags(List<String> tagNames) {
-        return tagNames.stream()
-                .map(tagName -> tagRepository.findByNameIgnoreCase(tagName)
-                        .orElseGet(() -> {
-                            Tag newTag = new Tag();
-                            newTag.setName(tagName);
-                            return newTag;
-                        }))
-                .collect(Collectors.toSet());
-    }
-
-    @Override
-    public Page<PostDTO> explorePosts(String keywords, List<String> tags, String sort, Pageable pageable, String currentUserId) {
-        // Build a specification for filtering
-        Specification<Post> spec = (root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
-
-            // Only published posts or posts by the owner (if authenticated)
-            if (currentUserId == null) {
-                predicates.add(cb.isTrue(root.get("published")));
-            } else {
-                predicates.add(cb.or(
-                        cb.isTrue(root.get("published")),
-                        cb.equal(root.get("authorId"), currentUserId)
-                ));
-            }
-
-            if (keywords != null && !keywords.isBlank()) {
-                String kw = "%" + keywords.toLowerCase() + "%";
-                predicates.add(cb.or(
-                        cb.like(cb.lower(root.get("title")), kw),
-                        cb.like(cb.lower(root.get("content")), kw)
-                ));
-            }
-
-            if (tags != null && !tags.isEmpty()) {
-                // Join to tags collection and match any of the provided tags (case-insensitive)
-                predicates.add(root.join("tags").get("name").in(
-                        tags.stream().map(String::toLowerCase).collect(Collectors.toList())
-                ));
-            }
-
-            return cb.and(predicates.toArray(new Predicate[0]));
-        };
-
-        // Remove any sorting from the incoming Pageable to avoid conflicts
-        Pageable unsortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
-        Page<Post> postPage = postRepository.findAll(spec, unsortedPageable);
-
-        // Apply custom sorting in memory
-        List<Post> sortedPosts = new ArrayList<>(postPage.getContent());
-        switch (sort.toLowerCase()) {
-            case "popular":
-                sortedPosts.sort(Comparator.comparingLong(
-                        p -> -(p.getLikeCount() + p.getHeartCount())
-                ));
-                break;
-            case "mostliked":
-                sortedPosts.sort(Comparator.comparingLong(
-                        p -> -p.getLikeCount()
-                ));
-                break;
-            case "recent":
-            default:
-                sortedPosts.sort(Comparator.comparing(Post::getCreatedAt, Comparator.nullsLast(Comparator.reverseOrder())));
-                break;
-        }
-
-        // Map posts to DTOs (including generating a safe excerpt)
-        List<PostDTO> dtos = sortedPosts.stream()
-                .map(post -> mapToDTO(post, true))
-                .collect(Collectors.toList());
-
-        // Return a new PageImpl preserving the original pagination metadata.
-        return new PageImpl<>(dtos, pageable, postPage.getTotalElements());
-    }
-
-    /**
-     * Generates a safe excerpt from HTML content using Jsoup.
-     */
-    private String generateExcerpt(String htmlContent, int maxLength) {
-        String text = Jsoup.clean(htmlContent, Safelist.none());
-        if (text.length() > maxLength) {
-            return text.substring(0, maxLength).trim() + "...";
-        }
-        return text;
-    }
-
-    @Override
-    public PostDetailDTO getFullPost(UUID postId, String currentUserId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new PostNotFoundException("Post not found"));
-
-        // If post is unpublished, only the owner can view it
-        if (!post.isPublished() && !post.getAuthorId().equals(currentUserId)) {
-            throw new SecurityException("This post is unpublished and you are not the owner");
-        }
-
-        return mapToDetailDTO(post);
-    }
-
-    /**
-     * Converts a Post entity into a full-detail DTO (without truncation).
-     */
-    private PostDetailDTO mapToDetailDTO(Post post) {
-        PostDetailDTO dto = new PostDetailDTO();
-        dto.setId(post.getId());
-        dto.setAuthorId(post.getAuthorId());
-        dto.setTitle(post.getTitle());
-        // Return full content, not a truncated excerpt
-        dto.setContent(post.getContent());
-        dto.setPublished(post.isPublished());
-        dto.setViewCount(post.getViewCount());
-        dto.setLikeCount(post.getLikeCount());
-        dto.setHeartCount(post.getHeartCount());
-        dto.setBookmarkCount(post.getBookmarkCount());
-        dto.setBannerImageKey(post.getBannerImageKey());
-        dto.setCreatedAt(post.getCreatedAt());
-        dto.setUpdatedAt(post.getUpdatedAt());
-        dto.setScheduledPublishAt(post.getScheduledPublishAt());
-        dto.setTags(post.getTags().stream().map(Tag::getName).collect(Collectors.toList()));
-
-        if (post.getBannerImageKey() != null) {
-            dto.setBannerImageUrl(constructS3Url(post.getBannerImageKey()));
-        }
-        return dto;
-    }
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/service/PostService.java -----
-package com.zblog.zblogpostcore.service;
-
-import com.zblog.zblogpostcore.dto.PostDTO;
-import com.zblog.zblogpostcore.dto.PostDetailDTO;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-
-import java.util.List;
-import java.util.UUID;
-
-public interface PostService {
-    PostDTO createPost(PostDTO postDTO, String currentUserId);
-    PostDTO updatePost(UUID postId, PostDTO postDTO, String currentUserId);
-    void deletePost(UUID postId, String currentUserId);
-
-    PostDTO getPost(UUID postId, String currentUserId);
-    Page<PostDTO> getAllPosts(boolean onlyPublished, Pageable pageable);
-    Page<PostDTO> searchPosts(String keyword, boolean onlyPublished, Pageable pageable);
-    Page<PostDTO> getPostsByAuthor(String authorId, boolean onlyPublished, Pageable pageable);
-
-    PostDTO incrementViewCount(UUID postId);
-    PostDTO reactToPost(UUID postId, String reactionType, String currentUserId);
-
-    void validatePostExists(UUID postId);
-
-    /**
-     * Returns posts filtered by optional keywords and tags, sorted by the provided option.
-     *
-     * @param keywords      full-text keyword search (optional)
-     * @param tags          list of tags to filter (optional)
-     * @param sort          "recent", "popular", or "mostLiked"
-     * @param pageable      pagination info
-     * @param currentUserId current user (can be null for public)
-     * @return a page of PostDTO results
-     */
-    Page<PostDTO> explorePosts(String keywords, List<String> tags, String sort, Pageable pageable, String currentUserId);
-
-    /**
-     * Returns the full post (with all content) for detail view.
-     * This does not truncate the content.
-     */
-    PostDetailDTO getFullPost(UUID postId, String currentUserId);
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/ZblogPostCoreApplication.java -----
-package com.zblog.zblogpostcore;
-
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-@SpringBootApplication
-public class ZblogPostCoreApplication {
-
-    public static void main(String[] args) {
-        SpringApplication.run(ZblogPostCoreApplication.class, args);
-    }
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/domain/entity/Post.java -----
-package com.zblog.zblogpostcore.domain.entity;
-
-import jakarta.persistence.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.Instant;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
-
-@Entity
-@Table(name = "posts")
-public class Post {
-
-    @Id
-    @GeneratedValue
-    private UUID id;
-
-    private String authorId;
-
-    private String title;
-
-    @Column(columnDefinition = "TEXT")
-    private String content;
-
-    private boolean published;
-
-    private long viewCount;
-    private long likeCount;
-    private long heartCount;
-    private long bookmarkCount;
-
-    // Renamed from bannerImageFileId to bannerImageKey
-    private String bannerImageKey;
-
-    @CreationTimestamp
-    private Instant createdAt;
-
-    @UpdateTimestamp
-    private Instant updatedAt;
-
-    private Instant scheduledPublishAt;
-
-    @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
-    @JoinTable(name = "post_tags",
-            joinColumns = @JoinColumn(name = "post_id"),
-            inverseJoinColumns = @JoinColumn(name = "tag_id"))
-    private Set<Tag> tags = new HashSet<>();
-
-    // Getters and setters
-
-    public UUID getId() {
-        return id;
-    }
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public String getAuthorId() {
-        return authorId;
-    }
-    public void setAuthorId(String authorId) {
-        this.authorId = authorId;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getContent() {
-        return content;
-    }
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public boolean isPublished() {
-        return published;
-    }
-    public void setPublished(boolean published) {
-        this.published = published;
-    }
-
-    public long getViewCount() {
-        return viewCount;
-    }
-    public void setViewCount(long viewCount) {
-        this.viewCount = viewCount;
-    }
-
-    public long getLikeCount() {
-        return likeCount;
-    }
-    public void setLikeCount(long likeCount) {
-        this.likeCount = likeCount;
-    }
-
-    public long getHeartCount() {
-        return heartCount;
-    }
-    public void setHeartCount(long heartCount) {
-        this.heartCount = heartCount;
-    }
-
-    public long getBookmarkCount() {
-        return bookmarkCount;
-    }
-    public void setBookmarkCount(long bookmarkCount) {
-        this.bookmarkCount = bookmarkCount;
-    }
-
-    public String getBannerImageKey() {
-        return bannerImageKey;
-    }
-    public void setBannerImageKey(String bannerImageKey) {
-        this.bannerImageKey = bannerImageKey;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Instant getUpdatedAt() {
-        return updatedAt;
-    }
-    public void setUpdatedAt(Instant updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public Instant getScheduledPublishAt() {
-        return scheduledPublishAt;
-    }
-    public void setScheduledPublishAt(Instant scheduledPublishAt) {
-        this.scheduledPublishAt = scheduledPublishAt;
-    }
-
-    public Set<Tag> getTags() {
-        return tags;
-    }
-    public void setTags(Set<Tag> tags) {
-        this.tags = tags;
-    }
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/domain/entity/Tag.java -----
-package com.zblog.zblogpostcore.domain.entity;
-
-import jakarta.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-@Entity
-@Table(name = "tags")
-public class Tag {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
-
-    @Column(unique = true, nullable = false)
-    private String name;
-
-    @ManyToMany(mappedBy = "tags", fetch = FetchType.LAZY)
-    private List<Post> posts = new ArrayList<>();
-
-    // Getters/Setters
-    public UUID getId() { return id; }
-    public void setId(UUID id) { this.id = id; }
-
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-
-    public List<Post> getPosts() { return posts; }
-    public void setPosts(List<Post> posts) { this.posts = posts; }
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/graphql/PostGraphQLController.java -----
-package com.zblog.zblogpostcore.graphql;
-
-import com.zblog.zblogpostcore.dto.PostDTO;
-import com.zblog.zblogpostcore.service.PostService;
-import com.zblog.zblogpostcore.util.SecurityUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.graphql.data.method.annotation.Argument;
-import org.springframework.graphql.data.method.annotation.MutationMapping;
-import org.springframework.graphql.data.method.annotation.QueryMapping;
-import org.springframework.stereotype.Controller;
-
-import java.util.UUID;
-
-@Controller
-public class PostGraphQLController {
-
-    private final PostService postService;
-
-    @Autowired
-    public PostGraphQLController(PostService postService) {
-        this.postService = postService;
-    }
-
-    @QueryMapping
-    public PostDTO getPost(@Argument("id") UUID id) {
-        String currentUserId = SecurityUtil.getCurrentUserIdOrNull();
-        return postService.getPost(id, currentUserId);
-    }
-
-    @QueryMapping
-    public Iterable<PostDTO> getAllPosts(@Argument("publishedOnly") boolean publishedOnly) {
-        return postService.getAllPosts(publishedOnly, org.springframework.data.domain.PageRequest.of(0, 100));
-    }
-
-    @MutationMapping
-    public PostDTO createPost(@Argument("postInput") PostDTO postInput) {
-        String currentUserId = SecurityUtil.getCurrentUserId();
-        return postService.createPost(postInput, currentUserId);
-    }
-}
-
-
------ /home/zakaria/zBlog/zblog-backend/zblog-post-core/src/main/java/com/zblog/zblogpostcore/exception/PostNotFoundException.java -----
-package com.zblog.zblogpostcore.exception;
-
-public class PostNotFoundException extends RuntimeException {
-    public PostNotFoundException(String message) {
-        super(message);
-    }
-}
-
-
------ /home/zakaria/zBlog/zblog-frontend/src/app/preview/page.tsx -----
-"use client";
-
-import React from "react";
-import { useRouter } from "next/navigation";
-import DOMPurify from "dompurify";
-import { usePostDraft } from "@/context/PostDraftContext";
-import PostDetail from "@/components/posts/PostDetail/PostDetail";
-
-export default function PreviewPage() {
-  const router = useRouter();
-  const { draft } = usePostDraft();
-
-  const safeContent = draft.content
-    ? DOMPurify.sanitize(draft.content)
-    : "<p>No content yet</p>";
-
-  const post = {
-    title: draft.title?.trim() || "Untitled Post",
-    coverImageUrl: draft.coverImageUrl?.trim() || "/default-cover.jpg",
-    content: safeContent,
-    tags: draft.tags.length ? draft.tags : ["General"],
-    publishedAt: new Date(),
-    author: {
-      name: "Preview Author",
-      avatarUrl: "/avatars/default.png",
-    },
-  };
-
-  return (
-    <div className="bg-slate-900 text-white min-h-screen">
-      {/* Back button */}
-      <div className="p-4 border-b border-slate-800">
-        <button
-          onClick={() => router.push("/express")}
-          className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded text-white transition"
-        >
-          ← Back to Editor
-        </button>
-      </div>
-
-      {/* Render PostPreview */}
-      <PostDetail post={post} />
-    </div>
-  );
+  return context;
 }
 
 

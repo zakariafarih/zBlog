@@ -51,7 +51,7 @@ public class PostServiceImpl implements PostService {
         post.setTitle(postDTO.getTitle());
         post.setContent(postDTO.getContent());
         post.setPublished(postDTO.isPublished());
-        post.setBannerImageKey(postDTO.getBannerImageKey()); 
+        post.setBannerImageKey(postDTO.getBannerImageKey());
         post.setScheduledPublishAt(postDTO.getScheduledPublishAt());
 
         // Initialize counters

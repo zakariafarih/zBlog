@@ -4,14 +4,19 @@ import com.zblog.zblogpostcore.dto.PostDTO;
 import com.zblog.zblogpostcore.dto.PostDetailDTO;
 import com.zblog.zblogpostcore.service.PostService;
 import com.zblog.zblogpostcore.util.SecurityUtil;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -21,10 +26,12 @@ import java.util.stream.Collectors;
 public class PostController {
 
     private final PostService postService;
+    private final JavaMailSender mailSender;
 
     @Autowired
-    public PostController(PostService postService) {
+    public PostController(PostService postService, JavaMailSender mailSender) {
         this.postService = postService;
+        this.mailSender = mailSender;
     }
 
     /**
@@ -115,5 +122,41 @@ public class PostController {
                          @RequestParam("type") String reactionType) {
         String currentUserId = SecurityUtil.getCurrentUserId();
         return postService.reactToPost(postId, reactionType, currentUserId);
+    }
+
+    @PostMapping("/visit")
+    public void logVisit(@RequestBody Map<String, Object> body, HttpServletRequest request) {
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip == null || ip.isEmpty()) {
+            ip = request.getRemoteAddr();
+        }
+
+        String userId = SecurityUtil.getCurrentUserIdOrNull();
+        String type = (String) body.get("type");
+
+        if ("view_all_posts".equals(type)) {
+            Integer page = (Integer) body.get("page");
+            Integer size = (Integer) body.get("size");
+            Boolean publishedOnly = (Boolean) body.get("publishedOnly");
+
+            System.out.printf("User %s viewed all posts (page=%d, size=%d, publishedOnly=%s) from IP %s%n",
+                    userId, page, size, publishedOnly, ip);
+
+        } else if ("view_single_post".equals(type)) {
+            String postId = (String) body.get("postId");
+
+            System.out.printf("User %s viewed post %s from IP %s%n", userId, postId, ip);
+        }
+
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setTo("zakariafarih142@gmail.com");
+            helper.setSubject("New IP Accessed Your App");
+            helper.setText("A new IP accessed the endpoint: " + ip);
+            mailSender.send(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

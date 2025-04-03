@@ -1,85 +1,95 @@
 "use client"
 
 import React from "react"
+import { useInfiniteQuery } from "@tanstack/react-query"
+import { explorePosts, PostDTO } from "@/services/postService"
 import RecentPosts from "@/components/posts/RecentPosts"
-import type { PostCardProps } from "@/components/posts/PostCard"
+import Fallback from "@/components/Fallback/Fallback"
+import NoPostsHolder from "@/components/posts/NoPostsHolder"
+import { useAuth } from "react-oidc-context"
 
+const PAGE_SIZE = 9
 
-const mockPosts: PostCardProps[] = [
-  {
-    id: "1",
-    title: "Mastering TypeScript",
-    description: "Discover the power of static typing in JavaScript and how it can improve your productivity.",
-    author: "Zakaria",
-    timestamp: "2 hours ago",
-    tags: ["Coding", "TypeScript"],
-    imageUrl: "https://picsum.photos/600/400?random=1",
-    reactionCount: 24,
-    commentCount: 5,
-  },
-  {
-    id: "2",
-    title: "Exploring Microservices Architecture",
-    description: "Learn how a microservices architecture can help you build scalable applications.",
-    author: "Alice",
-    timestamp: "3 hours ago",
-    tags: ["Microservices", "Architecture"],
-    imageUrl: "https://picsum.photos/600/400?random=2",
-    reactionCount: 35,
-    commentCount: 12,
-  },
-  {
-    id: "3",
-    title: "UI/UX Best Practices",
-    description: "Designing interfaces that are not only visually appealing but also provide great user experience.",
-    author: "Bob",
-    timestamp: "5 hours ago",
-    tags: ["Design", "UI/UX"],
-    imageUrl: "https://picsum.photos/600/400?random=3",
-    reactionCount: 10,
-    commentCount: 8,
-  },
-  {
-    id: "4",
-    title: "Understanding Cloud-Native Development",
-    description: "An in-depth look into building applications using cloud-native technologies and microservices.",
-    author: "Clara",
-    timestamp: "1 day ago",
-    tags: ["Cloud", "Microservices"],
-    imageUrl: "https://picsum.photos/600/400?random=4",
-    reactionCount: 18,
-    commentCount: 3,
-  },
-  {
-    id: "5",
-    title: "The Future of AI in Software Development",
-    description: "How artificial intelligence is reshaping coding, testing, and deployment workflows.",
-    author: "Derek",
-    timestamp: "2 days ago",
-    tags: ["AI", "Software Development"],
-    imageUrl: "https://picsum.photos/600/400?random=5",
-    reactionCount: 44,
-    commentCount: 16,
-  },
-  {
-    id: "6",
-    title: "Boosting Productivity with VS Code",
-    description: "Tips, tricks, and essential extensions to make Visual Studio Code your power tool.",
-    author: "Eva",
-    timestamp: "3 days ago",
-    tags: ["Productivity", "VS Code"],
-    imageUrl: "https://picsum.photos/600/400?random=6",
-    reactionCount: 27,
-    commentCount: 6,
-  },
-]
+export interface RawPost {
+  id: string
+  title: string
+  description: string
+  author: string
+  authorId?: string
+  timestamp: string
+  tags?: string[]
+  imageUrl?: string
+  reactionCount?: number
+  commentCount?: number
+}
 
 export default function RecentPostsPage() {
-  const handleLoadMore = () => {
-    console.log("Load more posts")
-  }
+  const auth = useAuth()
+  const idToken = auth.user?.id_token
+
+  const {
+    data,
+    error,
+    isError,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    refetch,
+  } = useInfiniteQuery({
+    queryKey: ["recentPosts", idToken],
+    queryFn: async ({ pageParam = 0 }) => {
+      if (!idToken) throw new Error("Unauthorized")
+      return await explorePosts("", [], "recent", pageParam, PAGE_SIZE, idToken)
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, pages) => {
+      return lastPage.last ? undefined : pages.length
+    },
+    enabled: !!idToken,
+    retry: 2,
+  })
+
+  const posts: PostDTO[] = data ? data.pages.flatMap(page => page.content) : []
+
+  const mappedPosts: RawPost[] = posts.map((post) => ({
+    id: post.id || "",
+    title: post.title,
+    description: post.content,
+    author: "User " + (post.authorId?.slice(0, 6) || "Unknown"), 
+    authorId: post.authorId,
+    timestamp: post.createdAt ? new Date(post.createdAt).toLocaleDateString() : "",
+    tags: post.tags || [],
+    imageUrl: post.bannerImageUrl || "/default-cover.jpg",
+    reactionCount: (post.likeCount || 0) + (post.heartCount || 0),
+    commentCount: 0,
+  }))
+  
 
   return (
-    <RecentPosts posts={mockPosts} onLoadMore={handleLoadMore} hasMore={true} />
+    <main className="bg-slate-900 text-white min-h-screen pt-4 pb-16 overflow-hidden">
+      {isLoading && <Fallback message="Loading recent posts..." />}
+
+      {isError && (
+        <div className="flex flex-col items-center justify-center py-16">
+          <p className="text-red-400 mb-4">Failed to load posts: {error?.message}</p>
+          <button
+            onClick={() => refetch()}
+            className="bg-slate-700 hover:bg-slate-600 text-white rounded-xl py-2 px-6 font-medium transition"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
+      {!isLoading && !isError && posts.length === 0 && <NoPostsHolder />}
+
+      {!isLoading && !isError && posts.length > 0 && (
+        <RecentPosts
+          posts={mappedPosts}
+          onLoadMore={() => fetchNextPage()}
+          hasMore={!!hasNextPage}
+        />
+      )}
+    </main>
   )
 }

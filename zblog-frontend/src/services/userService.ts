@@ -211,11 +211,16 @@ export async function listBookmarks(
  * getUserProfile: GET /user/api/users/{userId}
  */
 export async function getUserProfile(
-  userId: string
+  userId: string,
+  authToken?: string
 ): Promise<UserProfileDTO> {
   try {
     const url = `${userCoreBaseURL}/api/users/${userId}`;
-    const res = await axios.get<UserProfileDTO>(url);
+    const res = await axios.get<UserProfileDTO>(url, {
+      headers: {
+        ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+      },
+    });
     return res.data;
   } catch (error) {
     handleAxiosError(error);

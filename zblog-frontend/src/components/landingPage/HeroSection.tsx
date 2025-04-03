@@ -88,9 +88,16 @@ export default function HeroSection({
               className="absolute inset-0 bg-gradient-to-r from-slate-800 to-slate-700 rounded-2xl transform rotate-6 opacity-40 blur-xl"
             />
             <div className="relative bg-gradient-to-r from-slate-800 to-slate-700 p-8 rounded-2xl shadow-2xl">
-              <div className="h-64 flex items-center justify-center">
-                <span className="text-slate-400">Premium Content Preview</span>
-              </div>
+            <div className="h-64 flex items-center justify-center">
+              <motion.img
+                src="/images/hero-preview.png"
+                alt="Premium Content Preview"
+                className="max-h-full object-contain"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, delay: 0.6 }}
+              />
+            </div>
             </div>
           </div>
         </motion.div>

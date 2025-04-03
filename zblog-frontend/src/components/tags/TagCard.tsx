@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import React from "react"
 import Image from "next/image"
@@ -17,7 +17,7 @@ export default function TagCard({ title, image, description, onClick }: TagCardP
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
-      className="relative h-64 w-full rounded-xl shadow-md cursor-pointer overflow-hidden"
+      className="relative h-64 w-full rounded-xl shadow-md cursor-pointer overflow-hidden border border-slate-700"
     >
       {/* Background Image */}
       <Image
@@ -25,17 +25,17 @@ export default function TagCard({ title, image, description, onClick }: TagCardP
         alt={title}
         fill
         className="object-cover object-center brightness-75"
-        sizes="(max-width: 768px) 100vw,
-               (max-width: 1200px) 50vw,
-               33vw"
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
       />
 
-      {/* Overlay */}
+      {/* Dark overlay for neon contrast */}
       <div className="absolute inset-0 bg-black/40" />
 
-      {/* Content */}
+      {/* Tag title and optional description */}
       <div className="relative z-10 flex flex-col items-center justify-center text-center h-full px-4">
-        <h3 className="text-white text-2xl font-bold mb-2">#{title}</h3>
+        <h3 className="text-white text-2xl font-bold mb-2 neon-text">
+          #{title}
+        </h3>
         {description && (
           <p className="text-gray-200 text-sm max-w-xs">{description}</p>
         )}

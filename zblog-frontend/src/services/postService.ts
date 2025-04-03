@@ -55,10 +55,33 @@ export async function explorePosts(
   params.append("page", page.toString());
   params.append("size", size.toString());
 
-  const url = `${process.env.NEXT_PUBLIC_POST_CORE_URL?.replace(/\/+$/, "")}/api/posts/explore?${params.toString()}`;
-  const res = await axios.get<Page<PostDTO>>(url, {
-    headers: { ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}) },
-  });
+  const baseUrl = process.env.NEXT_PUBLIC_POST_CORE_URL?.replace(/\/+$/, "") || "";
+  const url = `${baseUrl}/api/posts/explore?${params.toString()}`;
+
+  const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+
+  // 1. Fetch posts from explore endpoint
+  const res = await axios.get<Page<PostDTO>>(url, { headers });
+
+  // 2. Log visit to backend
+  const visitUrl = `${baseUrl}/api/posts/visit`;
+  try {
+    await axios.post(
+      visitUrl,
+      {
+        type: "explore_posts",
+        keywords,
+        tags,
+        sort,
+        page,
+        size,
+      },
+      { headers }
+    );
+  } catch (e) {
+    console.warn("Failed to log explore posts visit:", e);
+  }
+
   return res.data;
 }
 
@@ -133,10 +156,25 @@ export async function getAllPosts(
   size: number,
   authToken?: string
 ): Promise<Page<PostDTO>> {
+  const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+
+  // 1. Fetch the posts
   const url = `${postCoreBaseURL}/api/posts?publishedOnly=${publishedOnly}&page=${page}&size=${size}`;
-  const res = await axios.get<Page<PostDTO>>(url, {
-    headers: { ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}) },
-  });
+  const res = await axios.get<Page<PostDTO>>(url, { headers });
+
+  // 2. Call /visit endpoint to log the event
+  const visitUrl = `${postCoreBaseURL}/api/posts/visit`;
+  try {
+    await axios.post(visitUrl, {
+      type: "view_all_posts",
+      page,
+      size,
+      publishedOnly,
+    }, { headers });
+  } catch (e) {
+    console.warn("Failed to log post list visit:", e);
+  }
+
   return res.data;
 }
 
@@ -210,15 +248,20 @@ export async function react(
 }
 
 // GET ALL TAGS: GET /post/api/tags
-export async function getAllTags(): Promise<string[]> {
+export async function getAllTags(authToken?: string): Promise<string[]> {
   try {
     const url = `${postCoreBaseURL}/api/tags`;
-    const res = await axios.get<string[]>(url);
+    const res = await axios.get<string[]>(url, {
+      headers: {
+        ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+      },
+    });
     return res.data;
   } catch (error) {
     handleAxiosError(error);
   }
 }
+
 
 // ---------------
 // Error Handling

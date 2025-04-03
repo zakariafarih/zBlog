@@ -19,8 +19,8 @@ const defaultFeatures: Feature[] = [
   },
   {
     id: 2,
-    title: "Run live code",
-    description: "Test and showcase your code snippets directly in your posts.",
+    title: "Code snippets",
+    description: "Showcase your code snippets directly in your posts.",
     icon: <TerminalSquare className="w-12 h-12 text-slate-300" />,
   },
   {
