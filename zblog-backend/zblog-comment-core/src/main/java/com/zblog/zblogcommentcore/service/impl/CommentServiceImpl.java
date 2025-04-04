@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import com.zblog.zblogcommentcore.util.SecurityUtil;
 
 import java.util.List;
 import java.util.UUID;
@@ -22,7 +23,7 @@ public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
     private final PostCoreClient postCoreClient;
-    private final CommentReactionService reactionService; // << inject
+    private final CommentReactionService reactionService;
     private final FileClient fileClient;
 
     @Autowired
@@ -39,15 +40,16 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public CommentResponseDTO createComment(CommentCreateRequest request, String currentUserId) {
-        postCoreClient.validatePostExists(request.getPostId());
+    public CommentResponseDTO createComment(CommentCreateRequest request, String currentUserId, String accessToken) {
+        // Validate that the post exists using the provided JWT token
+        postCoreClient.validatePostExists(request.getPostId(), accessToken);
+
         Comment comment = new Comment();
         comment.setPostId(request.getPostId());
         comment.setAuthorId(currentUserId);
         comment.setContent(request.getContent());
         comment.setParentId(request.getParentId());
-
-        // store fileId if present
+        // Store attachment file ID if provided
         comment.setAttachmentFileId(request.getAttachmentFileId());
 
         commentRepository.save(comment);
@@ -64,7 +66,6 @@ public class CommentServiceImpl implements CommentService {
         }
 
         existing.setContent(request.getContent());
-        // if the user can change the file:
         existing.setAttachmentFileId(request.getAttachmentFileId());
 
         commentRepository.save(existing);
@@ -80,12 +81,11 @@ public class CommentServiceImpl implements CommentService {
             throw new SecurityException("Not authorized to delete this comment");
         }
 
-        // If there's an attachment, optionally delete from s3-core
+        // Optionally delete the attachment from s3-core if it exists
         if (existing.getAttachmentFileId() != null) {
             fileClient.deleteFile(existing.getAttachmentFileId());
         }
 
-        // also remove children if your logic requires it
         deleteCommentAndChildren(existing);
     }
 
@@ -117,7 +117,7 @@ public class CommentServiceImpl implements CommentService {
         return toDTO(root, true);
     }
 
-    // ---------- toDTO Helper ----------
+    // Helper to convert Comment entity to DTO
     private CommentResponseDTO toDTO(Comment comment, boolean buildReplies) {
         CommentResponseDTO dto = new CommentResponseDTO();
         dto.setId(comment.getId());
@@ -128,14 +128,13 @@ public class CommentServiceImpl implements CommentService {
         dto.setUpdatedAt(comment.getUpdatedAt());
         dto.setParentId(comment.getParentId());
 
-        // Reaction summary
+        // Get reaction summary from reaction service
         var summary = reactionService.getReactionSummary(comment.getId());
         dto.setLikeCount(summary.getLikeCount());
         dto.setLaughCount(summary.getLaughCount());
         dto.setSadCount(summary.getSadCount());
         dto.setInsightfulCount(summary.getInsightfulCount());
 
-        // if there's an attachment, fetch presigned URL
         dto.setAttachmentFileId(comment.getAttachmentFileId());
         if (comment.getAttachmentFileId() != null) {
             try {

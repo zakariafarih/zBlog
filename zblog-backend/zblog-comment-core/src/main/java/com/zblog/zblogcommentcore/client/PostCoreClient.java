@@ -2,6 +2,9 @@ package com.zblog.zblogcommentcore.client;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -19,14 +22,20 @@ public class PostCoreClient {
         this.restTemplate = builder.build();
     }
 
-    public void validatePostExists(UUID postId) {
+    public void validatePostExists(UUID postId, String accessToken) {
         try {
-            // e.g. GET /api/posts/{postId}
-            restTemplate.getForObject(postCoreBaseUrl + "/post/api/posts/" + postId, Object.class);
-            // if 200 => post exists
+            String fullUrl = postCoreBaseUrl.endsWith("/")
+                    ? postCoreBaseUrl + "post/api/posts/" + postId
+                    : postCoreBaseUrl + "/post/api/posts/" + postId;
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(accessToken);
+
+            HttpEntity<Void> entity = new HttpEntity<>(headers);
+            // If the GET fails (e.g. 404, 401) an exception is thrown.
+            restTemplate.exchange(fullUrl, HttpMethod.GET, entity, Object.class);
         } catch (Exception ex) {
-            // If post-core returns 404 or an error, rethrow or handle
-            throw new IllegalArgumentException("Post does not exist: " + postId);
+            throw new IllegalArgumentException("Post check failed: " + postId, ex);
         }
     }
 }

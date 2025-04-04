@@ -51,7 +51,8 @@ public class CommentGraphQLController {
     @MutationMapping
     public CommentResponseDTO createComment(@Argument CommentCreateRequest input) {
         String userId = SecurityUtil.getCurrentUserId();
-        return commentService.createComment(input, userId);
+        String accessToken = SecurityUtil.getCurrentAccessToken();
+        return commentService.createComment(input, userId, accessToken);
     }
 
     @MutationMapping

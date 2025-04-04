@@ -7,26 +7,26 @@ const commentCoreBaseURL =
 // From your DTOs:
 
 export interface CommentCreateRequest {
-  postId: string;         // UUID
-  parentId?: string;      // UUID
+  postId: string;
+  parentId?: string;
   content: string;
   attachmentFileId?: string;
 }
 
 export interface CommentUpdateRequest {
-  id: string; // UUID
+  id: string;
   content: string;
   attachmentFileId?: string;
 }
 
 export interface CommentResponseDTO {
-  id: string;        // UUID
-  postId: string;    // UUID
+  id: string;
+  postId: string;
   authorId: string;
   content: string;
-  createdAt: string; // Instant -> string
-  updatedAt: string; // Instant -> string
-  parentId?: string; // UUID
+  createdAt: string;
+  updatedAt: string;
+  parentId?: string;
   likeCount: number;
   laughCount: number;
   sadCount: number;
@@ -117,11 +117,16 @@ export async function deleteComment(
 export async function getTopLevelComments(
   postId: string,
   page: number,
-  size: number
+  size: number,
+  authToken?: string
 ): Promise<Page<CommentResponseDTO>> {
   try {
     const url = `${commentCoreBaseURL}/api/comments/post/${postId}?page=${page}&size=${size}`;
-    const res = await axios.get<Page<CommentResponseDTO>>(url);
+    const res = await axios.get<Page<CommentResponseDTO>>(url, {
+      headers: {
+        ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+      },
+    });
     return res.data;
   } catch (error) {
     handleAxiosError(error);

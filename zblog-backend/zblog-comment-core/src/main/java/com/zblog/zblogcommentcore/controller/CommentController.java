@@ -30,8 +30,10 @@ public class CommentController {
 
     @PostMapping
     public CommentResponseDTO createComment(@Valid @RequestBody CommentCreateRequest request) {
+        // Obtain the current JWT access token for post validation
+        String token = SecurityUtil.getCurrentAccessToken();
         String currentUserId = SecurityUtil.getCurrentUserId();
-        return commentService.createComment(request, currentUserId);
+        return commentService.createComment(request, currentUserId, token);
     }
 
     @PutMapping("/{commentId}")
@@ -65,18 +67,14 @@ public class CommentController {
     }
 
     /**
-     * Toggle a reaction. If the user already has the reaction => remove it.
-     * Otherwise => create it.
-     * Then return the full updated comment (with new counts).
+     * Toggle a reaction. If the user already has the reaction, remove it;
+     * otherwise, create it. Then return the full updated comment (with new counts).
      */
     @PatchMapping("/{commentId}/react")
     public CommentResponseDTO toggleReaction(@PathVariable("commentId") UUID commentId,
                                              @RequestParam("type") String reactionType) {
         String userId = SecurityUtil.getCurrentUserId();
-
         reactionService.toggleReaction(commentId, userId, reactionType);
-
-        // after toggling, get the updated comment with fresh reaction counts
         return commentService.getComment(commentId);
     }
 }

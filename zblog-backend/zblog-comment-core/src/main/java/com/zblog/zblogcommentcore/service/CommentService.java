@@ -9,8 +9,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.UUID;
 
 public interface CommentService {
-
-    CommentResponseDTO createComment(CommentCreateRequest request, String currentUserId);
+    CommentResponseDTO createComment(CommentCreateRequest request, String currentUserId, String accessToken);
 
     CommentResponseDTO updateComment(CommentUpdateRequest request, String currentUserId);
 
