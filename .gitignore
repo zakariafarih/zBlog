@@ -46,3 +46,4 @@ zblog-frontend/.env
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+zblog-backend/*.tar
