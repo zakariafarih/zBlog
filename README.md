@@ -31,7 +31,6 @@ Whether it's a reflective journal entry, a dev tutorial, or a book review, zBlog
 - **Lucide Icons** for UI polish
 - **React TSParticles** for animated backgrounds
 
-t
 ### Backend (📙 `zblog-backend`)
 - **Spring Boot 3** (Java 21+)
 - **Spring Security** + JWT Auth
