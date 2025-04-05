@@ -6,12 +6,7 @@ export function useComments(postId: string) {
   const auth = useAuth();
   const token = auth.user?.access_token;
 
-  const {
-    data,
-    fetchNextPage,
-    isLoading,
-    hasNextPage,
-  } = useInfiniteQuery({
+  const query = useInfiniteQuery({
     queryKey: ["comments", postId],
     queryFn: ({ pageParam = 0 }) =>
       getTopLevelComments(postId, pageParam, 10, token),
@@ -21,13 +16,13 @@ export function useComments(postId: string) {
     enabled: !!postId && !!token,
   });
 
-  const comments = data?.pages.flatMap((page) => page.content) ?? [];
+  const comments = query.data?.pages.flatMap((page) => page.content) ?? [];
 
   return {
     comments,
-    hasNextPage: hasNextPage ?? false,
-    fetchNextPage: fetchNextPage ?? (() => {}),
-    isLoading,
+    hasNextPage: query.hasNextPage ?? false,
+    fetchNextPage: query.fetchNextPage ?? (() => {}),
+    isLoading: query.isLoading,
+    refetch: query.refetch,
   };
 }
-

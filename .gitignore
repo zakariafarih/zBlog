@@ -35,6 +35,8 @@ zblog-frontend/build-cache/
 # env files (can opt-in for committing if needed)
 .env*
 .env
+zblog-backend/.env
+zblog-frontend/.env
 
 # vercel
 .vercel

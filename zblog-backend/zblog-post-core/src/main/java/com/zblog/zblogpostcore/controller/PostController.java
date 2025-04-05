@@ -159,4 +159,14 @@ public class PostController {
             e.printStackTrace();
         }
     }
+
+    @PatchMapping("/{postId}/comment-count")
+    public void updateCommentCount(@PathVariable("postId") UUID postId,
+                                   @RequestParam("delta") int delta) {
+        if(delta > 0) {
+            postService.incrementCommentCount(postId);
+        } else if(delta < 0) {
+            postService.decrementCommentCount(postId);
+        }
+    }
 }

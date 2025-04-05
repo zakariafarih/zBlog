@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ThumbsUp, MessageCircle } from "lucide-react";
@@ -28,7 +26,7 @@ export default function PostCard({
   tags = [],
   imageUrl,
   reactionCount = 0,
-  commentCount = 0,
+  commentCount = 0, // new prop
   onClick,
 }: PostCardProps) {
   const [safeDescription, setSafeDescription] = useState("");
@@ -71,7 +69,6 @@ export default function PostCard({
 
         <h3 className="text-white text-lg font-semibold line-clamp-1">{title}</h3>
         <p className="text-gray-300 text-sm line-clamp-2 mt-1">
-          {/* Only render if it's sanitized (i.e. on the client) */}
           {safeDescription && (
             <span dangerouslySetInnerHTML={{ __html: safeDescription }} />
           )}

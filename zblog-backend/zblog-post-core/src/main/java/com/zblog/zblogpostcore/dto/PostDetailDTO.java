@@ -31,6 +31,8 @@ public class PostDetailDTO {
 
     private List<String> tags;
 
+    private long commentCount;
+
     public long getViewCount() {
         return viewCount;
     }
@@ -149,5 +151,12 @@ public class PostDetailDTO {
 
     public void setTags(List<String> tags) {
         this.tags = tags;
+    }
+
+    public long getCommentCount() {
+        return commentCount;
+    }
+    public void setCommentCount(long commentCount) {
+        this.commentCount = commentCount;
     }
 }

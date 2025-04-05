@@ -53,6 +53,7 @@ public class CommentServiceImpl implements CommentService {
         comment.setAttachmentFileId(request.getAttachmentFileId());
 
         commentRepository.save(comment);
+        postCoreClient.updateCommentCount(comment.getPostId(), 1, accessToken);
         return toDTO(comment, true);
     }
 
@@ -87,6 +88,11 @@ public class CommentServiceImpl implements CommentService {
         }
 
         deleteCommentAndChildren(existing);
+
+        // Retrieve the current access token from SecurityUtil
+        String accessToken = SecurityUtil.getCurrentAccessToken();
+        // Update comment count in post-core (-1)
+        postCoreClient.updateCommentCount(existing.getPostId(), -1, accessToken);
     }
 
     private void deleteCommentAndChildren(Comment comment) {

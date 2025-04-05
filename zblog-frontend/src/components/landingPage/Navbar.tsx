@@ -180,9 +180,10 @@ export default function Navbar() {
         
         {/* Dropdown Content */}
         <div 
-          className="absolute right-0 top-[calc(100%+1px)] w-56 bg-slate-800 rounded-lg shadow-lg border border-slate-700 z-50 overflow-hidden"
-          onClick={(e) => e.stopPropagation()}
-        >
+  className="profile-dropdown absolute right-0 top-[calc(100%+1px)] w-56 bg-slate-800 rounded-lg shadow-lg border border-slate-700 z-50 overflow-hidden"
+  onClick={(e) => e.stopPropagation()}
+>
+
           
           {/* Menu Items */}
           <div className="p-2">

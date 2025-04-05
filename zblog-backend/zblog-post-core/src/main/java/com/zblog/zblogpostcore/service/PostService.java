@@ -40,4 +40,8 @@ public interface PostService {
      * This does not truncate the content.
      */
     PostDetailDTO getFullPost(UUID postId, String currentUserId);
+
+    void incrementCommentCount(UUID postId);
+
+    void decrementCommentCount(UUID postId);
 }

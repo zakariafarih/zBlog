@@ -58,6 +58,7 @@ public class PostServiceImpl implements PostService {
         post.setLikeCount(0);
         post.setHeartCount(0);
         post.setBookmarkCount(0);
+        post.setCommentCount(0);
 
         if (postDTO.getTags() != null) {
             post.setTags(resolveTags(postDTO.getTags()));
@@ -360,5 +361,22 @@ public class PostServiceImpl implements PostService {
             dto.setBannerImageUrl(constructS3Url(post.getBannerImageKey()));
         }
         return dto;
+    }
+
+    @Override
+    public void incrementCommentCount(UUID postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new PostNotFoundException("Post not found"));
+        post.setCommentCount(post.getCommentCount() + 1);
+        postRepository.save(post);
+    }
+
+    @Override
+    public void decrementCommentCount(UUID postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new PostNotFoundException("Post not found"));
+        // Ensure the count does not go negative
+        post.setCommentCount(Math.max(0, post.getCommentCount() - 1));
+        postRepository.save(post);
     }
 }

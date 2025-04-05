@@ -2,15 +2,16 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { useCreateComment } from "@/hooks/comment/useCreateComment";
-import { CommentResponseDTO } from "@/services/commentService";
+import { CommentResponseDTO, CommentCreateRequest } from "@/services/commentService";
 
 interface CommentFormProps {
   postId: string;
   parentId?: string;
   onSuccess: (newComment: CommentResponseDTO) => void;
+  onCommentCreated: () => void;
 }
 
-export default function CommentForm({ postId, parentId, onSuccess }: CommentFormProps) {
+export default function CommentForm({ postId, parentId, onSuccess, onCommentCreated }: CommentFormProps) {
   const [content, setContent] = useState("");
   const { create, loading, error } = useCreateComment();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -21,10 +22,11 @@ export default function CommentForm({ postId, parentId, onSuccess }: CommentForm
 
   const handleSubmit = async () => {
     if (!content.trim()) return;
-    const req = { postId, parentId, content };
+    const req: CommentCreateRequest = { postId, parentId, content };
     const newComment = await create(req);
     if (newComment) {
       onSuccess(newComment);
+      onCommentCreated();
       setContent("");
     }
   };

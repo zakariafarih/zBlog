@@ -32,6 +32,8 @@ public class PostDTO {
 
     private List<String> tags;
 
+    private long commentCount;
+
     public UUID getId() {
         return id;
     }
@@ -135,5 +137,12 @@ public class PostDTO {
     }
     public void setTags(List<String> tags) {
         this.tags = tags;
+    }
+
+    public long getCommentCount() {
+        return commentCount;
+    }
+    public void setCommentCount(long commentCount) {
+        this.commentCount = commentCount;
     }
 }

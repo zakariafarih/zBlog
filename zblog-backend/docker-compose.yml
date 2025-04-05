@@ -2,9 +2,12 @@ version: "3.8"
 
 services:
   zblog-user-core:
+    container_name: zblog-user-core
     build:
       context: ./zblog-user-core
       dockerfile: Dockerfile
+    env_file:
+      - .env
     environment:
       - DB_URL=${DB_URL_USER}
       - DB_USERNAME=${DB_USERNAME}
@@ -14,17 +17,28 @@ services:
       - POST_CORE_URL=${POST_CORE_URL}
       - INTERNAL_SHARED_SECRET=${INTERNAL_SHARED_SECRET}
       - S3_CORE_URL=${S3_CORE_URL}
-    networks:
-      - zblog-net
+    ports:
+      - "8092:8092"
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8092/user/health"]
       interval: 30s
       retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - zblog-net
 
   zblog-post-core:
+    container_name: zblog-post-core
     build:
       context: ./zblog-post-core
       dockerfile: Dockerfile
+    env_file:
+      - .env
     environment:
       - DB_URL=${DB_URL_POST}
       - DB_USERNAME=${DB_USERNAME}
@@ -33,17 +47,28 @@ services:
       - AWS_REGION=${AWS_S3_REGION}
       - S3_CORE_URL=${S3_CORE_URL}
       - PORT=8081
-    networks:
-      - zblog-net
+    ports:
+      - "8081:8081"
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8081/post/health"]
       interval: 30s
       retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - zblog-net
 
   zblog-comment-core:
+    container_name: zblog-comment-core
     build:
       context: ./zblog-comment-core
       dockerfile: Dockerfile
+    env_file:
+      - .env
     environment:
       - DB_URL=${DB_URL_COMMENT}
       - DB_USERNAME=${DB_USERNAME}
@@ -52,17 +77,28 @@ services:
       - AWS_REGION=${AWS_S3_REGION}
       - S3_CORE_URL=${S3_CORE_URL}
       - POST_CORE_URL=${POST_CORE_URL}
-    networks:
-      - zblog-net
+    ports:
+      - "8082:8082"
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8082/comment/health"]
       interval: 30s
       retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - zblog-net
 
   s3-core:
+    container_name: s3-core
     build:
       context: ./s3-core
       dockerfile: Dockerfile
+    env_file:
+      - .env
     environment:
       - AWS_S3_BUCKET=${AWS_S3_BUCKET}
       - AWS_S3_REGION=${AWS_S3_REGION}
@@ -71,24 +107,36 @@ services:
       - LOGGING_LEVEL_ORG_SPRING_SECURITY=${LOGGING_LEVEL_ORG_SPRING_SECURITY}
       - AWS_COGNITO_ISSUER_URI=${COGNITO_ISSUER_URI}
       - SPRING_MVC_STATIC_PATH_PATTERN=${SPRING_MVC_STATIC_PATH_PATTERN}
-    networks:
-      - zblog-net
+    ports:
+      - "8083:8083"
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8083/s3/health"]
       interval: 30s
       retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - zblog-net
 
   nginx:
+    container_name: nginx
     image: nginx:latest
     ports:
       - "80:80"
+      - "443:443" # For HTTPS
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro # For Let's Encrypt
     depends_on:
       - zblog-user-core
       - zblog-post-core
       - zblog-comment-core
       - s3-core
+    restart: unless-stopped
     networks:
       - zblog-net
 

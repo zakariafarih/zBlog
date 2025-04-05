@@ -2,23 +2,25 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import { MoreVertical } from "lucide-react";
+import { MoreVertical, Trash2 } from "lucide-react";
 import ReactionButtons from "./ReactionButtons";
 import ReplyButton from "./ReplyButton";
-import { CommentResponseDTO } from "@/services/commentService";
+import { CommentResponseDTO, deleteComment } from "@/services/commentService";
 import { getAuthorName } from "@/services/authorCache";
 import { useAuth } from "react-oidc-context";
 
 interface CommentItemProps {
   comment: CommentResponseDTO;
   onReply?: (commentId: string) => void;
+  onDelete?: () => void;
 }
 
-export default function CommentItem({ comment, onReply }: CommentItemProps) {
+export default function CommentItem({ comment, onReply, onDelete }: CommentItemProps) {
   const auth = useAuth();
-  // Initially, we use the raw authorId; it will be replaced with the display name.
   const [displayName, setDisplayName] = useState(comment.authorId);
   const [avatarUrl, setAvatarUrl] = useState("/avatars/default.png");
+
+  const userSub = auth.user?.profile?.sub;
 
   useEffect(() => {
     async function resolveAuthor() {
@@ -30,6 +32,19 @@ export default function CommentItem({ comment, onReply }: CommentItemProps) {
     }
     resolveAuthor();
   }, [comment.authorId, auth.user]);
+
+  const handleDelete = async () => {
+    if (userSub && comment.authorId === userSub) {
+      try {
+        await deleteComment(comment.id, auth.user?.access_token ?? "");
+        onDelete?.();
+      } catch (err) {
+        console.error("Failed to delete comment", err);
+      }
+    } else {
+      alert("You are not authorized to delete this comment.");
+    }
+  };
 
   return (
     <div className="flex items-start gap-4 py-4 border-b border-slate-700">
@@ -49,7 +64,15 @@ export default function CommentItem({ comment, onReply }: CommentItemProps) {
             <span className="text-slate-500">•</span>
             <span>{new Date(comment.createdAt).toLocaleString()}</span>
           </div>
-          <MoreVertical className="w-4 h-4 text-slate-500 cursor-pointer hover:text-slate-300" />
+          <div className="flex items-center gap-2">
+            <MoreVertical className="w-4 h-4 text-slate-500 cursor-pointer hover:text-slate-300" />
+            {userSub && comment.authorId === userSub && (
+              <Trash2
+                className="w-4 h-4 text-red-400 cursor-pointer hover:text-red-300"
+                onClick={handleDelete}
+              />
+            )}
+          </div>
         </div>
         <p className="text-slate-100 text-sm mb-2">{comment.content}</p>
         <div className="flex items-center justify-between text-sm text-slate-400">
@@ -59,7 +82,7 @@ export default function CommentItem({ comment, onReply }: CommentItemProps) {
         {comment.replies && comment.replies.length > 0 && (
           <div className="ml-8 mt-4">
             {comment.replies.map((reply) => (
-              <CommentItem key={reply.id} comment={reply} onReply={onReply} />
+              <CommentItem key={reply.id} comment={reply} onReply={onReply} onDelete={onDelete} />
             ))}
           </div>
         )}

@@ -47,6 +47,9 @@ public class Post {
             inverseJoinColumns = @JoinColumn(name = "tag_id"))
     private Set<Tag> tags = new HashSet<>();
 
+    @Column(nullable = false)
+    private long commentCount = 0;
+
     // Getters and setters
 
     public UUID getId() {
@@ -145,5 +148,12 @@ public class Post {
     }
     public void setTags(Set<Tag> tags) {
         this.tags = tags;
+    }
+
+    public long getCommentCount() {
+        return commentCount;
+    }
+    public void setCommentCount(long commentCount) {
+        this.commentCount = commentCount;
     }
 }

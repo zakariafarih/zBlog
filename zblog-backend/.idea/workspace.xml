@@ -8,14 +8,20 @@
       <change beforePath="$PROJECT_DIR$/../combined.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../combined.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/client/PostCoreClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/client/PostCoreClient.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/config/SecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/controller/CommentController.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/controller/CommentController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/graphql/CommentGraphQLController.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/graphql/CommentGraphQLController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/service/CommentService.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/service/CommentService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/service/impl/CommentServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/service/impl/CommentServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/util/SecurityUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/util/SecurityUtil.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/controller/PostController.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/controller/PostController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/domain/entity/Post.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/domain/entity/Post.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/dto/PostDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/dto/PostDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/dto/PostDetailDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/dto/PostDetailDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/service/PostService.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/service/PostService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/service/impl/PostServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/service/impl/PostServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/components/posts/PostCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/components/posts/PostCard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/components/posts/PostDetail/CommentForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/components/posts/PostDetail/CommentForm.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/components/posts/PostDetail/CommentItem.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/components/posts/PostDetail/CommentItem.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/components/posts/PostDetail/CommentList.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/components/posts/PostDetail/CommentList.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/components/posts/PostDetail/CommentSection.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/components/posts/PostDetail/CommentSection.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/components/posts/PostDetail/PostDetail.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/components/posts/PostDetail/PostDetail.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/hooks/comment/useComments.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/hooks/comment/useComments.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -203,7 +209,9 @@
       <workItem from="1743564726260" duration="16554000" />
       <workItem from="1743653354545" duration="9238000" />
       <workItem from="1743712389115" duration="5523000" />
-      <workItem from="1743726062627" duration="8225000" />
+      <workItem from="1743726062627" duration="8572000" />
+      <workItem from="1743758816235" duration="8375000" />
+      <workItem from="1743819574672" duration="2435000" />
     </task>
     <servers />
   </component>

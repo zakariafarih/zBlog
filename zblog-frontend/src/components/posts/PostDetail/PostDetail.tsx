@@ -51,7 +51,7 @@ export default function PostDetail({
             className="text-slate-300 leading-relaxed space-y-6"
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
-          <CommentSection postId={post.id!} />
+          <CommentSection postId={post.id} />
         </div>
       </section>
     </main>
