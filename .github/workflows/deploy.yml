@@ -10,6 +10,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
+    - name: Test SSH connectivity
+      run: ssh -v -o StrictHostKeyChecking=no root@${{ secrets.VPS_HOST }} echo "✅ Connected"
+    
+
     - name: Checkout repository
       uses: actions/checkout@v3
       with:
