@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+sentence-transformers==2.2.2
+scikit-learn
+transformers==4.31.0
+huggingface_hub==0.16.4
+numpy
+torch

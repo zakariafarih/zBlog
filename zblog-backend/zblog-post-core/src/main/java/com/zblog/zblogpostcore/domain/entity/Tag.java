@@ -16,15 +16,22 @@ public class Tag {
     @Column(unique = true, nullable = false)
     private String name;
 
+    @Column
+    private String category;
+
     @ManyToMany(mappedBy = "tags", fetch = FetchType.LAZY)
     private List<Post> posts = new ArrayList<>();
 
-    // Getters/Setters
+    // Getters and Setters
+
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
+
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
 
     public List<Post> getPosts() { return posts; }
     public void setPosts(List<Post> posts) { this.posts = posts; }

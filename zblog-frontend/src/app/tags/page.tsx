@@ -1,20 +1,25 @@
-'use client'
+"use client"
 
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import TagCard from '@/components/tags/TagCard'
 import { getAllTags } from '@/services/postService'
-import { getSmartTagCategory, TagCategory } from '@/lib/getSmartTagCategory'
 import { tagCategoryToBackgroundMap } from '@/lib/tagCategoryToBackgroundMap'
-import Fallback from '@/components/Fallback/Fallback'
+import Fallback from '@/components/fallback/Fallback'
 import NoTagsHolder from '@/components/tags/NoTagsHolder'
 import { useAuth } from 'react-oidc-context'
+import { TagCategory } from '@/lib/getSmartTagCategory'
 
 interface TagData {
   title: string
   image?: string
   description?: string
+}
+
+interface TagDTO {
+  name: string;
+  category: TagCategory;
 }
 
 export default function TagsPage() {
@@ -29,14 +34,12 @@ export default function TagsPage() {
   
     async function fetchTags() {
       try {
-        const tagNames = await getAllTags(token)
-        const tagData: TagData[] = await Promise.all(
-          tagNames.map(async (tagName) => {
-            const category: TagCategory = await getSmartTagCategory(tagName)
-            const image = tagCategoryToBackgroundMap[category]
-            return { title: tagName, image, description: '' }
-          })
-        )
+        // getAllTags now returns an array of TagDTO objects
+        const tagDTOs: TagDTO[] = await getAllTags(token)
+        const tagData: TagData[] = tagDTOs.map(tagDTO => {
+          const image = tagCategoryToBackgroundMap[tagDTO.category]
+          return { title: tagDTO.name, image, description: '' }
+        })
         setTags(tagData)
       } catch (error) {
         console.error('Error fetching tags:', error)

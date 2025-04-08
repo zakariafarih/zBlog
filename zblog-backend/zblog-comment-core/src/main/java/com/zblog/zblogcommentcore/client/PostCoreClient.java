@@ -26,8 +26,8 @@ public class PostCoreClient {
     public void validatePostExists(UUID postId, String accessToken) {
         try {
             String fullUrl = postCoreBaseUrl.endsWith("/")
-                    ? postCoreBaseUrl + "post/api/posts/" + postId
-                    : postCoreBaseUrl + "/post/api/posts/" + postId;
+                    ? postCoreBaseUrl + "api/posts/" + postId
+                    : postCoreBaseUrl + "/api/posts/" + postId;
 
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(accessToken);
@@ -46,8 +46,8 @@ public class PostCoreClient {
 
     public void updateCommentCount(UUID postId, int delta, String accessToken) {
         String fullUrl = postCoreBaseUrl.endsWith("/")
-                ? postCoreBaseUrl + "post/api/posts/" + postId + "/comment-count"
-                : postCoreBaseUrl + "/post/api/posts/" + postId + "/comment-count";
+                ? postCoreBaseUrl + "api/posts/" + postId + "/comment-count"
+                : postCoreBaseUrl + "/api/posts/" + postId + "/comment-count";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(accessToken);

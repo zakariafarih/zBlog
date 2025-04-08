@@ -35,7 +35,7 @@ public class FileClient {
     @CircuitBreaker(name = "s3CoreCircuitBreaker", fallbackMethod = "getFileUrlFallback")
     @Retry(name = "s3CoreRetry")
     public FileMetadataDTO getFileMetadata(String fileId, boolean isPublic) {
-        String url = String.format("%s/s3/files/%s?public=%s", s3CoreUrl, fileId, isPublic);
+        String url = String.format("%s/files/metadata/%s?public=%s", s3CoreUrl, fileId, isPublic);
         ResponseEntity<FileMetadataDTO> response = restTemplate.getForEntity(url, FileMetadataDTO.class);
         return response.getBody();
     }

@@ -1,6 +1,17 @@
+# --------------- zblog-user-core Dockerfile ---------------
+# Minimal image for running a Spring Boot jar
 FROM eclipse-temurin:21-jre-alpine
+
+# Create a non-root user (optional but recommended)
+RUN addgroup -S zblog && adduser -S zblog -G zblog
+
 WORKDIR /app
-COPY target/zblog-user-core-0.0.1-SNAPSHOT.jar app.jar
+COPY target/*.jar /app/user-core.jar
+
+# Use the non-root user
+USER zblog
+
 EXPOSE 8092
-HEALTHCHECK --interval=30s --timeout=5s CMD curl -f http://localhost:8092/user/health || exit 1
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# If you rely on environment variables from .env (through docker-compose),
+# you do NOT necessarily need to copy .env inside the container.
+CMD ["java", "-jar", "/app/user-core.jar"]

@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { react } from "@/services/postService";
-import { PostDTO } from "@/services/postService";
+import { react, ReactionDTO } from "@/services/postService";
 
 export function useTogglePostReaction() {
   const [loading, setLoading] = useState(false);
@@ -10,12 +9,12 @@ export function useTogglePostReaction() {
     postId: string,
     reactionType: string,
     token: string
-  ): Promise<PostDTO | undefined> => {
+  ): Promise<ReactionDTO | undefined> => {
     try {
       setLoading(true);
       setError(undefined);
-      const updatedPost = await react(postId, reactionType, token);
-      return updatedPost;
+      const reactionUpdate = await react(postId, reactionType, token);
+      return reactionUpdate;
     } catch (err: any) {
       setError(err.message || "Error toggling post reaction");
       return undefined;

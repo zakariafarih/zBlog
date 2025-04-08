@@ -2,11 +2,11 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import AboutHeader from "@/components/About/AboutHeader";
-import TechStackOverview from "@/components/About/TechStackOverview";
-import PersonalNote from "@/components/About/PersonalNote";
-import UpcomingFeatures from "@/components/About/UpcomingFeatures";
-import ContactSection from "@/components/About/ContactSection";
+import AboutHeader from "@/components/about/AboutHeader";
+import TechStackOverview from "@/components/about/TechStackOverview";
+import PersonalNote from "@/components/about/PersonalNote";
+import UpcomingFeatures from "@/components/about/UpcomingFeatures";
+import ContactSection from "@/components/about/ContactSection";
 
 export default function AboutPage() {
   return (

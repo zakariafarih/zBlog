@@ -4,7 +4,7 @@ import React from "react"
 import { useInfiniteQuery } from "@tanstack/react-query"
 import { explorePosts, PostDTO } from "@/services/postService"
 import RecentPosts from "@/components/posts/RecentPosts"
-import Fallback from "@/components/Fallback/Fallback"
+import Fallback from "@/components/fallback/Fallback"
 import NoPostsHolder from "@/components/posts/NoPostsHolder"
 import { useAuth } from "react-oidc-context"
 

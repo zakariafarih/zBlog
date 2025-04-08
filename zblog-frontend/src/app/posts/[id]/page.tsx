@@ -1,14 +1,16 @@
-"use client";
+'use client';
 
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useAuth } from "react-oidc-context";
 import DOMPurify from "dompurify";
 import { getPost, PostDTO } from "@/services/postService";
+import { getUserProfile } from "@/services/userService"; 
 import PostDetail from "@/components/posts/PostDetail/PostDetail";
-import Fallback from "@/components/Fallback/Fallback";
-import ErrorBoundary from "@/components/Fallback/ErrorBoundary";
+import Fallback from "@/components/fallback/Fallback";
+import ErrorBoundary from "@/components/fallback/ErrorBoundary";
 import { useTogglePostReaction } from "@/hooks/post/useTogglePostReaction";
+import { createBookmark } from "@/services/bookmarkService";
 
 export default function SinglePostPage() {
   const params = useParams();
@@ -21,6 +23,10 @@ export default function SinglePostPage() {
       : "";
 
   const [post, setPost] = useState<PostDTO | null>(null);
+  const [author, setAuthor] = useState<{ name: string; avatarUrl: string }>({
+    name: "Unknown Author",
+    avatarUrl: "/avatars/default.png",
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toggle: togglePostReaction } = useTogglePostReaction();
@@ -34,6 +40,22 @@ export default function SinglePostPage() {
             throw new Error("Post ID is missing in response");
           }
           setPost(data);
+          if (data.authorId) {
+            getUserProfile(data.authorId, token)
+              .then((authorData) => {
+                setAuthor({
+                  name: authorData.username,
+                  avatarUrl: authorData.profileImageUrl || "/avatars/default.png",
+                });
+              })
+              .catch((err) => {
+                console.error("Failed to load author info:", err);
+                setAuthor({
+                  name: `User ${(data.authorId ?? "unknown").substring(0, 6)}`,
+                  avatarUrl: "/avatars/default.png",
+                });
+              });
+          }
           setLoading(false);
         })
         .catch((err) => {
@@ -55,44 +77,8 @@ export default function SinglePostPage() {
     return <Fallback message="No post found." />;
   }
 
+  // Sanitize post content to prevent XSS
   const safeContent = DOMPurify.sanitize(post.content);
-
-  const handleLike = async () => {
-    if (auth.user && post.id) {
-      const updatedPost = await togglePostReaction(
-        post.id,
-        "like",
-        auth.user.access_token
-      );
-      if (updatedPost) {
-        setPost(updatedPost);
-      }
-    }
-  };
-
-  const handleBookmark = async () => {
-    if (auth.user && post.id) {
-      const updatedPost = await togglePostReaction(
-        post.id,
-        "bookmark",
-        auth.user.access_token
-      );
-      if (updatedPost) {
-        setPost(updatedPost);
-      }
-    }
-  };
-
-  const handleShare = async () => {
-    navigator.clipboard.writeText(window.location.href);
-    alert("Post URL copied to clipboard!");
-  };
-
-  const handleCommentClick = () => {
-    document
-      .getElementById("comment-section")
-      ?.scrollIntoView({ behavior: "smooth" });
-  };
 
   return (
     <ErrorBoundary fallback={<Fallback message="Something went wrong rendering the post." />}>
@@ -100,19 +86,64 @@ export default function SinglePostPage() {
         post={{
           id: post.id,
           title: post.title,
-          coverImageUrl: post.bannerImageUrl || "/default-cover.jpg",
+          coverImageUrl: post.bannerImageUrl || "avatars/default-cover.jpg",
           content: safeContent,
           tags: post.tags || [],
           publishedAt: post.createdAt ? new Date(post.createdAt) : new Date(),
           author: {
-            name: post.authorId ? `User ${post.authorId.substring(0, 6)}` : "Unknown Author",
-            avatarUrl: "/avatars/default.png",
+            name: author.name,
+            avatarUrl: author.avatarUrl,
           },
         }}
-        onLike={handleLike}
-        onBookmark={handleBookmark}
-        onShare={handleShare}
-        onCommentClick={handleCommentClick}
+        onLike={async () => {
+          if (auth.user && post.id) {
+            // Optimistic update of likeCount
+            setPost((prev) =>
+              prev ? { ...prev, likeCount: (prev.likeCount ?? 0) + 1 } : prev
+            );
+            const reactionUpdate = await togglePostReaction(
+              post.id,
+              "like",
+              auth.user.access_token
+            );
+            if (reactionUpdate) {
+              setPost((prev) =>
+                prev ? { ...prev, likeCount: reactionUpdate.likeCount } : prev
+              );
+            }
+          }
+        }}
+        onBookmark={async () => {
+          if (auth.user && post.id) {
+            setPost((prev) =>
+              prev ? { ...prev, bookmarkCount: (prev.bookmarkCount ?? 0) + 1 } : prev
+            );
+            const reactionUpdate = await togglePostReaction(
+              post.id,
+              "bookmark",
+              auth.user.access_token
+            );
+            try {
+              await createBookmark(post.id, auth.user.access_token);
+            } catch (err) {
+              console.error("Error creating bookmark record:", err);
+            }
+            if (reactionUpdate) {
+              setPost((prev) =>
+                prev ? { ...prev, bookmarkCount: reactionUpdate.bookmarkCount } : prev
+              );
+            }
+          }
+        }}
+        onShare={async () => {
+          navigator.clipboard.writeText(window.location.href);
+          alert("Post URL copied to clipboard!");
+        }}
+        onCommentClick={() => {
+          document
+            .getElementById("comment-section")
+            ?.scrollIntoView({ behavior: "smooth" });
+        }}
       />
     </ErrorBoundary>
   );

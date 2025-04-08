@@ -19,6 +19,7 @@ public class PostDTO {
 
     private boolean published;
     private long viewCount;
+    private long commentCount;
     private long likeCount;
     private long heartCount;
     private long bookmarkCount;
@@ -31,8 +32,6 @@ public class PostDTO {
     private Instant scheduledPublishAt;
 
     private List<String> tags;
-
-    private long commentCount;
 
     public UUID getId() {
         return id;

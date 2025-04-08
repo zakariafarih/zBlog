@@ -47,8 +47,8 @@ public class Post {
             inverseJoinColumns = @JoinColumn(name = "tag_id"))
     private Set<Tag> tags = new HashSet<>();
 
-    @Column(nullable = false)
-    private long commentCount = 0;
+    @Column(name = "comment_count", nullable = false)
+    private long commentCount;
 
     // Getters and setters
 

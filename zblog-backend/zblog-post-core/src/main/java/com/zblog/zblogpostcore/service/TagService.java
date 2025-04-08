@@ -35,6 +35,10 @@ public class TagService {
                 });
     }
 
+    public Tag saveTag(Tag tag) {
+        return tagRepository.save(tag);
+    }
+
     public void deleteTag(UUID id) {
         tagRepository.deleteById(id);
     }

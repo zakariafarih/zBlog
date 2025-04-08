@@ -1,6 +1,13 @@
-FROM eclipse-temurin:21-jre-alpine
-WORKDIR /app
-COPY target/zblog-comment-core-0.0.1-SNAPSHOT.jar app.jar
-EXPOSE 8082
-HEALTHCHECK --interval=30s --timeout=5s CMD curl -f http://localhost:8082/comment/health || exit 1
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# --------------- zblog-comment-core Dockerfile ---------------
+    FROM eclipse-temurin:21-jre-alpine
+
+    RUN addgroup -S zblog && adduser -S zblog -G zblog
+    
+    WORKDIR /app
+    COPY target/*.jar /app/comment-core.jar
+    
+    USER zblog
+    
+    EXPOSE 8282
+    CMD ["java", "-jar", "/app/comment-core.jar"]
+    

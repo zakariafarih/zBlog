@@ -24,6 +24,7 @@ public class UserServiceImpl implements UserService {
     public UserProfileDTO getProfile(String userId, boolean resolveImageUrl) {
         UserProfile profile = userProfileRepo.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found: " + userId));
+
         return toDTO(profile, resolveImageUrl);
     }
 

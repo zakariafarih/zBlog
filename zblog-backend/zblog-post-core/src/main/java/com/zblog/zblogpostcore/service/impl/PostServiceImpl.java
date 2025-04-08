@@ -3,14 +3,17 @@ package com.zblog.zblogpostcore.service.impl;
 import com.zblog.zblogpostcore.client.FileClient;
 import com.zblog.zblogpostcore.domain.entity.Post;
 import com.zblog.zblogpostcore.domain.entity.Tag;
+import com.zblog.zblogpostcore.dto.CategoryResponse;
 import com.zblog.zblogpostcore.dto.PostDTO;
-import com.zblog.zblogpostcore.dto.PostDetailDTO;
+import com.zblog.zblogpostcore.dto.ReactionDTO;
 import com.zblog.zblogpostcore.exception.PostNotFoundException;
 import com.zblog.zblogpostcore.repository.PostRepository;
 import com.zblog.zblogpostcore.repository.TagRepository;
 import com.zblog.zblogpostcore.service.PostService;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -18,10 +21,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.Predicate;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 public class PostServiceImpl implements PostService {
@@ -29,12 +37,21 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final TagRepository tagRepository;
     private final FileClient fileClient;
+    private static final Logger log = LoggerFactory.getLogger(PostServiceImpl.class);
+    private final RestTemplate restTemplate = new RestTemplate();
 
     @Value("${aws.bucketName}")
     private String bucketName;
 
     @Value("${aws.region}")
     private String awsRegion;
+
+    @Value("${python.classifier.url}")
+    private String classifierUrl;
+
+    // Inject the EntityManager to force refresh
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public PostServiceImpl(PostRepository postRepository,
                            TagRepository tagRepository,
@@ -113,11 +130,12 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PostDTO getPost(UUID postId, String currentUserId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException("Post not found"));
-
-        // If not published, only the owner can see it
+        // Force refresh to get latest DB state
+        entityManager.refresh(post);
         if (!post.isPublished() && !post.getAuthorId().equals(currentUserId)) {
             throw new SecurityException("This post is unpublished and you are not the owner");
         }
@@ -173,7 +191,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostDTO reactToPost(UUID postId, String reactionType, String currentUserId) {
+    public ReactionDTO reactToPost(UUID postId, String reactionType, String currentUserId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException("Post not found"));
 
@@ -184,7 +202,13 @@ public class PostServiceImpl implements PostService {
             default -> throw new IllegalArgumentException("Unknown reaction type: " + reactionType);
         }
         Post saved = postRepository.save(post);
-        return mapToDTO(saved, false);
+
+        ReactionDTO dto = new ReactionDTO();
+        dto.setId(saved.getId());
+        dto.setLikeCount(saved.getLikeCount());
+        dto.setHeartCount(saved.getHeartCount());
+        dto.setBookmarkCount(saved.getBookmarkCount());
+        return dto;
     }
 
     @Override
@@ -221,6 +245,9 @@ public class PostServiceImpl implements PostService {
             dto.setBannerImageUrl(constructS3Url(post.getBannerImageKey()));
         }
 
+        log.info("[DEBUG] Mapping post: {} with commentCount={}", post.getId(), post.getCommentCount());
+        dto.setCommentCount(post.getCommentCount());
+
         return dto;
     }
 
@@ -235,15 +262,39 @@ public class PostServiceImpl implements PostService {
     /**
      * Create or find Tag entities for the given list of tag names.
      */
+    // It looks up each tag; if the tag exists but its category is null or blank, or if it’s new,
+    // then it calls the Python service to get the category and updates the tag.
     private Set<Tag> resolveTags(List<String> tagNames) {
-        return tagNames.stream()
-                .map(tagName -> tagRepository.findByNameIgnoreCase(tagName)
-                        .orElseGet(() -> {
-                            Tag newTag = new Tag();
-                            newTag.setName(tagName);
-                            return newTag;
-                        }))
-                .collect(Collectors.toSet());
+        return tagNames.stream().map(tagName -> {
+            // Try to find an existing tag
+            Tag tag = tagRepository.findByNameIgnoreCase(tagName).orElse(null);
+            if (tag == null) {
+                tag = new Tag();
+                tag.setName(tagName);
+            }
+            // If the tag does not have a category, call the Python service
+            if (tag.getCategory() == null || tag.getCategory().isBlank()) {
+                try {
+                    String url = UriComponentsBuilder.fromHttpUrl(classifierUrl)
+                            .queryParam("tag", tagName)
+                            .toUriString();
+                    // Assuming the response maps to a POJO with fields "tag" and "category"
+                    CategoryResponse response = restTemplate.getForObject(url, CategoryResponse.class);
+                    if (response != null && response.getCategory() != null) {
+                        tag.setCategory(response.getCategory());
+                    } else {
+                        tag.setCategory("misc");
+                    }
+                } catch (Exception ex) {
+                    // Log error and fallback to "misc"
+                    System.err.println("Error classifying tag '" + tagName + "': " + ex.getMessage());
+                    tag.setCategory("misc");
+                }
+                // Save or update the tag mapping
+                tag = tagRepository.save(tag);
+            }
+            return tag;
+        }).collect(Collectors.toSet());
     }
 
     @Override
@@ -277,12 +328,16 @@ public class PostServiceImpl implements PostService {
                 ));
             }
 
+            log.info("[DEBUG] Exploring posts with keywords: {}", keywords);
+
             return cb.and(predicates.toArray(new Predicate[0]));
         };
 
         // Remove any sorting from the incoming Pageable to avoid conflicts
         Pageable unsortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
         Page<Post> postPage = postRepository.findAll(spec, unsortedPageable);
+
+        log.info("[DEBUG] Exploring posts with keywords: {}, found count: {}", keywords, postPage.getTotalElements());
 
         // Apply custom sorting in memory
         List<Post> sortedPosts = new ArrayList<>(postPage.getContent());
@@ -308,6 +363,8 @@ public class PostServiceImpl implements PostService {
                 .map(post -> mapToDTO(post, true))
                 .collect(Collectors.toList());
 
+        System.out.println("[DEBUG] Exploring posts: " + sortedPosts);
+
         // Return a new PageImpl preserving the original pagination metadata.
         return new PageImpl<>(dtos, pageable, postPage.getTotalElements());
     }
@@ -324,23 +381,23 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostDetailDTO getFullPost(UUID postId, String currentUserId) {
+    @Transactional(readOnly = true)
+    public PostDTO getFullPost(UUID postId, String currentUserId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException("Post not found"));
-
-        // If post is unpublished, only the owner can view it
+        // Refresh the entity so we get the latest DB state (including commentCount)
+        entityManager.refresh(post);
         if (!post.isPublished() && !post.getAuthorId().equals(currentUserId)) {
             throw new SecurityException("This post is unpublished and you are not the owner");
         }
-
         return mapToDetailDTO(post);
     }
 
     /**
      * Converts a Post entity into a full-detail DTO (without truncation).
      */
-    private PostDetailDTO mapToDetailDTO(Post post) {
-        PostDetailDTO dto = new PostDetailDTO();
+    private PostDTO mapToDetailDTO(Post post) {
+        PostDTO dto = new PostDTO();
         dto.setId(post.getId());
         dto.setAuthorId(post.getAuthorId());
         dto.setTitle(post.getTitle());
@@ -357,6 +414,9 @@ public class PostServiceImpl implements PostService {
         dto.setScheduledPublishAt(post.getScheduledPublishAt());
         dto.setTags(post.getTags().stream().map(Tag::getName).collect(Collectors.toList()));
 
+        System.out.println("[DEBUG] Mapping post: " + post.getId() + " with commentCount=" + post.getCommentCount());
+        dto.setCommentCount(post.getCommentCount());
+
         if (post.getBannerImageKey() != null) {
             dto.setBannerImageUrl(constructS3Url(post.getBannerImageKey()));
         }
@@ -368,7 +428,7 @@ public class PostServiceImpl implements PostService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException("Post not found"));
         post.setCommentCount(post.getCommentCount() + 1);
-        postRepository.save(post);
+        postRepository.saveAndFlush(post);
     }
 
     @Override

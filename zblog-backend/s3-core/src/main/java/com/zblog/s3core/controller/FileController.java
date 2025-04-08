@@ -83,4 +83,19 @@ public class FileController {
         List<S3FileMetadata> files = s3Service.listFiles(prefix);
         return ResponseEntity.ok(files);
     }
+
+    @GetMapping("/metadata/**")
+    public ResponseEntity<S3FileMetadata> getFileMetadata(
+            HttpServletRequest request,
+            @RequestParam(value = "public", defaultValue = "false") boolean isPublic
+    ) throws S3ServiceException {
+        String fullPath = request.getRequestURI().substring(
+                request.getRequestURI().indexOf("/metadata/") + "/metadata/".length()
+        );
+
+        S3FileMetadata metadata = new S3FileMetadata();
+        metadata.setKey(fullPath);
+        metadata.setUrl(s3Service.getFileUrl(fullPath, isPublic));
+        return ResponseEntity.ok(metadata);
+    }
 }

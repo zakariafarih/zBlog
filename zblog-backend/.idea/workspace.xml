@@ -5,23 +5,97 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="52557961-8265-43bb-a8a2-baeed8e79ed3" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../combined.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../combined.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lambda-add-permission-policy.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/dto/TagDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.github/workflows/deploy.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.vscode/settings.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../sync-envs.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/916c8771-4305-4097-8eab-423c29b0ca34.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/916c8771-4305-4097-8eab-423c29b0ca34/storage_v2/_src_/schema/information_schema.FNRwLQ.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/916c8771-4305-4097-8eab-423c29b0ca34/storage_v2/_src_/schema/mysql.osA4Bg.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/916c8771-4305-4097-8eab-423c29b0ca34/storage_v2/_src_/schema/performance_schema.kIw0nw.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/916c8771-4305-4097-8eab-423c29b0ca34/storage_v2/_src_/schema/sys.zb4BAA.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/cd7e31c2-f888-482c-8275-2f57d52478c7.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/cd7e31c2-f888-482c-8275-2f57d52478c7/storage_v2/_src_/schema/information_schema.FNRwLQ.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/cd7e31c2-f888-482c-8275-2f57d52478c7/storage_v2/_src_/schema/mysql.osA4Bg.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/cd7e31c2-f888-482c-8275-2f57d52478c7/storage_v2/_src_/schema/performance_schema.kIw0nw.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/cd7e31c2-f888-482c-8275-2f57d52478c7/storage_v2/_src_/schema/sys.zb4BAA.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/f4f17020-7f54-46cb-92a3-b4fe42827b59.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/f4f17020-7f54-46cb-92a3-b4fe42827b59/storage_v2/_src_/schema/information_schema.FNRwLQ.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/f4f17020-7f54-46cb-92a3-b4fe42827b59/storage_v2/_src_/schema/mysql.osA4Bg.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/f4f17020-7f54-46cb-92a3-b4fe42827b59/storage_v2/_src_/schema/performance_schema.kIw0nw.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/f4f17020-7f54-46cb-92a3-b4fe42827b59/storage_v2/_src_/schema/sys.zb4BAA.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/f4f17020-7f54-46cb-92a3-b4fe42827b59/storage_v2/_src_/schema/zblog_post_core.e15lRQ.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/fc228d06-9671-4dec-9f39-cf99a05bf213.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/fc228d06-9671-4dec-9f39-cf99a05bf213/storage_v2/_src_/schema/information_schema.FNRwLQ.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/fc228d06-9671-4dec-9f39-cf99a05bf213/storage_v2/_src_/schema/mysql.osA4Bg.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/fc228d06-9671-4dec-9f39-cf99a05bf213/storage_v2/_src_/schema/performance_schema.kIw0nw.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/fc228d06-9671-4dec-9f39-cf99a05bf213/storage_v2/_src_/schema/sys.zb4BAA.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/fc228d06-9671-4dec-9f39-cf99a05bf213/storage_v2/_src_/schema/zblog_user_core.ME4_4g.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/jarRepositories.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/nginx.conf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/s3-core/Dockerfile" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/s3-core/docker-compose.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/s3-core/dockerignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/s3-core/src/main/java/com/zblog/s3core/controller/FileController.java" beforeDir="false" afterPath="$PROJECT_DIR$/s3-core/src/main/java/com/zblog/s3core/controller/FileController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zblog-comment-core/Dockerfile" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/zblog-comment-core/docker-compose.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/zblog-comment-core/dockerignore" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/client/PostCoreClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/client/PostCoreClient.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/service/impl/CommentServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-comment-core/src/main/java/com/zblog/zblogcommentcore/service/impl/CommentServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zblog-comment-core/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-comment-core/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zblog-post-core/Dockerfile" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/zblog-post-core/docker-compose.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/zblog-post-core/dockerignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/config/WebSecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/config/WebSecurityConfig.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/controller/PostController.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/controller/PostController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/controller/TagController.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/controller/TagController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/domain/entity/Post.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/domain/entity/Post.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/domain/entity/Tag.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/domain/entity/Tag.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/dto/PostDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/dto/PostDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/dto/PostDetailDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/dto/PostDetailDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/dto/PostDetailDTO.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/service/PostService.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/service/PostService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/service/TagService.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/service/TagService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/service/impl/PostServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/java/com/zblog/zblogpostcore/service/impl/PostServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/components/posts/PostCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/components/posts/PostCard.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/components/posts/PostDetail/CommentForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/components/posts/PostDetail/CommentForm.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zblog-post-core/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-post-core/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zblog-user-core/Dockerfile" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/zblog-user-core/docker-compose.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/zblog-user-core/src/main/java/com/zblog/zblogusercore/client/FileClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-user-core/src/main/java/com/zblog/zblogusercore/client/FileClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zblog-user-core/src/main/java/com/zblog/zblogusercore/service/impl/BookmarkServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-user-core/src/main/java/com/zblog/zblogusercore/service/impl/BookmarkServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zblog-user-core/src/main/java/com/zblog/zblogusercore/service/impl/PostCoreClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-user-core/src/main/java/com/zblog/zblogusercore/client/PostCoreClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zblog-user-core/src/main/java/com/zblog/zblogusercore/service/impl/UserServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-user-core/src/main/java/com/zblog/zblogusercore/service/impl/UserServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zblog-user-core/src/main/java/com/zblog/zblogusercore/util/SecurityUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-user-core/src/main/java/com/zblog/zblogusercore/util/SecurityUtil.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zblog-user-core/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/zblog-user-core/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zblog-user-core/zENVUSER-Core" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../zblog-frontend/.dockerignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../zblog-frontend/Dockerfile" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../zblog-frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../zblog-frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/app/about/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/app/about/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/app/globals.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/app/posts/[id]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/app/posts/[id]/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/app/posts/mockPosts.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/app/posts/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/app/posts/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/app/recent/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/app/recent/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/app/tags/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/app/tags/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/components/About/AboutHeader.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/components/About/ContactSection.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/components/About/PersonalNote.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/components/About/TechStackOverview.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/components/About/UpcomingFeatures.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/components/Fallback/ErrorBoundary.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/components/Fallback/Fallback.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/components/landingPage/Navbar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/components/landingPage/Navbar.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/components/posts/ExplorePostsContent.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/components/posts/ExplorePostsContent.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/components/posts/PostDetail/CommentItem.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/components/posts/PostDetail/CommentItem.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/components/posts/PostDetail/CommentList.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/components/posts/PostDetail/CommentList.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/components/posts/PostDetail/CommentSection.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/components/posts/PostDetail/CommentSection.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/components/posts/PostDetail/PostDetail.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/components/posts/PostDetail/PostDetail.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/hooks/comment/useComments.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/hooks/comment/useComments.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/hooks/post/useTogglePostReaction.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/hooks/post/useTogglePostReaction.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/lib/getSmartTagCategory.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/lib/getSmartTagCategory.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../zblog-frontend/src/services/postService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../zblog-frontend/src/services/postService.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -62,9 +136,10 @@
     &quot;Spring Boot.ZblogCommentCoreApplication.executor&quot;: &quot;Run&quot;,
     &quot;Spring Boot.ZblogPostCoreApplication.executor&quot;: &quot;Run&quot;,
     &quot;Spring Boot.ZblogUserCoreApplication.executor&quot;: &quot;Run&quot;,
+    &quot;database.data.extractors.current.export.id&quot;: &quot;Comma-separated (CSV)_id&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/zakaria/zBlog/zblog-backend&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/zakaria/zBlog&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -100,7 +175,7 @@
       </set>
     </option>
   </component>
-  <component name="RunManager" selected="Docker.zblog-post-core.zblog-post-core: Compose Deployment">
+  <component name="RunManager" selected="Spring Boot.ZblogPostCoreApplication">
     <configuration name="S3CoreApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" temporary="true" nameIsGenerated="true">
       <module name="s3-core" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="com.zblog.s3core.S3CoreApplication" />
@@ -177,8 +252,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Docker.zblog-post-core.zblog-post-core: Compose Deployment" />
         <item itemvalue="Spring Boot.ZblogPostCoreApplication" />
+        <item itemvalue="Docker.zblog-post-core.zblog-post-core: Compose Deployment" />
         <item itemvalue="Spring Boot.S3CoreApplication" />
         <item itemvalue="Spring Boot.ZblogCommentCoreApplication" />
         <item itemvalue="Spring Boot.ZblogUserCoreApplication" />
@@ -212,6 +287,13 @@
       <workItem from="1743726062627" duration="8572000" />
       <workItem from="1743758816235" duration="8375000" />
       <workItem from="1743819574672" duration="2435000" />
+      <workItem from="1743844136482" duration="35497000" />
+      <workItem from="1744013815592" duration="6872000" />
+      <workItem from="1744062225799" duration="37000" />
+      <workItem from="1744062269262" duration="88000" />
+      <workItem from="1744062363884" duration="31000" />
+      <workItem from="1744062400583" duration="32000" />
+      <workItem from="1744090186792" duration="737000" />
     </task>
     <servers />
   </component>

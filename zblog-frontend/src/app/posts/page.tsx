@@ -2,8 +2,8 @@
 
 import React, { Suspense } from "react";
 import ExplorePostsContent from "@/components/posts/ExplorePostsContent";
-import Fallback from "@/components/Fallback/Fallback";
-import ErrorBoundary from "@/components/Fallback/ErrorBoundary";
+import Fallback from "@/components/fallback/Fallback";
+import ErrorBoundary from "@/components/fallback/ErrorBoundary";
 
 export default function ExplorePostsPage() {
   return (

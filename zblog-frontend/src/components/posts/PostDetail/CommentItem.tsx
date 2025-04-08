@@ -6,8 +6,8 @@ import { MoreVertical, Trash2 } from "lucide-react";
 import ReactionButtons from "./ReactionButtons";
 import ReplyButton from "./ReplyButton";
 import { CommentResponseDTO, deleteComment } from "@/services/commentService";
-import { getAuthorName } from "@/services/authorCache";
 import { useAuth } from "react-oidc-context";
+import { getUserProfile } from "@/services/userService";
 
 interface CommentItemProps {
   comment: CommentResponseDTO;
@@ -26,8 +26,15 @@ export default function CommentItem({ comment, onReply, onDelete }: CommentItemP
     async function resolveAuthor() {
       if (comment.authorId) {
         const token = auth.user?.access_token;
-        const name = await getAuthorName(comment.authorId, token);
-        setDisplayName(name);
+        try {
+          const authorData = await getUserProfile(comment.authorId, token);
+          setDisplayName(authorData.username);
+          setAvatarUrl(authorData.profileImageUrl || "/avatars/default.png");
+        } catch (err) {
+          console.error("Error resolving author profile:", err);
+          setDisplayName(`User ${comment.authorId.substring(0, 6)}`);
+          setAvatarUrl("/avatars/default.png");
+        }
       }
     }
     resolveAuthor();
@@ -48,13 +55,18 @@ export default function CommentItem({ comment, onReply, onDelete }: CommentItemP
 
   return (
     <div className="flex items-start gap-4 py-4 border-b border-slate-700">
-      <div className="w-10 h-10 flex-shrink-0 rounded-full overflow-hidden">
+      <div className="relative w-10 h-10 flex-shrink-0 rounded-full overflow-hidden">
         <Image
           src={avatarUrl}
           alt={displayName}
           width={40}
           height={40}
-          className="rounded-full"
+          className="rounded-full object-cover"
+          loading="eager"
+          priority
+          placeholder="blur"
+          blurDataURL="/avatars/placeholder.png"
+          onError={() => setAvatarUrl("/avatars/default.png")}
         />
       </div>
       <div className="flex-1">

@@ -3,26 +3,39 @@ import axios, { AxiosError } from 'axios';
 const postCoreBaseURL =
   (process.env.NEXT_PUBLIC_POST_CORE_URL ?? 'http://localhost:8081/post').replace(/\/+$/, '');
 
-  export interface PostDTO {
-    id?: string;
-    authorId?: string;
-    title: string;
-    content: string;
-    published?: boolean;
-    viewCount?: number;
-    likeCount?: number;
-    heartCount?: number;
-    bookmarkCount?: number;
-    bannerImageKey?: string;
-    bannerImageUrl?: string;
-    createdAt?: string;
-    updatedAt?: string;
-    scheduledPublishAt?: string;
-    tags?: string[];
-  }
+export interface PostDTO {
+  id?: string;
+  authorId?: string;
+  title: string;
+  content: string;
+  published?: boolean;
+  viewCount?: number;
+  likeCount?: number;
+  heartCount?: number;
+  bookmarkCount?: number;
+  bannerImageKey?: string;
+  bannerImageUrl?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  scheduledPublishAt?: string;
+  tags?: string[];
+  commentCount?: number;
+}
 
-// The Page<T> interface can be reused from userService (or define your own).
+export interface TagDTO {
+  name: string;
+  category: TagCategory;
+}
+
+export interface ReactionDTO {
+  id: string;
+  likeCount: number;
+  heartCount: number;
+  bookmarkCount: number;
+}
+
 import { Page } from './userService';
+import { TagCategory } from '@/lib/getSmartTagCategory';
 
 /**
  * getPostHealth: GET /post/health
@@ -85,7 +98,9 @@ export async function explorePosts(
   return res.data;
 }
 
-// CREATE: POST /post/api/posts
+/**
+ * CREATE: POST /post/api/posts
+ */
 export async function createPost(
   postDTO: PostDTO,
   authToken?: string
@@ -104,6 +119,9 @@ export async function createPost(
   }
 }
 
+/**
+ * GET single post: GET /post/api/posts/{postId}
+ */
 export async function getPost(postId: string, authToken?: string): Promise<PostDTO> {
   const url = `${postCoreBaseURL}/api/posts/${postId}`;
   const res = await axios.get<PostDTO>(url, {
@@ -112,7 +130,9 @@ export async function getPost(postId: string, authToken?: string): Promise<PostD
   return res.data;
 }
 
-// UPDATE: PUT /post/api/posts/{postId}
+/**
+ * UPDATE post: PUT /post/api/posts/{postId}
+ */
 export async function updatePost(
   postId: string,
   postDTO: PostDTO,
@@ -132,7 +152,9 @@ export async function updatePost(
   }
 }
 
-// DELETE: DELETE /post/api/posts/{postId}
+/**
+ * DELETE post: DELETE /post/api/posts/{postId}
+ */
 export async function deletePost(
   postId: string,
   authToken?: string
@@ -149,7 +171,9 @@ export async function deletePost(
   }
 }
 
-// LIST/PAGINATION: GET /post/api/posts?publishedOnly={true|false}&page=X&size=Y
+/**
+ * LIST posts: GET /post/api/posts?publishedOnly=...&page=X&size=Y
+ */
 export async function getAllPosts(
   publishedOnly: boolean,
   page: number,
@@ -157,12 +181,10 @@ export async function getAllPosts(
   authToken?: string
 ): Promise<Page<PostDTO>> {
   const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
-
-  // 1. Fetch the posts
   const url = `${postCoreBaseURL}/api/posts?publishedOnly=${publishedOnly}&page=${page}&size=${size}`;
   const res = await axios.get<Page<PostDTO>>(url, { headers });
 
-  // 2. Call /visit endpoint to log the event
+  /*
   const visitUrl = `${postCoreBaseURL}/api/posts/visit`;
   try {
     await axios.post(visitUrl, {
@@ -174,11 +196,13 @@ export async function getAllPosts(
   } catch (e) {
     console.warn("Failed to log post list visit:", e);
   }
-
+    */
   return res.data;
 }
 
-// SEARCH: GET /post/api/posts/search?keyword=...&publishedOnly=...
+/**
+ * SEARCH posts: GET /post/api/posts/search?keyword=...&publishedOnly=...
+ */
 export async function searchPosts(
   keyword: string,
   publishedOnly: boolean,
@@ -195,7 +219,9 @@ export async function searchPosts(
   return res.data;
 }
 
-// LIST BY AUTHOR: GET /post/api/posts/by-author/{authorId}?publishedOnly=...
+/**
+ * LIST posts by author: GET /post/api/posts/by-author/{authorId}?publishedOnly=...
+ */
 export async function getPostsByAuthor(
   authorId: string,
   publishedOnly: boolean,
@@ -211,7 +237,9 @@ export async function getPostsByAuthor(
   }
 }
 
-// INCREMENT VIEW COUNT: PATCH /post/api/posts/{postId}/view
+/**
+ * INCREMENT view count: PATCH /post/api/posts/{postId}/view
+ */
 export async function incrementView(
   postId: string
 ): Promise<PostDTO> {
@@ -224,15 +252,18 @@ export async function incrementView(
   }
 }
 
-// REACT: PATCH /post/api/posts/{postId}/react?type=like|heart|...
+/**
+ * REACT: PATCH /post/api/posts/{postId}/react?type=like|heart|...
+ * Updated to return ReactionDTO instead of full PostDTO.
+ */
 export async function react(
   postId: string,
   reactionType: string,
   authToken?: string
-): Promise<PostDTO> {
+): Promise<ReactionDTO> {
   try {
     const url = `${postCoreBaseURL}/api/posts/${postId}/react?type=${reactionType}`;
-    const res = await axios.patch<PostDTO>(
+    const res = await axios.patch<ReactionDTO>(
       url,
       {},
       {
@@ -247,11 +278,13 @@ export async function react(
   }
 }
 
-// GET ALL TAGS: GET /post/api/tags
-export async function getAllTags(authToken?: string): Promise<string[]> {
+/**
+ * GET ALL TAGS: GET /post/api/tags
+ */
+export async function getAllTags(authToken?: string): Promise<TagDTO[]> {
   try {
     const url = `${postCoreBaseURL}/api/tags`;
-    const res = await axios.get<string[]>(url, {
+    const res = await axios.get<TagDTO[]>(url, {
       headers: {
         ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
       },
@@ -262,10 +295,6 @@ export async function getAllTags(authToken?: string): Promise<string[]> {
   }
 }
 
-
-// ---------------
-// Error Handling
-// ---------------
 function handleAxiosError(error: unknown): never {
   if (axios.isAxiosError(error)) {
     const err = error as AxiosError;

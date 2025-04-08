@@ -4,6 +4,8 @@ import { motion } from "framer-motion"
 import Link from "next/link"
 import { useEffect } from "react"
 import { useAuth } from "react-oidc-context"
+import Lottie from "lottie-react"
+import premiumAnimation from "@/assets/animations/premium-content.json"
 
 export interface HeroSectionProps {
   title?: string
@@ -26,7 +28,6 @@ export default function HeroSection({
     }
   }, [auth.isAuthenticated, auth.user])
 
-  
   return (
     <section className="relative overflow-hidden">
       {/* Background decorative elements */}
@@ -56,14 +57,12 @@ export default function HeroSection({
             {title}
           </h1>
           <p className="text-slate-400 text-lg md:text-xl max-w-xl">{subtitle}</p>
-          {/* Button Animation: transform origin set to center */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, ease: "easeOut", delay: 0.5 }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            style={{ originX: 0.5, originY: 0.5 }}
             className="inline-block ml-6"
           >
             <Link href="/register" className="inline-block">
@@ -88,16 +87,14 @@ export default function HeroSection({
               className="absolute inset-0 bg-gradient-to-r from-slate-800 to-slate-700 rounded-2xl transform rotate-6 opacity-40 blur-xl"
             />
             <div className="relative bg-gradient-to-r from-slate-800 to-slate-700 p-8 rounded-2xl shadow-2xl">
-            <div className="h-64 flex items-center justify-center">
-              <motion.img
-                src="/images/hero-preview.png"
-                alt="Premium Content Preview"
-                className="max-h-full object-contain"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8, delay: 0.6 }}
-              />
-            </div>
+              <div className="h-64 flex items-center justify-center">
+                <Lottie
+                  animationData={premiumAnimation}
+                  loop
+                  autoplay
+                  style={{ height: "100%", width: "100%" }}
+                />
+              </div>
             </div>
           </div>
         </motion.div>

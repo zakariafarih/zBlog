@@ -1,0 +1,134 @@
+version: '3.8'
+
+services:
+  # ------------------------------------------------------------------------
+  zblog-user-core:
+    container_name: zblog-user-core
+    build:
+      context: ./zblog-backend/zblog-user-core
+    env_file:
+      - ./zblog-backend/.env
+    networks:
+      - zblog-net
+    expose:
+      - "8092"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8092/user/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # ------------------------------------------------------------------------
+  zblog-post-core:
+    container_name: zblog-post-core
+    build:
+      context: ./zblog-backend/zblog-post-core
+    env_file:
+      - ./zblog-backend/.env
+    networks:
+      - zblog-net
+    expose:
+      - "8081"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/post/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # ------------------------------------------------------------------------
+  zblog-comment-core:
+    container_name: zblog-comment-core
+    build:
+      context: ./zblog-backend/zblog-comment-core
+    env_file:
+      - ./zblog-backend/.env
+    networks:
+      - zblog-net
+    expose:
+      - "8282"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8282/comment/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # ------------------------------------------------------------------------
+  s3-core:
+    container_name: s3-core
+    build:
+      context: ./zblog-backend/s3-core
+    env_file:
+      - ./zblog-backend/.env
+    networks:
+      - zblog-net
+    expose:
+      - "8083"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/s3/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # ------------------------------------------------------------------------
+  python-classifier:
+    container_name: python-classifier
+    build:
+      context: ./zblog-backend/python-classifier
+    env_file:
+      - ./zblog-backend/.env
+    networks:
+      - zblog-net
+    expose:
+      - "8001"
+    volumes:
+      - /opt/zblog/models/sentence-transformer:/app/models
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/classifier/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # ------------------------------------------------------------------------
+  zblog-frontend:
+    container_name: zblog-frontend
+    build:
+      context: ./zblog-frontend
+    networks:
+      - zblog-net
+    expose:
+      - "3000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # ------------------------------------------------------------------------
+  zblog-gateway:
+    container_name: zblog-gateway
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    depends_on:
+      - zblog-frontend
+      - zblog-user-core
+      - zblog-post-core
+      - zblog-comment-core
+      - s3-core
+      - python-classifier
+    networks:
+      - zblog-net
+    ports:
+      - "80:80"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      # Mount our local nginx.conf into the container
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
+networks:
+  zblog-net:
+    driver: bridge

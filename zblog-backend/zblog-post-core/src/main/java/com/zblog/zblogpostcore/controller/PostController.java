@@ -1,7 +1,7 @@
 package com.zblog.zblogpostcore.controller;
 
 import com.zblog.zblogpostcore.dto.PostDTO;
-import com.zblog.zblogpostcore.dto.PostDetailDTO;
+import com.zblog.zblogpostcore.dto.ReactionDTO;
 import com.zblog.zblogpostcore.service.PostService;
 import com.zblog.zblogpostcore.util.SecurityUtil;
 import jakarta.mail.internet.MimeMessage;
@@ -56,6 +56,7 @@ public class PostController {
         List<String> tagList = (tags != null && !tags.isBlank())
                 ? List.of(tags.split(",")).stream().map(String::trim).filter(s -> !s.isEmpty()).collect(Collectors.toList())
                 : null;
+        System.out.println("HEEEEEEEEEEEEEEEEEEERE");
         return postService.explorePosts(keywords, tagList, sort, pageable, currentUserId);
     }
 
@@ -68,7 +69,7 @@ public class PostController {
 
     // READ (single post)
     @GetMapping("/{postId}")
-    public PostDetailDTO getPost(@PathVariable("postId") UUID postId) {
+    public PostDTO getPost(@PathVariable("postId") UUID postId) {
         String currentUserId = SecurityUtil.getCurrentUserIdOrNull();
         return postService.getFullPost(postId, currentUserId);
     }
@@ -116,10 +117,10 @@ public class PostController {
         return postService.incrementViewCount(postId);
     }
 
-    // REACT
+    // REACT: only return reaction counts
     @PatchMapping("/{postId}/react")
-    public PostDTO react(@PathVariable("postId") UUID postId,
-                         @RequestParam("type") String reactionType) {
+    public ReactionDTO react(@PathVariable("postId") UUID postId,
+                             @RequestParam("type") String reactionType) {
         String currentUserId = SecurityUtil.getCurrentUserId();
         return postService.reactToPost(postId, reactionType, currentUserId);
     }

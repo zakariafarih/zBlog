@@ -1,7 +1,7 @@
 package com.zblog.zblogpostcore.service;
 
 import com.zblog.zblogpostcore.dto.PostDTO;
-import com.zblog.zblogpostcore.dto.PostDetailDTO;
+import com.zblog.zblogpostcore.dto.ReactionDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -19,7 +19,6 @@ public interface PostService {
     Page<PostDTO> getPostsByAuthor(String authorId, boolean onlyPublished, Pageable pageable);
 
     PostDTO incrementViewCount(UUID postId);
-    PostDTO reactToPost(UUID postId, String reactionType, String currentUserId);
 
     void validatePostExists(UUID postId);
 
@@ -39,9 +38,11 @@ public interface PostService {
      * Returns the full post (with all content) for detail view.
      * This does not truncate the content.
      */
-    PostDetailDTO getFullPost(UUID postId, String currentUserId);
+    PostDTO getFullPost(UUID postId, String currentUserId);
 
     void incrementCommentCount(UUID postId);
 
     void decrementCommentCount(UUID postId);
+
+    ReactionDTO reactToPost(UUID postId, String reactionType, String currentUserId);
 }

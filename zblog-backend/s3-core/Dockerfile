@@ -1,6 +1,13 @@
-FROM eclipse-temurin:21-jre-alpine
-WORKDIR /app
-COPY target/s3-core-0.0.1-SNAPSHOT.jar app.jar
-EXPOSE 8083
-HEALTHCHECK --interval=30s --timeout=5s CMD curl -f http://localhost:8083/s3/health || exit 1
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# --------------- s3-core Dockerfile ---------------
+    FROM eclipse-temurin:21-jre-alpine
+
+    RUN addgroup -S zblog && adduser -S zblog -G zblog
+    
+    WORKDIR /app
+    COPY target/*.jar /app/s3-core.jar
+    
+    USER zblog
+    
+    EXPOSE 8083
+    CMD ["java", "-jar", "/app/s3-core.jar"]
+    

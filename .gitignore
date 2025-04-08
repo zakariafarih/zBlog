@@ -46,4 +46,8 @@ zblog-frontend/.env
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Docker tars
 zblog-backend/*.tar
+zblog-frontend/*.tar
+*.tar

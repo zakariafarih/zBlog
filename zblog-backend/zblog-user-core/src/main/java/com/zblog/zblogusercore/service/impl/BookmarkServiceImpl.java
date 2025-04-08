@@ -1,5 +1,6 @@
 package com.zblog.zblogusercore.service.impl;
 
+import com.zblog.zblogusercore.client.PostCoreClient;
 import com.zblog.zblogusercore.exception.PostNotFoundException;
 import com.zblog.zblogusercore.domain.entity.Bookmark;
 import com.zblog.zblogusercore.dto.BookmarkDTO;
@@ -7,6 +8,7 @@ import com.zblog.zblogusercore.exception.UserNotFoundException;
 import com.zblog.zblogusercore.repository.BookmarkRepository;
 import com.zblog.zblogusercore.repository.UserProfileRepository;
 import com.zblog.zblogusercore.service.BookmarkService;
+import com.zblog.zblogusercore.util.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,14 +34,14 @@ public class BookmarkServiceImpl implements BookmarkService {
 
     @Override
     public BookmarkDTO createBookmark(String userId, UUID postId) {
-        // optionally check user existence:
+        // Optionally check user existence:
         if (!userProfileRepo.existsById(userId)) {
             throw new UserNotFoundException("User not found: " + userId);
         }
 
-        if (!postCoreClient.postExists(postId)) {
-            throw new PostNotFoundException("Post not found in post-core");
-        }
+        // Validate the post exists in post-core using the caller's access token.
+        String accessToken = SecurityUtil.getCurrentAccessToken();
+        postCoreClient.validatePostExists(postId, accessToken);
 
         Bookmark bookmark = new Bookmark();
         bookmark.setUserId(userId);
